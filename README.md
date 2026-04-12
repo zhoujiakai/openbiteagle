@@ -13,9 +13,11 @@ Python 3.12+ / FastAPI / SQLAlchemy / Pydantic / LangChain / LangGraph / LangSmi
 
 ## 目录结构
 
-- `backend/` - 后端服务
-- `frontend/` - 前端界面
-- `infra/` - 基础设施
+```
+backend/   # 后端服务
+frontend/  # 前端界面
+infra/     # 基础设施
+```
 
 ## 许可证
 
