@@ -194,10 +194,23 @@ class OdailyScraper:
         await page.evaluate("window.scrollTo(0, 0)")
         await page.wait_for_timeout(2000)
 
+    async def health_check(self) -> bool:
+        """检查爬虫是否能连接到新闻源。
+
+        Returns:
+            连接成功返回 True，否则返回 False
+        """
+        try:
+            items = await self.fetch_news(limit=1)
+            return len(items) >= 0
+        except Exception as e:
+            return False
+
 
 
 def main():
     scraper = OdailyScraper(headless=True)
+
     items = asyncio.run(scraper.fetch_news(limit=10))
     for item in items:
         print(f"[{item.published_at}] {item.title}")
