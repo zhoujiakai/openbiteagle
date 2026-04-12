@@ -34,8 +34,9 @@ Base.metadata.schema = cfg.database.DATABASE_SCHEMA
 
 
 async def ensure_schema() -> None:
-    """Create the database schema if it does not exist."""
+    """Create the database schema and required extensions if they do not exist."""
     async with engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.execute(
             text(f"CREATE SCHEMA IF NOT EXISTS {cfg.database.DATABASE_SCHEMA}")
         )
