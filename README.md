@@ -9,7 +9,10 @@ AI 驱动的 Web3 投资分析系统，从 Odaily 快讯获取 Web3 行业新闻
 
 ## 技术栈
 
-Python 3.12+ / FastAPI / SQLAlchemy / Pydantic / LangChain / LangGraph / LangSmith / RabbitMQ / PostgreSQL
+- **后端**: Python 3.12+ / FastAPI / Pydantic
+- **数据库**: PostgreSQL / SQLAlchemy / Redis / Neo4j
+- **LLM**: LangChain / LangGraph / LangSmith
+- **消息队列**: RabbitMQ
 
 ## 目录结构
 
