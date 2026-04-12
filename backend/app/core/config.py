@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str
+    DATABASE_SCHEMA: str = "biteagle"
 
     # Security
     SECRET_KEY: str

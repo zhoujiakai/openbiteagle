@@ -18,7 +18,7 @@ async def init_vector_extension() -> None:
     async with engine.begin() as conn:
         try:
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-            logger.info("✅ pgvector extension initialized")
+            logger.info("pgvector extension initialized")
         except Exception as e:
             logger.error(f"Failed to initialize pgvector: {e}")
             raise
@@ -26,9 +26,12 @@ async def init_vector_extension() -> None:
 
 async def create_tables() -> None:
     """Create vector-related tables."""
+    from app.data.db import ensure_schema
+
+    await ensure_schema()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        logger.info("✅ Vector tables created")
+        logger.info("Vector tables created")
 
 
 async def insert_document(

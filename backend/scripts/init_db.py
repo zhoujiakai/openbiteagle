@@ -7,12 +7,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.data.db import AsyncSessionLocal, Base, engine
+from app.data.db import AsyncSessionLocal, Base, engine, ensure_schema
 from app.models import analysis, document, news, token  # noqa: F401 import models
 
 
 async def main():
     """Create all tables."""
+    await ensure_schema()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

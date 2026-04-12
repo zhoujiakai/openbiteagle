@@ -1,58 +1,42 @@
 """基于 Playwright 的 Odaily 新闻爬虫实现。"""
 
 import asyncio
+import re
 from urllib.parse import parse_qs, urlparse
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
+from datetime import datetime
 
 from app.data.logger import create_logger
 
 logger = create_logger("Odaily快讯页爬虫")
 
 @dataclass
-class ImageInfo:
-    """从文章内容中提取的图片信息。"""
-
-    url: str                    # 图片的 URL 地址
-    alt: Optional[str] = None   # 图片的替代文本描述
-    width: Optional[int] = None # 图片宽度
-    height: Optional[int] = None # 图片高度
-
-    def to_dict(self) -> dict:
-        """转换为字典，用于数据库存储。"""
-        return {
-            "url": self.url,
-            "alt": self.alt,
-            "width": self.width,
-            "height": self.height,
-        }
-
-
-@dataclass
 class NewsItem:
     """新闻条目数据结构。"""
 
-    title: str                                  # 新闻标题
-    content: Optional[str] = None               # 正文纯文本
-    content_html: Optional[str] = None          # 正文 HTML
-    page_url: Optional[str] = None              # 新闻源页面的链接（如 Odaily 快讯页）
-    external_url: Optional[str] = None          # 原文外链（指向原始出处，可选）
-    source_id: Optional[str] = None             # 新闻在来源平台的唯一 ID
-    published_at: Optional[datetime] = None     # 发布时间
-    images: Optional[list[ImageInfo]] = None    # 文章中的图片列表
+    id: Optional[str] = None                   # 快讯 ID（Odaily 平台）
+    title: str = ""                            # 标题
+    content: Optional[str] = None              # 正文（HTML 格式）
+    images: Optional[list[str]] = None         # 图片 URL 列表
+    isImportant: bool = False                  # 是否重要快讯
+    publishTimestamp: Optional[int] = None     # 发布时间戳（ms）
+    publishDate: Optional[str] = None          # 发布时间，格式 yyyy-MM-dd HH:mm:ss
+    sourceUrl: Optional[str] = None            # 原文外链，可能为空字符串
+    link: Optional[str] = None                 # Odaily 站内详情页 URL
 
     def to_dict(self) -> dict:
         """转换为字典。"""
         return {
+            "id": self.id,
             "title": self.title,
             "content": self.content,
-            "content_html": self.content_html,
-            "page_url": self.page_url,
-            "external_url": self.external_url,
-            "source_id": self.source_id,
-            "published_at": self.published_at.isoformat() if self.published_at else None,
-            "images": [img.to_dict() for img in self.images] if self.images else None,
+            "images": self.images,
+            "isImportant": self.isImportant,
+            "publishTimestamp": self.publishTimestamp,
+            "publishDate": self.publishDate,
+            "sourceUrl": self.sourceUrl,
+            "link": self.link,
         }
 
 
@@ -95,8 +79,8 @@ class OdailyScraper:
                 if browser is None:
                     return []
                 try:
-                    # 导航到快讯页面
-                    await self._navigate_to_flash_page(page)
+                    # 导航到快讯页面并滚动加载足够内容
+                    await self._navigate_to_flash_page(page, target_count=limit)
                     # 从页面提取信息
                     items = await self._extract_news_items(page, limit)
                     logger.info(f"成功获取 {len(items)} 条新闻")
@@ -146,44 +130,48 @@ class OdailyScraper:
         Returns:
             NewsItem 或 None
         """
-        # 从 data-publish-timestamp 获取发布时间
+        # 从 data-publish-timestamp 获取发布时间戳（ms）
         timestamp_str = await elem.get_attribute("data-publish-timestamp")
-        published_at = None
-        if timestamp_str:
-            published_at = datetime.fromtimestamp(int(timestamp_str) / 1000)
+        publishTimestamp = int(timestamp_str) if timestamp_str else None
+        publishDate = None
+        if publishTimestamp:
+            dt = datetime.fromtimestamp(publishTimestamp / 1000)
+            publishDate = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-        # 获取 data-id 作为 source_id
+        # 获取 data-id 作为快讯 ID
         data_list_div = await elem.query_selector("div.data-list")
-        source_id = None
+        news_id = None
         if data_list_div:
-            source_id = await data_list_div.get_attribute("data-id")
+            news_id = await data_list_div.get_attribute("data-id")
 
-        # 获取标题和快讯页链接
+        # 获取标题和站内详情页链接
         detail_link = await elem.query_selector("a[href*='newsflash']")
         title = ""
-        page_url = None
+        link = None
         if detail_link:
             title_el = await detail_link.query_selector("span")
             if title_el:
                 title = (await title_el.inner_text()).strip()
             href = await detail_link.get_attribute("href")
             if href:
-                page_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
+                link = href if href.startswith("http") else f"{self.BASE_URL}{href}"
 
-        # 获取内容
+        # 获取内容（去掉 HTML 标签）
         content_el = await elem.query_selector("div.whitespace-pre-line")
-        content = ""
+        content = None
         if content_el:
-            content = (await content_el.inner_text()).strip().removeprefix("Odaily星球日报讯").strip()
+            raw = (await content_el.inner_html()).strip()
+            clean = re.sub(r'<[^>]+>', '', raw)
+            content = clean.removeprefix("Odaily星球日报讯").strip() or None
 
         # 获取原文外链
-        external_url = None
+        sourceUrl = None
         ext_link = await elem.query_selector("a:text('原文链接')")
         if ext_link:
-            external_url = await ext_link.get_attribute("href")
+            sourceUrl = await ext_link.get_attribute("href")
 
-        # 获取图片
-        images: list[ImageInfo] = []
+        # 获取图片 URL 列表
+        images: list[str] = []
         img_els = await elem.query_selector_all("button img[src]")
         for img_el in img_els:
             src = await img_el.get_attribute("src")
@@ -195,20 +183,20 @@ class OdailyScraper:
                 real_url = parse_qs(parsed.query).get("url", [src])[0]
             else:
                 real_url = src
-            alt = await img_el.get_attribute("alt")
-            images.append(ImageInfo(url=real_url, alt=alt))
+            images.append(real_url)
 
         if not title:
             return None
 
         return NewsItem(
+            id=news_id,
             title=title,
             content=content,
-            page_url=page_url,
-            external_url=external_url,
-            source_id=source_id,
-            published_at=published_at,
             images=images or None,
+            publishTimestamp=publishTimestamp,
+            publishDate=publishDate,
+            sourceUrl=sourceUrl or "",
+            link=link,
         )
 
     async def _create_browser_page(self, playwright):
@@ -234,11 +222,12 @@ class OdailyScraper:
             logger.error(f"创建浏览器失败: {e}")
             return None, None
 
-    async def _navigate_to_flash_page(self, page):
-        """导航到快讯页面并等待内容加载。
+    async def _navigate_to_flash_page(self, page, target_count: int = 20):
+        """导航到快讯页面并滚动加载足够的内容。
 
         Args:
             page: Playwright 页面对象
+            target_count: 需要加载的最小新闻数量
         """
         try:
             await page.goto(
@@ -249,14 +238,43 @@ class OdailyScraper:
         except Exception as e:
             logger.warning(f"导航警告: {e}")
 
-        # 等待页面加载
+        # 等待页面初始加载
         await page.wait_for_timeout(3000)
 
-        # 滚动触发懒加载
-        await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        await page.wait_for_timeout(2000)
-        await page.evaluate("window.scrollTo(0, 0)")
-        await page.wait_for_timeout(2000)
+        # 循环滚动，触发懒加载直到数量足够或无法继续加载
+        prev_count = 0
+        max_rounds = 200  # 安全上限，防止无限滚动
+        stale_rounds = 0  # 连续未增长计数
+
+        for round_num in range(max_rounds):
+            # 滚动到底部
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            await page.wait_for_timeout(1500)
+
+            current_count = await page.evaluate(
+                "document.querySelectorAll('div.newsflash-item').length"
+            )
+            logger.info(
+                f"滚动第 {round_num + 1} 轮，已加载 {current_count} 条 "
+                f"(目标 {target_count})"
+            )
+
+            if current_count >= target_count:
+                logger.info(f"已加载 {current_count} 条，达到目标数量")
+                break
+
+            if current_count == prev_count:
+                stale_rounds += 1
+                if stale_rounds >= 5:
+                    logger.warning(
+                        f"连续 {stale_rounds} 轮无新内容，停止滚动 "
+                        f"(共 {current_count} 条)"
+                    )
+                    break
+            else:
+                stale_rounds = 0
+
+            prev_count = current_count
 
     async def health_check(self) -> bool:
         """检查爬虫是否能连接到新闻源。
@@ -275,13 +293,13 @@ class OdailyScraper:
 def main():
     scraper = OdailyScraper(headless=True)
 
-    items = asyncio.run(scraper.fetch_news(limit=10))
+    items = asyncio.run(scraper.fetch_news(limit=20))
     for item in items:
-        print(f"[{item.published_at}] {item.title}")
+        print(f"[{item.publishDate}] {item.title}")
         if item.content:
             print(f"  {item.content[:80]}...")
-        if item.page_url:
-            print(f"  链接: {item.page_url}")
+        if item.link:
+            print(f"  链接: {item.link}")
         print()
 
 
