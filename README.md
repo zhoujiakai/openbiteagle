@@ -1,6 +1,15 @@
 # OpenBitEagle
 
-开源 Web3 加密货币新闻 AI 分析平台，基于 LLM 对链上新闻进行多步推理，生成投资建议。
+AI 驱动的 Web3 投资分析系统，从 Odaily 快讯获取 Web3 行业新闻，通过多阶段 AI 分析流水线对每条快讯进行投资价值分析，判断是否具有投资价值，如果有价值则提取相关代币，并分析代币的涨跌趋势，给出买入/卖出建议。
+
+## 目标指标
+
+- 投资分析准确率 ≥ 90%
+- 代币命中准确率 ≥ 90%
+
+## 技术栈
+
+Python 3.12+ / FastAPI / SQLAlchemy / Pydantic / LangChain / LangGraph / LangSmith / RabbitMQ / PostgreSQL
 
 ## 目录结构
 
