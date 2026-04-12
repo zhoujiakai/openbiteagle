@@ -21,12 +21,6 @@ cp .env.example .env
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## 测试
-
-```bash
-pytest
-```
-
 ## 项目结构
 
 ```
