@@ -19,7 +19,7 @@ async def main():
     """Main import function."""
     import argparse
 
-    from app.kg.client import Neo4jClient, Neo4jSettings
+    from app.kg.client import Neo4jClient
     from app.kg.importers import RootdataKGImporter
     from app.kg.loader import GraphLoader
     from app.kg.query import GraphQuery
@@ -69,8 +69,8 @@ async def main():
 
     # Connect to Neo4j
     print("Connecting to Neo4j...")
-    settings = Neo4jSettings()
-    client = await Neo4jClient.create(settings)
+    client = Neo4jClient()
+    await client.connect()
     print("   ✅ Connected to Neo4j")
 
     try:

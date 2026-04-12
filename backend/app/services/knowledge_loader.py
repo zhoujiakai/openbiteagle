@@ -84,11 +84,12 @@ class KnowledgeLoader:
             kg_client = None
             if import_to_kg:
                 try:
-                    from app.kg.client import Neo4jClient, Neo4jSettings
+                    from app.kg.client import Neo4jClient
                     from app.kg.importers import import_rootdata_to_kg
 
                     logger.info("Importing to Neo4j Knowledge Graph...")
-                    kg_client = await Neo4jClient.create(Neo4jSettings())
+                    kg_client = Neo4jClient()
+                    await kg_client.connect()
                     kg_stats = await import_rootdata_to_kg(kg_client, projects, skip_existing=True)
                     stats["kg_stats"] = kg_stats
                     logger.info(f"KG import complete: {kg_stats['success']} projects")

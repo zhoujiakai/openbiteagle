@@ -8,7 +8,7 @@ from pathlib import Path
 # Add app to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.kg.client import Neo4jClient, Neo4jSettings
+from app.kg.client import Neo4jClient
 from app.kg.loader import GraphLoader
 from app.kg.models import (
     ChainNode,
@@ -30,8 +30,8 @@ async def main():
 
     # Step 1: Connect to Neo4j
     print("\n1. Connecting to Neo4j...")
-    settings = Neo4jSettings()
-    client = await Neo4jClient.create(settings)
+    client = Neo4jClient()
+    await client.connect()
     print("   ✅ Connected to Neo4j")
 
     # Step 2: Initialize constraints

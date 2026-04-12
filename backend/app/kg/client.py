@@ -4,53 +4,24 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from neo4j import AsyncDriver, AsyncGraphDatabase
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class Neo4jSettings(BaseSettings):
-    """Neo4j configuration settings."""
-
-    model_config = SettingsConfigDict(env_prefix="NEO4J_", env_file=".env")
-
-    uri: str = "bolt://localhost:7687"
-    user: str = "neo4j"
-    password: str = "biteagle_password"
-    max_connection_lifetime: int = 3600
-    max_connection_pool_size: int = 50
-    connection_acquisition_timeout: int = 60
+from app.core.config import cfg
 
 
 @dataclass
 class Neo4jClient:
     """Neo4j client wrapper for async operations."""
 
-    settings: Neo4jSettings
     driver: Optional[AsyncDriver] = None
-
-    @classmethod
-    async def create(cls, settings: Optional[Neo4jSettings] = None) -> "Neo4jClient":
-        """Create a new Neo4j client instance.
-
-        Args:
-            settings: Neo4j settings, defaults to environment variables
-
-        Returns:
-            Neo4jClient instance
-        """
-        if settings is None:
-            settings = Neo4jSettings()
-        client = cls(settings=settings)
-        await client.connect()
-        return client
 
     async def connect(self) -> None:
         """Establish connection to Neo4j."""
         self.driver = AsyncGraphDatabase.driver(
-            self.settings.uri,
-            auth=(self.settings.user, self.settings.password),
-            max_connection_lifetime=self.settings.max_connection_lifetime,
-            max_connection_pool_size=self.settings.max_connection_pool_size,
-            connection_acquisition_timeout=self.settings.connection_acquisition_timeout,
+            cfg.neo4j.NEO4J_URI,
+            auth=(cfg.neo4j.NEO4J_USER, cfg.neo4j.NEO4J_PASSWORD),
+            max_connection_lifetime=cfg.neo4j.NEO4J_MAX_CONNECTION_LIFETIME,
+            max_connection_pool_size=cfg.neo4j.NEO4J_MAX_CONNECTION_POOL_SIZE,
+            connection_acquisition_timeout=cfg.neo4j.NEO4J_CONNECTION_ACQUISITION_TIMEOUT,
         )
         # Verify connection
         await self.verify_connectivity()

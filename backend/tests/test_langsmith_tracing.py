@@ -13,7 +13,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.graph.news_analysis import build_news_analysis_graph
 
 
@@ -31,11 +31,11 @@ async def test_langsmith_tracing():
     # Check LangSmith configuration
     print("\n[LangSmith Configuration]")
     print("-" * 70)
-    print(f"LANGCHAIN_TRACING_V2: {settings.LANGCHAIN_TRACING_V2}")
-    print(f"LANGCHAIN_PROJECT: {settings.LANGCHAIN_PROJECT}")
-    print(f"LANGCHAIN_API_KEY: {'***' + settings.LANGCHAIN_API_KEY[-4:] if settings.LANGCHAIN_API_KEY else 'Not set'}")
+    print(f"LANGCHAIN_TRACING_V2: {cfg.langsmith.LANGCHAIN_TRACING_V2}")
+    print(f"LANGCHAIN_PROJECT: {cfg.langsmith.LANGCHAIN_PROJECT}")
+    print(f"LANGCHAIN_API_KEY: {'***' + cfg.langsmith.LANGCHAIN_API_KEY[-4:] if cfg.langsmith.LANGCHAIN_API_KEY else 'Not set'}")
 
-    if settings.LANGCHAIN_TRACING_V2.lower() != "true":
+    if cfg.langsmith.LANGCHAIN_TRACING_V2.lower() != "true":
         print("\n⚠️  Warning: LANGCHAIN_TRACING_V2 is not set to 'true'")
         print("   Tracing will not be enabled.")
         print("\n   To enable LangSmith tracing, add to your .env:")
@@ -43,7 +43,7 @@ async def test_langsmith_tracing():
         print("   LANGCHAIN_API_KEY=your-langsmith-api-key")
         return
 
-    if not settings.LANGCHAIN_API_KEY:
+    if not cfg.langsmith.LANGCHAIN_API_KEY:
         print("\n⚠️  Warning: LANGCHAIN_API_KEY is not set")
         print("   Tracing may not work properly.")
         print("\n   Get your API key at: https://smith.langchain.com/")
@@ -73,7 +73,7 @@ async def test_langsmith_tracing():
     print("\n[Running Analysis with Tracing]")
     print("-" * 70)
     print("Check LangSmith UI for live trace:")
-    print(f"🔗 https://smith.langchain.com/o/{settings.LANGCHAIN_PROJECT if settings.LANGCHAIN_PROJECT else 'default'}/projects?tab=traces")
+    print(f"🔗 https://smith.langchain.com/o/{cfg.langsmith.LANGCHAIN_PROJECT if cfg.langsmith.LANGCHAIN_PROJECT else 'default'}/projects?tab=traces")
     print()
 
     try:

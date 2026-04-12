@@ -9,11 +9,11 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from app.core.config import settings
+from app.core.config import cfg
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.DEBUG,
+    cfg.database.DATABASE_URL,
+    echo=cfg.app.DEBUG,
     future=True,
 )
 
@@ -30,14 +30,14 @@ class Base(DeclarativeBase):
     pass
 
 
-Base.metadata.schema = settings.DATABASE_SCHEMA
+Base.metadata.schema = cfg.database.DATABASE_SCHEMA
 
 
 async def ensure_schema() -> None:
     """Create the database schema if it does not exist."""
     async with engine.begin() as conn:
         await conn.execute(
-            text(f"CREATE SCHEMA IF NOT EXISTS {settings.DATABASE_SCHEMA}")
+            text(f"CREATE SCHEMA IF NOT EXISTS {cfg.database.DATABASE_SCHEMA}")
         )
 
 

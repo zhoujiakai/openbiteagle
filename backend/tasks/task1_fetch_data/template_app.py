@@ -68,7 +68,7 @@ async def main():
 
     # 爬取
     logger.info("开始爬取 Odaily 快讯")
-    items = await scraper.fetch_news(limit=100)
+    items = await scraper.fetch_news(limit=20)
     logger.info(f"爬取到 {len(items)} 条")
 
     if not items:

@@ -7,7 +7,7 @@ import logging
 
 from langgraph.graph import StateGraph, END
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.graph.news_analysis.nodes import (
     extract_tokens_node,
     generate_recommendation_node,
@@ -34,17 +34,17 @@ def get_tracing_config(metadata: dict | None = None) -> dict:
     """
     config = {}
 
-    if settings.LANGCHAIN_TRACING_V2.lower() == "true":
+    if cfg.langsmith.LANGCHAIN_TRACING_V2.lower() == "true":
         # Add metadata for LangSmith tracing
         trace_metadata = {
-            "project": settings.LANGCHAIN_PROJECT,
+            "project": cfg.langsmith.LANGCHAIN_PROJECT,
             "graph_name": "news_analysis",
         }
         if metadata:
             trace_metadata.update(metadata)
 
         config["metadata"] = trace_metadata
-        logger.info(f"LangSmith tracing enabled for project: {settings.LANGCHAIN_PROJECT}")
+        logger.info(f"LangSmith tracing enabled for project: {cfg.langsmith.LANGCHAIN_PROJECT}")
 
     return config
 

@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.data.db import AsyncSessionLocal, engine
 from app.models.news import News
 from app.services import (

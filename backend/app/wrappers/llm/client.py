@@ -11,7 +11,7 @@ from typing import Any, Optional
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 
-from app.core.config import settings
+from app.core.config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -32,19 +32,19 @@ def get_llm(
         ChatOpenAI instance
     """
     # Try DeepSeek first
-    if settings.DEEPSEEK_API_KEY:
+    if cfg.deepseek.DEEPSEEK_API_KEY:
         return ChatOpenAI(
-            model=model or settings.DEEPSEEK_MODEL or "deepseek-chat",
+            model=model or cfg.deepseek.DEEPSEEK_MODEL or "deepseek-chat",
             temperature=temperature,
-            api_key=settings.DEEPSEEK_API_KEY,
-            base_url=settings.DEEPSEEK_BASE_URL or "https://api.deepseek.com",
+            api_key=cfg.deepseek.DEEPSEEK_API_KEY,
+            base_url=cfg.deepseek.DEEPSEEK_BASE_URL or "https://api.deepseek.com",
         )
 
     # Fallback to OpenAI
     return ChatOpenAI(
-        model=model or settings.OPENAI_MODEL or "gpt-4o-mini",
+        model=model or cfg.openai.OPENAI_MODEL or "gpt-4o-mini",
         temperature=temperature,
-        api_key=settings.OPENAI_API_KEY,
+        api_key=cfg.openai.OPENAI_API_KEY,
     )
 
 
@@ -54,7 +54,7 @@ def is_using_deepseek() -> bool:
     Returns:
         True if DeepSeek API key is set
     """
-    return bool(settings.DEEPSEEK_API_KEY)
+    return bool(cfg.deepseek.DEEPSEEK_API_KEY)
 
 
 async def call_llm_structured(

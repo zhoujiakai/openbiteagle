@@ -1,83 +1,101 @@
-"""Application configuration."""
+"""Application configuration loaded from config.yaml."""
 
+from pathlib import Path
 from typing import List
 
-from pydantic import AnyHttpUrl, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import yaml
 
 
-class Settings(BaseSettings):
-    """Application settings."""
+class Config:
+    """YAML-based application configuration."""
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore",
-    )
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
 
-    # Application
-    APP_NAME: str = "Biteagle API"
-    APP_VERSION: str = "0.1.0"
-    DEBUG: bool = False
+    def __init__(self) -> None:
+        self.load_config()
 
-    # Server
-    HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    def load_config(self) -> None:
+        config_file_path = self.BASE_DIR / "config.yaml"
+        if not config_file_path.exists():
+            return
+        with open(config_file_path, encoding="utf-8") as file:
+            raw = yaml.safe_load(file) or {}
+        for k, v in raw.items():
+            if not isinstance(v, dict):
+                continue
+            section_cls = getattr(self.__class__, k, None)
+            if section_cls is None or not isinstance(section_cls, type):
+                continue
+            for k2, v2 in v.items():
+                setattr(section_cls, k2, v2)
 
-    # Database
-    DATABASE_URL: str
-    DATABASE_SCHEMA: str = "biteagle"
+    # ── Application ──────────────────────────────────────
+    class app:
+        APP_NAME: str = "Biteagle API"
+        APP_VERSION: str = "0.1.0"
+        DEBUG: bool = False
+        HOST: str = "0.0.0.0"
+        PORT: int = 8000
 
-    # Security
-    SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # ── Database ─────────────────────────────────────────
+    class database:
+        DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/biteagle"
+        DATABASE_SCHEMA: str = "biteagle"
 
-    # CORS
-    CORS_ORIGINS: List[str] = []
+    # ── Security ─────────────────────────────────────────
+    class security:
+        SECRET_KEY: str = "your-secret-key-here-change-in-production"
+        ALGORITHM: str = "HS256"
+        ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse CORS origins from string or list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+    # ── CORS ─────────────────────────────────────────────
+    class cors:
+        CORS_ORIGINS: List[str] = []
 
-    # LLM - DeepSeek (primary)
-    DEEPSEEK_API_KEY: str = ""
-    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
-    DEEPSEEK_MODEL: str = "deepseek-chat"
+    # ── LLM - DeepSeek (primary) ────────────────────────
+    class deepseek:
+        DEEPSEEK_API_KEY: str = ""
+        DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+        DEEPSEEK_MODEL: str = "deepseek-chat"
 
-    # LLM - OpenAI (fallback)
-    OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-4o-mini"
+    # ── LLM - OpenAI (fallback) ─────────────────────────
+    class openai:
+        OPENAI_API_KEY: str = ""
+        OPENAI_MODEL: str = "gpt-4o-mini"
 
-    # Embeddings - Jina (free tier)
-    JINA_API_KEY: str = ""  # Get free key at https://jina.ai/embeddings
-    JINA_EMBEDDING_MODEL: str = "jina-embeddings-v3"
+    # ── Embeddings - Jina ────────────────────────────────
+    class jina:
+        JINA_API_KEY: str = ""
+        JINA_EMBEDDING_MODEL: str = "jina-embeddings-v3"
 
-    # LangSmith (optional, for tracing)
-    LANGCHAIN_TRACING_V2: str = "false"
-    LANGCHAIN_API_KEY: str = ""
-    LANGCHAIN_PROJECT: str = "biteagle"
+    # ── LangSmith (optional) ────────────────────────────
+    class langsmith:
+        LANGCHAIN_TRACING_V2: str = "false"
+        LANGCHAIN_API_KEY: str = ""
+        LANGCHAIN_PROJECT: str = "biteagle"
 
-    # CoinMarketCap (optional, for token market data)
-    CMC_API_KEY: str = ""
+    # ── CoinMarketCap ───────────────────────────────────
+    class cmc:
+        CMC_API_KEY: str = ""
 
-    # RabbitMQ
-    RABBITMQ_URL: str = "amqp://admin:admin@localhost:5672"
-    RABBITMQ_QUEUE: str = "biteagle_analysis"
-    RABBITMQ_DLQ: str = "biteagle_analysis_dlq"
+    # ── RabbitMQ ─────────────────────────────────────────
+    class rabbitmq:
+        RABBITMQ_URL: str = "amqp://admin:admin@localhost:5672"
+        RABBITMQ_QUEUE: str = "biteagle_analysis"
+        RABBITMQ_DLQ: str = "biteagle_analysis_dlq"
 
-    # Redis
-    REDIS_URL: str = "redis://localhost:6380"
+    # ── Redis ────────────────────────────────────────────
+    class redis:
+        REDIS_URL: str = "redis://localhost:6380"
 
-    # Neo4j Knowledge Graph
-    NEO4J_URI: str = "bolt://localhost:7687"
-    NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = "biteagle_password"
+    # ── Neo4j Knowledge Graph ───────────────────────────
+    class neo4j:
+        NEO4J_URI: str = "bolt://localhost:7687"
+        NEO4J_USER: str = "neo4j"
+        NEO4J_PASSWORD: str = "biteagle_password"
+        NEO4J_MAX_CONNECTION_LIFETIME: int = 3600
+        NEO4J_MAX_CONNECTION_POOL_SIZE: int = 50
+        NEO4J_CONNECTION_ACQUISITION_TIMEOUT: int = 60
 
 
-settings = Settings()
+cfg = Config()

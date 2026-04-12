@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.data.cache import get_cache
 from app.data.rabbit import get_rabbit
 
@@ -22,17 +22,17 @@ async def test_rabbitmq():
     print("=" * 60)
     print("Testing RabbitMQ Connection")
     print("=" * 60)
-    print(f"URL: {settings.RABBITMQ_URL}")
-    print(f"Queue: {settings.RABBITMQ_QUEUE}")
-    print(f"DLQ: {settings.RABBITMQ_DLQ}")
+    print(f"URL: {cfg.rabbitmq.RABBITMQ_URL}")
+    print(f"Queue: {cfg.rabbitmq.RABBITMQ_QUEUE}")
+    print(f"DLQ: {cfg.rabbitmq.RABBITMQ_DLQ}")
     print()
 
     try:
         rabbit = await get_rabbit()
         print("✅ RabbitMQ connection successful")
         print(f"   Exchange: biteagle")
-        print(f"   Main Queue: {settings.RABBITMQ_QUEUE}")
-        print(f"   DLQ: {settings.RABBITMQ_DLQ}")
+        print(f"   Main Queue: {cfg.rabbitmq.RABBITMQ_QUEUE}")
+        print(f"   DLQ: {cfg.rabbitmq.RABBITMQ_DLQ}")
         return True
     except Exception as e:
         print(f"❌ RabbitMQ connection failed: {e}")
@@ -45,7 +45,7 @@ async def test_cache():
     print("=" * 60)
     print("Testing Redis Cache")
     print("=" * 60)
-    print(f"URL: {settings.REDIS_URL}")
+    print(f"URL: {cfg.redis.REDIS_URL}")
     print()
 
     try:
@@ -80,7 +80,7 @@ async def test_producer(news_id: int = 999):
     try:
         rabbit = await get_rabbit()
         test_data = {"news_id": news_id, "priority": 5, "test": True}
-        await rabbit.send(settings.RABBITMQ_QUEUE, test_data)
+        await rabbit.send(cfg.rabbitmq.RABBITMQ_QUEUE, test_data)
 
         print(f"✅ Message sent successfully")
         print(f"   Check RabbitMQ management: http://localhost:15672")

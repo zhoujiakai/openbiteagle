@@ -8,7 +8,7 @@ from typing import Any
 
 import httpx
 
-from app.core.config import settings
+from app.core.config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +27,10 @@ class CMCClient:
         """Initialize CMC client.
 
         Args:
-            api_key: CMC API key (defaults to settings.CMC_API_KEY)
+            api_key: CMC API key (defaults to cfg.cmc.CMC_API_KEY)
             base_url: CMC API base URL
         """
-        self.api_key = api_key or settings.CMC_API_KEY
+        self.api_key = api_key or cfg.cmc.CMC_API_KEY
         self.base_url = base_url
         self._client: httpx.AsyncClient | None = None
 

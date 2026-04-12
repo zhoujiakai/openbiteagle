@@ -2,7 +2,8 @@
 
 import pytest
 
-from app.kg.client import Neo4jClient, Neo4jSettings
+from app.core.config import cfg
+from app.kg.client import Neo4jClient
 from app.kg.loader import GraphLoader
 from app.kg.models import (
     ProjectNode,
@@ -14,9 +15,8 @@ from app.kg.query import GraphQuery
 @pytest.mark.asyncio
 async def test_neo4j_settings():
     """Test Neo4j settings can be loaded."""
-    settings = Neo4jSettings()
-    assert settings.uri == "bolt://localhost:7687"
-    assert settings.user == "neo4j"
+    assert cfg.neo4j.NEO4J_URI == "bolt://localhost:7687"
+    assert cfg.neo4j.NEO4J_USER == "neo4j"
 
 
 @pytest.mark.asyncio
@@ -80,9 +80,9 @@ async def test_graph_loader_class():
 @pytest.mark.asyncio
 async def test_neo4j_connection():
     """Test connection to Neo4j."""
-    settings = Neo4jSettings()
-    client = await Neo4jClient.create(settings)
+    client = Neo4jClient()
     try:
+        await client.connect()
         assert await client.verify_connectivity() is True
     finally:
         await client.close()
@@ -92,9 +92,9 @@ async def test_neo4j_connection():
 @pytest.mark.asyncio
 async def test_create_and_query_project():
     """Test creating and querying a project."""
-    settings = Neo4jSettings()
-    client = await Neo4jClient.create(settings)
+    client = Neo4jClient()
     try:
+        await client.connect()
         loader = GraphLoader(client)
         query_service = GraphQuery(client)
 

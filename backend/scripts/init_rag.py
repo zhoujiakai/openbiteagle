@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import text
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.data.db import engine
 from app.data.vector import create_tables, init_vector_extension
 
@@ -19,7 +19,7 @@ async def main():
     print("=" * 60)
     print("RAG Knowledge Base Initialization")
     print("=" * 60)
-    print(f"Database: {settings.DATABASE_URL}")
+    print(f"Database: {cfg.database.DATABASE_URL}")
     print()
 
     # Initialize pgvector extension

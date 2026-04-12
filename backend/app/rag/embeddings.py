@@ -7,7 +7,7 @@ from typing import Optional
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.data.vector import insert_chunk
 from app.models.document import Document
 
@@ -126,9 +126,9 @@ class EmbeddingService:
             use_mock: Force use of mock embeddings for testing
         """
         self._embeddings: Optional[JinaEmbeddings | MockEmbeddings] = None
-        self.model = model or settings.JINA_EMBEDDING_MODEL
+        self.model = model or cfg.jina.JINA_EMBEDDING_MODEL
         # Use mock if explicitly requested or no API key configured
-        self.use_mock = use_mock or not settings.JINA_API_KEY
+        self.use_mock = use_mock or not cfg.jina.JINA_API_KEY
 
     @property
     def embeddings(self) -> JinaEmbeddings | MockEmbeddings:
@@ -141,7 +141,7 @@ class EmbeddingService:
                 logger.info(f"Using Jina embeddings: {self.model}")
                 self._embeddings = JinaEmbeddings(
                     model=self.model,
-                    api_key=settings.JINA_API_KEY,
+                    api_key=cfg.jina.JINA_API_KEY,
                 )
         return self._embeddings
 

@@ -9,7 +9,7 @@ from typing import Any, Optional
 import redis.asyncio as aioredis
 from pydantic import BaseModel
 
-from app.core.config import settings
+from app.core.config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Cache:
     async def connect(self) -> aioredis.Redis:
         """Get or create Redis connection."""
         if self._client is None:
-            self._client = aioredis.from_url(settings.REDIS_URL)
+            self._client = aioredis.from_url(cfg.redis.REDIS_URL)
         return self._client
 
     async def close(self) -> None:

@@ -8,14 +8,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.data.db import AsyncSessionLocal
-from app.core.config import settings
+from app.core.config import cfg
 from sqlalchemy import text
 
 
 async def main():
     """Drop and recreate document_chunks table with new dimensions."""
 
-    schema = settings.DATABASE_SCHEMA
+    schema = cfg.database.DATABASE_SCHEMA
     table_fqn = f"{schema}.document_chunks"
 
     async with AsyncSessionLocal() as db:

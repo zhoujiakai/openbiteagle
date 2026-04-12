@@ -6,7 +6,7 @@ from typing import Any, Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.wrappers.llm import get_llm
 
 logger = logging.getLogger(__name__)

@@ -17,7 +17,7 @@ from aio_pika.abc import (
 )
 import json
 
-from app.core.config import settings
+from app.core.config import cfg
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class RabbitMQ:
             if self._initialized:
                 return
 
-            self._connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
+            self._connection = await aio_pika.connect_robust(cfg.rabbitmq.RABBITMQ_URL)
             self._channel = await self._connection.channel()
 
             # Declare exchange
@@ -63,22 +63,22 @@ class RabbitMQ:
 
             # Declare queues
             self._main_queue = await self._channel.declare_queue(
-                settings.RABBITMQ_QUEUE,
+                cfg.rabbitmq.RABBITMQ_QUEUE,
                 durable=True,
                 arguments={
                     "x-dead-letter-exchange": self._exchange_name,
-                    "x-dead-letter-routing-key": settings.RABBITMQ_DLQ,
+                    "x-dead-letter-routing-key": cfg.rabbitmq.RABBITMQ_DLQ,
                 },
             )
 
             self._dlq_queue = await self._channel.declare_queue(
-                settings.RABBITMQ_DLQ,
+                cfg.rabbitmq.RABBITMQ_DLQ,
                 durable=True,
             )
 
             # Bind queues
-            await self._main_queue.bind(self._exchange, settings.RABBITMQ_QUEUE)
-            await self._dlq_queue.bind(self._exchange, settings.RABBITMQ_DLQ)
+            await self._main_queue.bind(self._exchange, cfg.rabbitmq.RABBITMQ_QUEUE)
+            await self._dlq_queue.bind(self._exchange, cfg.rabbitmq.RABBITMQ_DLQ)
 
             self._initialized = True
             self._ready.set()

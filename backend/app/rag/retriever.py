@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import make_transient
 
-from app.core.config import settings
+from app.core.config import cfg
 from app.data.db import AsyncSessionLocal
 from app.models.document import DocumentChunk
 

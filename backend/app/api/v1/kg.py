@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.kg.client import Neo4jClient, Neo4jSettings
+from app.kg.client import Neo4jClient
 from app.kg.loader import GraphLoader
 from app.kg.models import (
     ChainNode,
@@ -18,8 +18,8 @@ router = APIRouter(prefix="/kg", tags=["knowledge-graph"])
 
 async def get_neo4j_client() -> Neo4jClient:
     """Dependency to get Neo4j client."""
-    settings = Neo4jSettings()
-    client = await Neo4jClient.create(settings)
+    client = Neo4jClient()
+    await client.connect()
     try:
         yield client
     finally:

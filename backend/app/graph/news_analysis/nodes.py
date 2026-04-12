@@ -212,12 +212,12 @@ async def kg_knowledge_node(state: GraphState) -> dict:
     content = state.get("content", "")
 
     try:
-        from app.kg.client import Neo4jClient, Neo4jSettings
+        from app.kg.client import Neo4jClient
         from app.kg.query import GraphQuery
 
         # Create Neo4j client
-        settings = Neo4jSettings()
-        client = await Neo4jClient.create(settings)
+        client = Neo4jClient()
+        await client.connect()
 
         try:
             query_service = GraphQuery(client)
