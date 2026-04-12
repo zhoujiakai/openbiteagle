@@ -1,13 +1,60 @@
 """基于 Playwright 的 Odaily 新闻爬虫实现。"""
 
 import asyncio
+from urllib.parse import parse_qs, urlparse
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from base import NewsItem
 from app.data.logger import create_logger
 
 logger = create_logger("Odaily快讯页爬虫")
+
+@dataclass
+class ImageInfo:
+    """从文章内容中提取的图片信息。"""
+
+    url: str                    # 图片的 URL 地址
+    alt: Optional[str] = None   # 图片的替代文本描述
+    width: Optional[int] = None # 图片宽度
+    height: Optional[int] = None # 图片高度
+
+    def to_dict(self) -> dict:
+        """转换为字典，用于数据库存储。"""
+        return {
+            "url": self.url,
+            "alt": self.alt,
+            "width": self.width,
+            "height": self.height,
+        }
+
+
+@dataclass
+class NewsItem:
+    """新闻条目数据结构。"""
+
+    title: str                                  # 新闻标题
+    content: Optional[str] = None               # 正文纯文本
+    content_html: Optional[str] = None          # 正文 HTML
+    page_url: Optional[str] = None              # 新闻源页面的链接（如 Odaily 快讯页）
+    external_url: Optional[str] = None          # 原文外链（指向原始出处，可选）
+    source_id: Optional[str] = None             # 新闻在来源平台的唯一 ID
+    published_at: Optional[datetime] = None     # 发布时间
+    images: Optional[list[ImageInfo]] = None    # 文章中的图片列表
+
+    def to_dict(self) -> dict:
+        """转换为字典。"""
+        return {
+            "title": self.title,
+            "content": self.content,
+            "content_html": self.content_html,
+            "page_url": self.page_url,
+            "external_url": self.external_url,
+            "source_id": self.source_id,
+            "published_at": self.published_at.isoformat() if self.published_at else None,
+            "images": [img.to_dict() for img in self.images] if self.images else None,
+        }
+
 
 class OdailyScraper:
     """Odaily 新闻爬虫实现。
@@ -135,6 +182,22 @@ class OdailyScraper:
         if ext_link:
             external_url = await ext_link.get_attribute("href")
 
+        # 获取图片
+        images: list[ImageInfo] = []
+        img_els = await elem.query_selector_all("button img[src]")
+        for img_el in img_els:
+            src = await img_el.get_attribute("src")
+            if not src:
+                continue
+            # 从 /_next/image?url=xxx 中提取实际图片 URL
+            if src.startswith("/_next/image?url="):
+                parsed = urlparse(src)
+                real_url = parse_qs(parsed.query).get("url", [src])[0]
+            else:
+                real_url = src
+            alt = await img_el.get_attribute("alt")
+            images.append(ImageInfo(url=real_url, alt=alt))
+
         if not title:
             return None
 
@@ -145,6 +208,7 @@ class OdailyScraper:
             external_url=external_url,
             source_id=source_id,
             published_at=published_at,
+            images=images or None,
         )
 
     async def _create_browser_page(self, playwright):
