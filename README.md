@@ -10,4 +10,4 @@
 
 ## 许可证
 
-详见 [LICENSE](LICENSE)。
+MIT
