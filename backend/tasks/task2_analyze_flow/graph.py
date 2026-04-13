@@ -53,49 +53,42 @@ def build_news_analysis_graph():
 
     The graph has the following structure:
 
-    ┌─────────────────────┐
-    │ investment_value    │  Node 1: Judge investment value
-    └──────────┬──────────┘
-               │
-         ┌─────┴─────┐
-         │  Router   │  (should_continue?)
-         └─────┬─────┘
-       continue│       │skip
-    ┌──────────┘       └───────────────────┐
-    │                                       │
-    ▼                                       ▼
-┌──────────────┐                   ┌──────────────────┐
-│extract_tokens│  Node 2           │generate_recommend│
-└──────┬───────┘                   └────────┬─────────┘
-       │                                    │
-       ▼                                    │
-┌────────────────┐                          │
-│search_token_info│ Node 3                  │
-└───────┬────────┘                          │
-        │                                   │
-        ▼                                   │
-┌────────────────┐                          │
-│ rag_knowledge  │  Node 3.5 (RAG retrieval)│
-└───────┬────────┘                          │
-        │                                   │
-        ▼                                   │
-┌────────────────┐                          │
-│  kg_knowledge  │  Node 3.6 (KG retrieval) │
-└───────┬────────┘                          │
-        │                                   │
-        ▼                                   │
-┌──────────────┐                            │
-│trend_analysis│ Node 4 (enhanced with RAG+KG)│
-└──────┬───────┘                            │
-       │                                    │
-       └────────────┬───────────────────────┘
-                    ▼
-            ┌───────────────┐
-            │  recommendation│ Node 5
-            └───────┬───────┘
-                    │
-                    ▼
-                   END
+    ┌──────────────────┐
+    │ investment_value │  Node 1: 投资价值判断
+    └────────┬─────────┘
+             │
+       ┌─────┴───────┐
+       │   Router    │  (should_continue?)
+       └──┬────────┬─┘
+     continue    skip
+      │            └─┐
+          ▼          │
+  ┌──────────────┐   │
+  │extract_tokens│   │ Node 2: 提取代币
+  └──────┬───────┘   │
+         ▼           │
+  ┌─────────────────┐│
+  │search_token_info││ Node 3: 查询行情
+  └───────┬─────────┘│
+          ▼          │
+  ┌────────────────┐ │
+  │ rag_knowledge  │ │ Node 3.5: RAG 检索
+  └───────┬────────┘ │
+          ▼          │
+  ┌────────────────┐ │
+  │  kg_knowledge  │ │ Node 3.6: KG 检索
+  └───────┬────────┘ │
+          ▼          │
+  ┌──────────────┐   │
+  │trend_analysis│   │ Node 4: 趋势分析
+  └──────┬───────┘   │
+         │           │
+         ▼           ▼
+  ┌────────────────────────┐
+  │ generate_recommendation│  Node 5: 生成交易建议
+  └──────────┬─────────────┘
+             ▼
+            END
     """
     # Create the state graph
     graph = StateGraph(GraphState)
@@ -144,3 +137,10 @@ def visualize_graph():
     graph = build_news_analysis_graph()
     print(graph.get_graph().print_ascii())
     return graph
+
+def main():
+    visualize_graph()
+
+
+if __name__ == "__main__":
+    main()
