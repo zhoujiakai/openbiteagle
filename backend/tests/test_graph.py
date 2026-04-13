@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-"""Test script for news analysis graph.
+"""新闻分析图测试脚本。
 
-Runs a real news item through the graph and prints the execution process.
-"""
+使用真实新闻数据运行分析图并打印执行过程。"""
 
 import asyncio
 import sys
 from pathlib import Path
 
-# Add project root to path
+# 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -16,115 +15,115 @@ from tasks.task2_analyze_flow import build_news_analysis_graph
 
 
 def print_header(text: str):
-    """Print a section header."""
+    """打印章节标题。"""
     print("\n" + "=" * 70)
     print(f" {text}")
     print("=" * 70)
 
 
 def print_section(title: str, content: str):
-    """Print a section with title and content."""
+    """打印带标题的内容段落。"""
     print(f"\n[{title}]")
     print("-" * 70)
     print(content)
 
 
 async def test_graph():
-    """Test the news analysis graph with real data."""
-    print_header("LangGraph News Analysis Test")
+    """使用真实数据测试新闻分析图。"""
+    print_header("LangGraph 新闻分析测试")
 
-    # Sample news items for testing
+    # 测试用例
     test_cases = [
         {
-            "name": "Bullish News (ETF Approval)",
+            "name": "利好新闻（ETF 获批）",
             "input": {
                 "news_id": 1,
-                "title": "Ethereum ETF Approved by SEC",
-                "content": "The SEC has officially approved spot Ethereum ETFs, opening the door for mainstream institutional investment. Major firms including BlackRock and Fidelity will launch trading next week. Analysts predict significant inflows into Ethereum.",
+                "title": "以太坊 ETF 获得 SEC 批准",
+                "content": "SEC 已正式批准以太坊现货 ETF，为主流机构投资打开了大门。包括贝莱德和富达在内的大型公司将于下周开始交易。分析师预测以太坊将迎来大量资金流入。",
             },
         },
         {
-            "name": "Bearish News (Regulatory Crackdown)",
+            "name": "利空新闻（监管打击）",
             "input": {
                 "news_id": 2,
-                "title": "Binance Faces $4B Fine from DOJ",
-                "content": "The Department of Justice has imposed a record $4 billion penalty on Binance for sanctions violations. The exchange has agreed to compliance monitoring and may face further restrictions on US operations.",
+                "title": "币安面临司法部 40 亿美元罚款",
+                "content": "司法部因制裁违规对币安处以创纪录的 40 亿美元罚款。该交易所已同意接受合规监控，并可能面临对美国业务的进一步限制。",
             },
         },
         {
-            "name": "Neutral News (General Info)",
+            "name": "中性新闻（一般信息）",
             "input": {
                 "news_id": 3,
-                "title": "Crypto Industry Overview",
-                "content": "Cryptocurrency has evolved significantly over the past decade. Bitcoin remains the largest by market cap, followed by Ethereum. Many new projects emerge each year in various sectors including DeFi, NFTs, and gaming.",
+                "title": "加密行业概览",
+                "content": "加密货币在过去十年中有了显著发展。比特币仍然是市值最大的加密货币，其次是以太坊。每年都有许多新项目在 DeFi、NFT 和游戏等各个领域涌现。",
             },
         },
     ]
 
-    # Build graph
-    print("\nBuilding graph...")
+    # 构建图
+    print("\n正在构建分析图...")
     graph = build_news_analysis_graph()
-    print("Graph built successfully!")
+    print("分析图构建成功！")
 
-    # Run test for each case
+    # 运行每个测试用例
     for i, test_case in enumerate(test_cases, 1):
-        print_header(f"Test Case {i}/{len(test_cases)}: {test_case['name']}")
+        print_header(f"测试用例 {i}/{len(test_cases)}: {test_case['name']}")
 
-        # Print input
-        print_section("Input", f"Title: {test_case['input']['title']}\nContent: {test_case['input']['content'][:100]}...")
+        # 打印输入
+        print_section("输入", f"标题: {test_case['input']['title']}\n内容: {test_case['input']['content'][:100]}...")
 
-        # Run analysis
-        print("\n[Running Analysis...]")
+        # 运行分析
+        print("\n[正在运行分析...]")
         try:
             result = await graph.ainvoke(test_case["input"])
 
-            # Print results
-            print_section("Investment Value",
-                f"Value: {result.get('investment_value', 'N/A')}\n"
-                f"Confidence: {result.get('investment_confidence', 'N/A')}\n"
-                f"Reasoning: {result.get('investment_reasoning', 'N/A')}"
+            # 打印结果
+            print_section("投资价值",
+                f"价值: {result.get('investment_value', 'N/A')}\n"
+                f"置信度: {result.get('investment_confidence', 'N/A')}\n"
+                f"推理: {result.get('investment_reasoning', 'N/A')}"
             )
 
             tokens = result.get('tokens') or []
             if tokens:
                 token_list = ", ".join([f"{t['symbol']} ({t.get('name', 'N/A')})" for t in tokens])
-                print_section("Extracted Tokens", token_list)
+                print_section("提取的代币", token_list)
             else:
-                print_section("Extracted Tokens", "None (skipped due to neutral value)")
+                print_section("提取的代币", "无（因中性价值而跳过）")
 
             token_details = result.get('token_details') or {}
             if token_details:
                 detail_lines = []
                 for symbol, data in token_details.items():
-                    detail_lines.append(f"{symbol}: ${data.get('price', 'N/A')} ({data.get('change_24h', 'N/A')}% 24h)")
-                print_section("Token Market Data", "\n".join(detail_lines))
+                    detail_lines.append(f"{symbol}: ${data.get('price', 'N/A')} ({data.get('change_24h', 'N/A')}% 24小时)")
+                print_section("代币市场数据", "\n".join(detail_lines))
             else:
-                print_section("Token Market Data", "Not available")
+                print_section("代币市场数据", "不可用")
 
-            print_section("Trend Analysis", result.get('trend_analysis', 'N/A'))
+            print_section("趋势分析", result.get('trend_analysis', 'N/A'))
 
-            print_section("Recommendation",
-                f"Action: {result.get('recommendation', 'N/A')}\n"
-                f"Risk Level: {result.get('risk_level', 'N/A')}\n"
-                f"Reasoning: {result.get('recommendation_reasoning', 'N/A')}"
+            print_section("推荐",
+                f"操作: {result.get('recommendation', 'N/A')}\n"
+                f"风险等级: {result.get('risk_level', 'N/A')}\n"
+                f"推理: {result.get('recommendation_reasoning', 'N/A')}"
             )
 
-            # Check for errors
+            # 检查错误
             if result.get('error'):
-                print_section("Warning", f"Error occurred: {result['error']}")
+                print_section("警告", f"发生错误: {result['error']}")
 
-            print("\n✓ Test case completed")
+            print("\n✓ 测试用例完成")
 
         except Exception as e:
-            print_section("Error", str(e))
+            print_section("错误", str(e))
             import traceback
             traceback.print_exc()
 
-    print_header("All Tests Completed")
+    print_header("所有测试完成")
 
 
 def main():
-    """Main entry point."""
+    """主入口。"""
     asyncio.run(test_graph())
 
 

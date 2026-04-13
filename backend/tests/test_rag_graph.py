@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Test the full LangGraph with RAG integration."""
+"""测试带有 RAG 集成的完整 LangGraph。"""
 
 import asyncio
 import sys
@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from tasks.task2_analyze_flow.graph import build_news_analysis_graph
 
 
-# Test news items
+# 测试新闻数据
 TEST_NEWS = [
     {
         "id": 1,
@@ -31,22 +31,22 @@ TEST_NEWS = [
 
 
 async def main():
-    """Run the full LangGraph analysis with RAG."""
+    """运行带有 RAG 的完整 LangGraph 分析。"""
     graph = build_news_analysis_graph()
 
     print("=" * 70)
-    print("LangGraph with RAG - Integration Test")
+    print("LangGraph + RAG 集成测试")
     print("=" * 70)
     print()
 
     for news in TEST_NEWS:
         print(f"\n{'='*70}")
-        print(f"NEWS #{news['id']}: {news['title']}")
+        print(f"新闻 #{news['id']}: {news['title']}")
         print('='*70)
-        print(f"Content: {news['content'][:100]}...")
+        print(f"内容: {news['content'][:100]}...")
         print()
 
-        # Initial state
+        # 初始状态
         state = {
             "news_id": news["id"],
             "title": news["title"],
@@ -54,34 +54,34 @@ async def main():
         }
 
         try:
-            # Run the graph
+            # 运行分析图
             result = await graph.ainvoke(state)
 
-            # Print results
-            print(f"\n📊 Analysis Results:")
-            print(f"  Investment Value: {result.get('investment_value', 'N/A')}")
-            print(f"  Confidence: {result.get('investment_confidence', 0):.2f}")
+            # 打印结果
+            print(f"\n📊 分析结果:")
+            print(f"  投资价值: {result.get('investment_value', 'N/A')}")
+            print(f"  置信度: {result.get('investment_confidence', 0):.2f}")
 
             tokens = result.get('tokens', [])
             if tokens:
                 symbols = [t.get('symbol') if isinstance(t, dict) else t.symbol for t in tokens]
-                print(f"  Tokens Found: {', '.join(symbols)}")
+                print(f"  发现代币: {', '.join(symbols)}")
 
-            # RAG results
+            # RAG 结果
             rag_sources = result.get('rag_sources', [])
             if rag_sources:
-                print(f"  📚 RAG Sources: {len(rag_sources)} chunks retrieved")
+                print(f"  📚 RAG 来源: 检索到 {len(rag_sources)} 个分块")
                 for i, source in enumerate(rag_sources[:2], 1):
                     print(f"    [{i}] {source.get('content', '')[:60]}...")
 
-            print(f"\n  📈 Trend Analysis: {result.get('trend_analysis', 'N/A')[:100]}...")
+            print(f"\n  📈 趋势分析: {result.get('trend_analysis', 'N/A')[:100]}...")
 
-            print(f"\n  💡 Recommendation: {result.get('recommendation', 'N/A').upper()}")
-            print(f"  Risk Level: {result.get('risk_level', 'N/A')}")
-            print(f"  Reasoning: {result.get('recommendation_reasoning', 'N/A')[:100]}...")
+            print(f"\n  💡 推荐: {result.get('recommendation', 'N/A').upper()}")
+            print(f"  风险等级: {result.get('risk_level', 'N/A')}")
+            print(f"  推理: {result.get('recommendation_reasoning', 'N/A')[:100]}...")
 
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n❌ 错误: {e}")
             import traceback
             traceback.print_exc()
 

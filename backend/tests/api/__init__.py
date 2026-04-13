@@ -1,1 +1,1 @@
-"""Tests for API endpoints."""
+"""API 端点测试。"""

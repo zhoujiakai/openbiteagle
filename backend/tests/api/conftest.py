@@ -1,4 +1,4 @@
-"""Fixtures for API tests."""
+"""API 测试的固件。"""
 
 import pytest
 import pytest_asyncio
@@ -14,7 +14,7 @@ from app.models.news import News
 
 @pytest_asyncio.fixture
 async def async_engine():
-    """Create in-memory SQLite async engine for tests."""
+    """创建内存 SQLite 异步引擎用于测试。"""
     from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 
     engine = create_async_engine(
@@ -22,7 +22,7 @@ async def async_engine():
         echo=False,
     )
 
-    # Replace PostgreSQL-specific types with SQLite-compatible types
+    # 将 PostgreSQL 特有类型替换为 SQLite 兼容类型
     for table in Base.metadata.tables.values():
         for column in table.columns:
             type_str = str(column.type)
@@ -32,7 +32,7 @@ async def async_engine():
                 from sqlalchemy import Text
                 column.type = Text()
 
-    # Only create the tables we need for these tests
+    # 仅创建本测试所需的表
     async with engine.begin() as conn:
         await conn.run_sync(
             lambda sync_conn: Base.metadata.create_all(
@@ -49,7 +49,7 @@ async def async_engine():
 
 @pytest_asyncio.fixture
 async def db_session(async_engine) -> AsyncSession:
-    """Create async database session for tests."""
+    """创建异步数据库会话用于测试。"""
     async_session_maker = sessionmaker(
         async_engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -59,10 +59,10 @@ async def db_session(async_engine) -> AsyncSession:
 
 @pytest_asyncio.fixture
 async def sample_news(db_session: AsyncSession) -> News:
-    """Create a sample news item for testing."""
+    """创建测试用新闻样本。"""
     news = News(
-        title="Test News Title",
-        content="This is a test news content about Bitcoin and Ethereum.",
+        title="测试新闻标题",
+        content="这是一条关于比特币和以太坊的测试新闻内容。",
         source_url="https://test.com/news/1",
     )
     db_session.add(news)
@@ -72,14 +72,14 @@ async def sample_news(db_session: AsyncSession) -> News:
 
 @pytest_asyncio.fixture
 async def sample_analysis(db_session: AsyncSession, sample_news: News) -> Analysis:
-    """Create a sample analysis for testing."""
+    """创建测试用分析样本。"""
     analysis = Analysis(
         news_id=sample_news.id,
         status="completed",
         investment_value="bullish",
         confidence=0.85,
         tokens={"tokens": [{"symbol": "BTC", "name": "Bitcoin"}]},
-        trend_analysis="Positive trend observed.",
+        trend_analysis="观察到正向趋势。",
         recommendation="buy",
         steps={
             "steps": [
@@ -95,17 +95,17 @@ async def sample_analysis(db_session: AsyncSession, sample_news: News) -> Analys
 
 @pytest_asyncio.fixture
 async def async_client(db_session: AsyncSession) -> TestClient:
-    """Test client with async database session override."""
+    """带有异步数据库会话覆盖的测试客户端。"""
     from app.main import app
     from app.api.v1.news import get_db
 
-    # Override dependency
+    # 覆盖依赖
     async def override_get_db():
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
-    # Use sync TestClient but with async db override
+    # 使用同步 TestClient，但带有异步数据库覆盖
     with TestClient(app) as test_client:
         yield test_client
 

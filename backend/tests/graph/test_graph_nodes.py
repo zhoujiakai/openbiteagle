@@ -1,7 +1,6 @@
-"""Unit tests for news analysis graph nodes.
+"""新闻分析图节点的单元测试。
 
-Tests each node in isolation with mocked LLM responses.
-"""
+使用模拟的 LLM 响应逐个测试每个节点。"""
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -23,10 +22,10 @@ from tasks.task2_analyze_flow.state import GraphState
 
 
 def make_mock_llm_structured(output: any):
-    """Create a mock LLM with structured output.
+    """创建带有结构化输出的模拟 LLM。
 
-    The node code does: call_llm_structured(llm, prompt, Model, schema)
-    So we need to patch call_llm_structured directly.
+    节点代码调用: call_llm_structured(llm, prompt, Model, schema)
+    因此我们需要直接修补 call_llm_structured。
     """
     async def mock_call(llm, prompt, model_class, schema=None):
         return output
@@ -34,7 +33,7 @@ def make_mock_llm_structured(output: any):
 
 
 def make_mock_llm_plain(output: any):
-    """Create a mock LLM for plain invoke calls."""
+    """创建用于普通 invoke 调用的模拟 LLM。"""
     mock_llm = MagicMock()
     mock_response = MagicMock()
     mock_response.content = output
@@ -45,11 +44,11 @@ def make_mock_llm_plain(output: any):
 
 @pytest.fixture
 def sample_state():
-    """Sample graph state for testing."""
+    """用于测试的示例图状态。"""
     return {
         "news_id": 1,
-        "title": "Bitcoin breaks new all-time high",
-        "content": "Bitcoin has reached a new record price of $100,000...",
+        "title": "比特币突破历史新高",
+        "content": "比特币已达到 $100,000 的新纪录价格...",
         "investment_value": None,
         "investment_confidence": None,
         "investment_reasoning": None,
@@ -65,13 +64,13 @@ def sample_state():
 
 
 class TestInvestmentValueNode:
-    """Tests for investment_value_node."""
+    """投资价值节点测试。"""
 
     @pytest.mark.asyncio
     async def test_bullish_classification(self, sample_state):
-        """Test node correctly classifies bullish news."""
+        """测试节点正确分类利好新闻。"""
         mock_output = InvestmentValueOutput(
-            value="bullish", confidence=0.85, reasoning="Strong positive momentum"
+            value="bullish", confidence=0.85, reasoning="强劲的正向动能"
         )
         mock_call = make_mock_llm_structured(mock_output)
 
@@ -84,9 +83,9 @@ class TestInvestmentValueNode:
 
     @pytest.mark.asyncio
     async def test_neutral_skip(self, sample_state):
-        """Test node sets should_continue=False for neutral news."""
+        """测试节点对中性新闻设置 should_continue=False。"""
         mock_output = InvestmentValueOutput(
-            value="neutral", confidence=0.3, reasoning="No clear signal"
+            value="neutral", confidence=0.3, reasoning="无明显信号"
         )
         mock_call = make_mock_llm_structured(mock_output)
 
@@ -98,11 +97,11 @@ class TestInvestmentValueNode:
 
 
 class TestExtractTokensNode:
-    """Tests for extract_tokens_node."""
+    """代币提取节点测试。"""
 
     @pytest.mark.asyncio
     async def test_token_extraction(self, sample_state):
-        """Test node extracts tokens from news."""
+        """测试节点从新闻中提取代币。"""
         mock_output = TokenExtractionOutput(
             tokens=[
                 {"symbol": "BTC", "name": "Bitcoin", "confidence": 0.95},
@@ -119,16 +118,16 @@ class TestExtractTokensNode:
 
 
 class TestSearchTokenInfoNode:
-    """Tests for search_token_info_node."""
+    """代币信息搜索节点测试。"""
 
     @pytest.mark.asyncio
     async def test_token_info_retrieval(self, sample_state):
-        """Test node fetches market data for tokens."""
+        """测试节点获取代币市场数据。"""
         sample_state["tokens"] = [
             {"symbol": "BTC", "name": "Bitcoin", "confidence": 0.95}
         ]
 
-        # Patch CMCClient at its source module
+        # 在源模块处修补 CMCClient
         with patch("app.wrappers.cmc.CMCClient") as mock_cmc_class:
             mock_cmc_instance = MagicMock()
             mock_cmc_instance.get_token_info = AsyncMock(
@@ -148,11 +147,11 @@ class TestSearchTokenInfoNode:
 
 
 class TestTrendAnalysisNode:
-    """Tests for trend_analysis_node."""
+    """趋势分析节点测试。"""
 
     @pytest.mark.asyncio
     async def test_trend_analysis(self, sample_state):
-        """Test node generates trend analysis."""
+        """测试节点生成趋势分析。"""
         sample_state["investment_value"] = "bullish"
         sample_state["investment_confidence"] = 0.8
         sample_state["token_details"] = {
@@ -164,7 +163,7 @@ class TestTrendAnalysisNode:
         }
 
         mock_response = MagicMock()
-        mock_response.content = "Strong bullish trend with 5% daily gain..."
+        mock_response.content = "强劲的看涨趋势，日涨幅 5%..."
         mock_llm = make_mock_llm_plain(mock_response.content)
 
         with patch("tasks.task2_analyze_flow.nodes.get_llm", return_value=mock_llm):
@@ -174,18 +173,18 @@ class TestTrendAnalysisNode:
 
 
 class TestGenerateRecommendationNode:
-    """Tests for generate_recommendation_node."""
+    """推荐生成节点测试。"""
 
     @pytest.mark.asyncio
     async def test_buy_recommendation(self, sample_state):
-        """Test node generates buy recommendation."""
+        """测试节点生成买入推荐。"""
         sample_state["should_continue"] = True
         sample_state["investment_value"] = "bullish"
         sample_state["investment_confidence"] = 0.8
-        sample_state["trend_analysis"] = "Strong bullish momentum..."
+        sample_state["trend_analysis"] = "强劲的看涨动能..."
 
         mock_output = RecommendationOutput(
-            action="buy", risk_level="medium", reasoning="Positive momentum confirmed"
+            action="buy", risk_level="medium", reasoning="正向动能已确认"
         )
         mock_call = make_mock_llm_structured(mock_output)
 
@@ -197,11 +196,11 @@ class TestGenerateRecommendationNode:
 
     @pytest.mark.asyncio
     async def test_skip_to_hold(self, sample_state):
-        """Test node outputs 'hold' when skipping analysis."""
+        """测试跳过分析时节点输出 'hold'。"""
         sample_state["should_continue"] = False
 
         mock_output = RecommendationOutput(
-            action="hold", risk_level="low", reasoning="No significant value"
+            action="hold", risk_level="low", reasoning="无明显投资价值"
         )
         mock_call = make_mock_llm_structured(mock_output)
 
@@ -212,14 +211,14 @@ class TestGenerateRecommendationNode:
 
 
 class TestRouting:
-    """Tests for routing logic."""
+    """路由逻辑测试。"""
 
     def test_continue_route(self, sample_state):
-        """Test router returns 'continue' for bullish news."""
+        """测试路由器对利好新闻返回 'continue'。"""
         sample_state["should_continue"] = True
         assert should_continue_route(sample_state) == "continue"
 
     def test_skip_route(self, sample_state):
-        """Test router returns 'skip' for neutral news."""
+        """测试路由器对中性新闻返回 'skip'。"""
         sample_state["should_continue"] = False
         assert should_continue_route(sample_state) == "skip"

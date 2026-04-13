@@ -1,1 +1,1 @@
-"""Tests for graph module."""
+"""图模块测试。"""

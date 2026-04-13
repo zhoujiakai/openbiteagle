@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test: Send and receive message."""
+"""测试：发送并接收消息。"""
 
 import asyncio
 import json
@@ -8,9 +8,9 @@ import aio_pika
 
 
 async def test_send_receive():
-    """Send a message and receive it."""
+    """发送一条消息并接收它。"""
     print("=" * 60)
-    print("Testing Send -> Receive")
+    print("测试 发送 -> 接收")
     print("=" * 60)
 
     connection = await aio_pika.connect_robust(
@@ -19,7 +19,7 @@ async def test_send_receive():
 
     channel = await connection.channel()
 
-    # Declare exchange and queue
+    # 声明交换机和队列
     exchange = await channel.declare_exchange(
         "biteagle",
         aio_pika.ExchangeType.DIRECT,
@@ -37,7 +37,7 @@ async def test_send_receive():
 
     await queue.bind(exchange, "biteagle_analysis")
 
-    # Send message
+    # 发送消息
     test_data = {"news_id": 123, "priority": 5, "test": True}
     message = aio_pika.Message(
         json.dumps(test_data).encode(),
@@ -46,23 +46,23 @@ async def test_send_receive():
     )
 
     await exchange.publish(message, routing_key="biteagle_analysis")
-    print(f"✅ Sent: {test_data}")
+    print(f"✅ 已发送: {test_data}")
 
-    # Receive message
+    # 接收消息
     received = await queue.get(timeout=5)
     if received:
         body = json.loads(received.body.decode())
-        print(f"📨 Received: {body}")
+        print(f"📨 已接收: {body}")
         await received.ack()
-        print(f"✅ Message ACKed")
+        print(f"✅ 消息已确认")
 
-        # Verify
+        # 验证
         if body == test_data:
-            print("\n✅ Send/Receive test PASSED!")
+            print("\n✅ 发送/接收测试通过！")
         else:
-            print(f"\n❌ Data mismatch: sent {test_data}, got {body}")
+            print(f"\n❌ 数据不匹配: 发送 {test_data}，收到 {body}")
     else:
-        print("❌ No message received")
+        print("❌ 未收到消息")
 
     await connection.close()
 

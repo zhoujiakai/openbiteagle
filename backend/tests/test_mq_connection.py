@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quick test RabbitMQ and Redis connection."""
+"""快速测试 RabbitMQ 和 Redis 连接。"""
 
 import asyncio
 import sys
@@ -9,9 +9,9 @@ import redis.asyncio as aioredis
 
 
 async def test_rabbitmq():
-    """Test RabbitMQ connection."""
+    """测试 RabbitMQ 连接。"""
     print("=" * 60)
-    print("Testing RabbitMQ Connection")
+    print("测试 RabbitMQ 连接")
     print("=" * 60)
     print("URL: amqp://admin:admin@localhost:5672")
     print()
@@ -22,17 +22,17 @@ async def test_rabbitmq():
             reconnect_interval=5,
         )
 
-        # Create channel
+        # 创建通道
         channel = await connection.channel()
 
-        # Declare exchange
+        # 声明交换机
         exchange = await channel.declare_exchange(
             "biteagle",
             aio_pika.ExchangeType.DIRECT,
             durable=True,
         )
 
-        # Declare queues
+        # 声明队列
         main_queue = await channel.declare_queue(
             "biteagle_analysis",
             durable=True,
@@ -47,28 +47,28 @@ async def test_rabbitmq():
             durable=True,
         )
 
-        # Bind queues
+        # 绑定队列
         await main_queue.bind(exchange, "biteagle_analysis")
         await dlq_queue.bind(exchange, "biteagle_analysis_dlq")
 
-        print(f"✅ RabbitMQ connection successful")
-        print(f"   Exchange: {exchange.name}")
-        print(f"   Main Queue: {main_queue.name}")
-        print(f"   DLQ: {dlq_queue.name}")
+        print(f"✅ RabbitMQ 连接成功")
+        print(f"   交换机: {exchange.name}")
+        print(f"   主队列: {main_queue.name}")
+        print(f"   死信队列: {dlq_queue.name}")
 
         await connection.close()
         return True
 
     except Exception as e:
-        print(f"❌ RabbitMQ connection failed: {e}")
+        print(f"❌ RabbitMQ 连接失败: {e}")
         return False
 
 
 async def test_redis():
-    """Test Redis connection."""
+    """测试 Redis 连接。"""
     print()
     print("=" * 60)
-    print("Testing Redis Connection")
+    print("测试 Redis 连接")
     print("=" * 60)
     print("URL: redis://localhost:6380")
     print()
@@ -76,19 +76,19 @@ async def test_redis():
     try:
         client = aioredis.from_url("redis://localhost:6380")
         await client.ping()
-        print("✅ Redis connection successful")
+        print("✅ Redis 连接成功")
         await client.close()
         return True
     except Exception as e:
-        print(f"❌ Redis connection failed: {e}")
+        print(f"❌ Redis 连接失败: {e}")
         return False
 
 
 async def test_producer():
-    """Test sending a message."""
+    """测试发送消息。"""
     print()
     print("=" * 60)
-    print("Testing Producer")
+    print("测试生产者")
     print("=" * 60)
 
     try:
@@ -103,7 +103,7 @@ async def test_producer():
             durable=True,
         )
 
-        # Create test message
+        # 创建测试消息
         message = aio_pika.Message(
             b'{"news_id": 999, "priority": 5}',
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
@@ -112,36 +112,36 @@ async def test_producer():
 
         await exchange.publish(message, routing_key="biteagle_analysis")
 
-        print(f"✅ Message sent successfully")
-        print(f"   Check RabbitMQ management: http://localhost:15672")
+        print(f"✅ 消息发送成功")
+        print(f"   查看 RabbitMQ 管理界面: http://localhost:15672")
 
         await connection.close()
         return True
 
     except Exception as e:
-        print(f"❌ Producer test failed: {e}")
+        print(f"❌ 生产者测试失败: {e}")
         return False
 
 
 async def main():
     results = []
 
-    # Test RabbitMQ
+    # 测试 RabbitMQ
     results.append(await test_rabbitmq())
 
-    # Test Redis
+    # 测试 Redis
     results.append(await test_redis())
 
-    # Test Producer
+    # 测试生产者
     results.append(await test_producer())
 
     print()
     print("=" * 60)
     if all(results):
-        print("✅ All tests passed!")
+        print("✅ 所有测试通过！")
         return 0
     else:
-        print(f"❌ Some tests failed ({sum(results)}/{len(results)} passed)")
+        print(f"❌ 部分测试失败（{sum(results)}/{len(results)} 通过）")
         return 1
 
 

@@ -1,16 +1,16 @@
-"""Tests for Analysis API endpoints."""
+"""分析 API 端点测试。"""
 
 import pytest
 
 
 @pytest.mark.usefixtures("mock_settings")
 class TestAnalysisAPI:
-    """Test analysis API endpoints."""
+    """测试分析 API 端点。"""
 
     def test_create_analysis_with_news_id(
         self, async_client, sample_news
     ):
-        """Test creating analysis with existing news_id."""
+        """测试使用已有的 news_id 创建分析。"""
         response = async_client.post(
             "/api/v1/analysis", json={"news_id": sample_news.id}
         )
@@ -23,10 +23,10 @@ class TestAnalysisAPI:
     def test_create_analysis_with_content(
         self, async_client
     ):
-        """Test creating analysis with raw content."""
+        """测试使用原始内容创建分析。"""
         response = async_client.post(
             "/api/v1/analysis",
-            json={"news_content": "Bitcoin reaches new all-time high today."}
+            json={"news_content": "比特币今日创下历史新高。"}
         )
 
         assert response.status_code == 201
@@ -37,7 +37,7 @@ class TestAnalysisAPI:
     def test_create_analysis_missing_input(
         self, async_client
     ):
-        """Test creating analysis without news_id or content."""
+        """测试未提供 news_id 或内容时创建分析。"""
         response = async_client.post("/api/v1/analysis", json={})
 
         assert response.status_code == 400
@@ -45,7 +45,7 @@ class TestAnalysisAPI:
     def test_create_analysis_invalid_news_id(
         self, async_client
     ):
-        """Test creating analysis with non-existent news_id."""
+        """测试使用不存在的 news_id 创建分析。"""
         response = async_client.post(
             "/api/v1/analysis", json={"news_id": 99999}
         )
@@ -55,7 +55,7 @@ class TestAnalysisAPI:
     def test_batch_create_analysis(
         self, async_client, sample_news
     ):
-        """Test batch analysis creation."""
+        """测试批量创建分析。"""
         response = async_client.post(
             "/api/v1/analysis/batch",
             json={"news_ids": [sample_news.id]}
@@ -70,7 +70,7 @@ class TestAnalysisAPI:
     def test_batch_empty_list(
         self, async_client
     ):
-        """Test batch with empty list."""
+        """测试空列表批量创建。"""
         response = async_client.post(
             "/api/v1/analysis/batch", json={"news_ids": []}
         )
@@ -80,15 +80,15 @@ class TestAnalysisAPI:
     def test_get_analysis(
         self, async_client, sample_news
     ):
-        """Test getting analysis by ID."""
-        # First create an analysis
+        """测试通过 ID 获取分析。"""
+        # 先创建分析
         create_response = async_client.post(
             "/api/v1/analysis", json={"news_id": sample_news.id}
         )
         assert create_response.status_code == 201
         analysis_id = create_response.json()["analysis_id"]
 
-        # Then get it
+        # 再获取
         response = async_client.get(f"/api/v1/analysis/{analysis_id}")
 
         assert response.status_code == 200
@@ -100,7 +100,7 @@ class TestAnalysisAPI:
     def test_get_analysis_not_found(
         self, async_client
     ):
-        """Test getting non-existent analysis."""
+        """测试获取不存在的分析。"""
         response = async_client.get("/api/v1/analysis/99999")
 
         assert response.status_code == 404
@@ -108,7 +108,7 @@ class TestAnalysisAPI:
     def test_get_overview(
         self, async_client, sample_analysis
     ):
-        """Test getting analysis overview."""
+        """测试获取分析概览。"""
         response = async_client.get("/api/v1/analysis/overview")
 
         assert response.status_code == 200
@@ -121,7 +121,7 @@ class TestAnalysisAPI:
     def test_legacy_create_analysis(
         self, async_client, sample_news
     ):
-        """Test legacy POST /analysis/news/{news_id} endpoint."""
+        """测试旧版 POST /analysis/news/{news_id} 端点。"""
         response = async_client.post(f"/api/v1/analysis/news/{sample_news.id}")
 
         assert response.status_code == 200

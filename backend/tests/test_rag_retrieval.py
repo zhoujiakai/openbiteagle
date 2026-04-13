@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Test RAG retrieval with real embeddings."""
+"""测试 RAG 检索（使用真实嵌入）。"""
 
 import asyncio
 import sys
@@ -21,18 +21,18 @@ async def main():
 
     for query in queries:
         print(f"\n{'='*60}")
-        print(f"Query: {query}")
+        print(f"查询: {query}")
         print('='*60)
 
         results = await retriever.search(query)
 
         if not results:
-            print("No results found")
+            print("未找到结果")
             continue
 
         for i, r in enumerate(results, 1):
-            print(f"\n[{i}] Similarity: {r['similarity']:.4f}")
-            print(f"    Content: {r['content'][:150]}...")
+            print(f"\n[{i}] 相似度: {r['similarity']:.4f}")
+            print(f"    内容: {r['content'][:150]}...")
 
 
 if __name__ == "__main__":
