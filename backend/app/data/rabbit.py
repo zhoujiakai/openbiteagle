@@ -4,7 +4,6 @@ Reference: repos/back-template/data/rabbit.py
 """
 
 import asyncio
-import logging
 from typing import Any, AsyncGenerator, Optional, Tuple
 
 import aio_pika
@@ -13,13 +12,13 @@ from aio_pika.abc import (
     AbstractChannel,
     AbstractExchange,
     AbstractIncomingMessage,
-    AbstractQueue,
 )
 import json
 
 from app.core.config import cfg
+from data import create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger("消息队列")
 
 __all__ = [
     "RabbitMQ",

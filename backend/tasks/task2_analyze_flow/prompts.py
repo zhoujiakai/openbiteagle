@@ -158,16 +158,6 @@ Since there is no clear investment value or actionable signal, recommend "hold" 
 Provide brief reasoning explaining why this news doesn't warrant action.
 """
 
-# Route check prompt (optional, for more nuanced routing)
-ROUTE_CHECK_PROMPT = """Determine if this news justifies a full token analysis.
-
-Classification: {investment_value}
-Confidence: {confidence}
-
-For "neutral" with confidence < 0.5: Skip token analysis, go directly to hold recommendation.
-Otherwise: Continue with full analysis pipeline.
-"""
-
 
 def format_investment_value_prompt(title: str, content: str) -> str:
     """Format the investment value judgment prompt."""
