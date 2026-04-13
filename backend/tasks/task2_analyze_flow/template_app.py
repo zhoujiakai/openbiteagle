@@ -48,5 +48,19 @@ async def main():
     print("recommendation:", result5)
 
 
+async def run_graph():
+    """演示整个 graph 流水线一键跑"""
+    from tasks.task2_analyze_flow.graph import build_news_analysis_graph
+
+    graph = build_news_analysis_graph()
+    result = await graph.ainvoke({
+        "news_id": 1,
+        "title": "Bitcoin ETF approved by SEC",
+        "content": "The SEC has officially approved the Bitcoin ETF application.",
+    })
+    for k, v in result.items():
+        print(f"{k}: {v}")
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(run_graph())
