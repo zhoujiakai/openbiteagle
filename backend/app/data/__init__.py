@@ -23,6 +23,8 @@ def __getattr__(name):
         "IncomingMessage": "app.data.rabbit",
         "RobustChannel": "app.data.rabbit",
         "RobustConnection": "app.data.rabbit",
+        # Worker
+        "Worker": "app.data.mq",
     }
     if name in _lazy:
         import importlib
@@ -54,4 +56,6 @@ __all__ = [
     "IncomingMessage",
     "RobustChannel",
     "RobustConnection",
+    # Worker
+    "Worker",
 ]

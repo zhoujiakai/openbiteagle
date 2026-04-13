@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.news import get_db
+from app.core.config import cfg
 from app.data.rabbit import get_rabbit
 from app.schemas.analysis import (
     AnalysisCreate,
@@ -37,7 +38,7 @@ async def _queue_analysis(news_id: int, priority: int = 5) -> bool:
     try:
         rabbit = await get_rabbit()
         await rabbit.send(
-            queue="analysis",
+            queue=cfg.rabbitmq.RABBITMQ_QUEUE,
             message={"news_id": news_id, "priority": priority},
             delivery_mode=2,
         )

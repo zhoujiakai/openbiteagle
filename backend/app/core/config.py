@@ -88,6 +88,13 @@ class Config:
     class redis:
         REDIS_URL: str = "redis://localhost:6380"
 
+    # ── Worker ───────────────────────────────────────────
+    class worker:
+        MAX_RETRIES: int = 3
+        CONCURRENCY: int = 5
+        RETRY_BASE_DELAY: int = 5
+        TASK_TTL: int = 3600
+
     # ── Neo4j Knowledge Graph ───────────────────────────
     class neo4j:
         NEO4J_URI: str = "bolt://localhost:7687"
