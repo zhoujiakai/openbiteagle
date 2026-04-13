@@ -5,7 +5,7 @@ Tests the end-to-end flow with mocked LLM calls.
 
 import pytest
 
-from app.graph.news_analysis import build_news_analysis_graph
+from tasks.task2_analyze_flow import build_news_analysis_graph
 
 
 class TestGraphFlow:
@@ -46,7 +46,7 @@ class TestGraphFlow:
 
     def test_visualize_graph(self, capsys):
         """Test graph visualization works."""
-        from app.graph.news_analysis.graph import visualize_graph
+        from tasks.task2_analyze_flow.graph import visualize_graph
 
         visualize_graph()
         captured = capsys.readouterr()

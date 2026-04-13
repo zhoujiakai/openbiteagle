@@ -5,13 +5,13 @@ evaluating investment value, extracting tokens, searching market data,
 analyzing trends, and generating trading recommendations.
 """
 
-from app.graph.news_analysis.graph import build_news_analysis_graph
-from app.graph.news_analysis.models import (
+from tasks.task2_analyze_flow.graph import build_news_analysis_graph
+from tasks.task2_analyze_flow.models import (
     RecommendationOutput,
     TokenExtractionOutput,
     TokenInfo,
 )
-from app.graph.news_analysis.state import GraphState
+from tasks.task2_analyze_flow.state import GraphState
 
 __all__ = [
     "build_news_analysis_graph",

@@ -6,12 +6,12 @@ Tests each node in isolation with mocked LLM responses.
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.graph.news_analysis.models import (
+from tasks.task2_analyze_flow.models import (
     InvestmentValueOutput,
     RecommendationOutput,
     TokenExtractionOutput,
 )
-from app.graph.news_analysis.nodes import (
+from tasks.task2_analyze_flow.nodes import (
     extract_tokens_node,
     generate_recommendation_node,
     investment_value_node,
@@ -19,7 +19,7 @@ from app.graph.news_analysis.nodes import (
     should_continue_route,
     trend_analysis_node,
 )
-from app.graph.news_analysis.state import GraphState
+from tasks.task2_analyze_flow.state import GraphState
 
 
 def make_mock_llm_structured(output: any):
@@ -75,7 +75,7 @@ class TestInvestmentValueNode:
         )
         mock_call = make_mock_llm_structured(mock_output)
 
-        with patch("app.graph.news_analysis.nodes.call_llm_structured", side_effect=mock_call):
+        with patch("tasks.task2_analyze_flow.nodes.call_llm_structured", side_effect=mock_call):
             result = await investment_value_node(sample_state)
 
         assert result["investment_value"] == "bullish"
@@ -90,7 +90,7 @@ class TestInvestmentValueNode:
         )
         mock_call = make_mock_llm_structured(mock_output)
 
-        with patch("app.graph.news_analysis.nodes.call_llm_structured", side_effect=mock_call):
+        with patch("tasks.task2_analyze_flow.nodes.call_llm_structured", side_effect=mock_call):
             result = await investment_value_node(sample_state)
 
         assert result["investment_value"] == "neutral"
@@ -111,7 +111,7 @@ class TestExtractTokensNode:
         )
         mock_call = make_mock_llm_structured(mock_output)
 
-        with patch("app.graph.news_analysis.nodes.call_llm_structured", side_effect=mock_call):
+        with patch("tasks.task2_analyze_flow.nodes.call_llm_structured", side_effect=mock_call):
             result = await extract_tokens_node(sample_state)
 
         assert len(result["tokens"]) == 2
@@ -167,7 +167,7 @@ class TestTrendAnalysisNode:
         mock_response.content = "Strong bullish trend with 5% daily gain..."
         mock_llm = make_mock_llm_plain(mock_response.content)
 
-        with patch("app.graph.news_analysis.nodes.get_llm", return_value=mock_llm):
+        with patch("tasks.task2_analyze_flow.nodes.get_llm", return_value=mock_llm):
             result = await trend_analysis_node(sample_state)
 
         assert "bullish" in result["trend_analysis"].lower()
@@ -189,7 +189,7 @@ class TestGenerateRecommendationNode:
         )
         mock_call = make_mock_llm_structured(mock_output)
 
-        with patch("app.graph.news_analysis.nodes.call_llm_structured", side_effect=mock_call):
+        with patch("tasks.task2_analyze_flow.nodes.call_llm_structured", side_effect=mock_call):
             result = await generate_recommendation_node(sample_state)
 
         assert result["recommendation"] == "buy"
@@ -205,7 +205,7 @@ class TestGenerateRecommendationNode:
         )
         mock_call = make_mock_llm_structured(mock_output)
 
-        with patch("app.graph.news_analysis.nodes.call_llm_structured", side_effect=mock_call):
+        with patch("tasks.task2_analyze_flow.nodes.call_llm_structured", side_effect=mock_call):
             result = await generate_recommendation_node(sample_state)
 
         assert result["recommendation"] == "hold"

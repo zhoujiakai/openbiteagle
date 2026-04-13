@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.graph.news_analysis.graph import build_news_analysis_graph
+from tasks.task2_analyze_flow.graph import build_news_analysis_graph
 
 
 # Test news items

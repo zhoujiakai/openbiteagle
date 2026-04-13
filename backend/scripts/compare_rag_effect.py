@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.graph.news_analysis.graph import build_news_analysis_graph
-from app.graph.news_analysis.state import GraphState
+from tasks.task2_analyze_flow.graph import build_news_analysis_graph
+from tasks.task2_analyze_flow.state import GraphState
 
 
 # Test news - about a less known project that would benefit from RAG
@@ -66,7 +66,7 @@ async def run_without_rag(news: dict):
     print("="*70)
 
     # Temporarily disable RAG by mocking the node
-    from app.graph.news_analysis import nodes
+    from tasks.task2_analyze_flow import nodes
     original_rag_node = nodes.rag_knowledge_node
 
     async def mock_rag_node(state):

@@ -5,7 +5,7 @@ business scenarios. Each graph is a self-contained workflow that processes
 inputs through multiple nodes and produces structured outputs.
 """
 
-from app.graph.news_analysis import build_news_analysis_graph
+from tasks.task2_analyze_flow import build_news_analysis_graph
 
 # Graph registry - add new graphs here as they are implemented
 GRAPHS = {

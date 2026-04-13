@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import cfg
 from app.data.db import AsyncSessionLocal
 from app.graph import get_graph
-from app.graph.news_analysis.graph import get_tracing_config
+from tasks.task2_analyze_flow.graph import get_tracing_config
 from app.models.analysis import Analysis
 from app.models.news import News
 
@@ -36,12 +36,12 @@ class Worker:
     """RabbitMQ 消费者，驱动新闻分析 LangGraph 流水线。"""
 
     def __init__(self) -> None:
-        self._connection: Optional[aio_pika.RobustConnection] = None
-        self._channel: Optional[aio_pika.RobustChannel] = None
-        self._exchange: Optional[aio_pika.abc.AbstractExchange] = None
-        self._redis: Optional[aioredis.Redis] = None
-        self._semaphore = asyncio.Semaphore(cfg.worker.CONCURRENCY)
-        self._closing = False
+        self._connection: Optional[aio_pika.RobustConnection] = None  # RabbitMQ 连接
+        self._channel: Optional[aio_pika.RobustChannel] = None  # RabbitMQ 通道
+        self._exchange: Optional[aio_pika.abc.AbstractExchange] = None  # RabbitMQ 交换机
+        self._redis: Optional[aioredis.Redis] = None  # Redis 客户端，用于幂等锁
+        self._semaphore = asyncio.Semaphore(cfg.worker.CONCURRENCY)  # 并发信号量，控制同时处理的消息数
+        self._closing = False  # 关闭标志，用于优雅停机时阻止新操作
 
     # ------------------------------------------------------------------
     # 生命周期

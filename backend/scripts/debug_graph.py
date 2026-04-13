@@ -22,7 +22,7 @@ load_dotenv(project_root / ".env")
 
 def visualize_graph():
     """Print ASCII visualization of the graph."""
-    from app.graph.news_analysis.graph import build_news_analysis_graph
+    from tasks.task2_analyze_flow.graph import build_news_analysis_graph
 
     print("=" * 60)
     print("News Analysis Graph Structure")
@@ -51,7 +51,7 @@ async def test_manual_analysis():
 
     Requires OPENAI_API_KEY to be set in .env
     """
-    from app.graph.news_analysis import build_news_analysis_graph
+    from tasks.task2_analyze_flow import build_news_analysis_graph
 
     # Check API key
     if not os.getenv("OPENAI_API_KEY"):

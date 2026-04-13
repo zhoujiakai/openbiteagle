@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.graph import get_graph
-from app.graph.news_analysis.graph import get_tracing_config
+from tasks.task2_analyze_flow.graph import get_tracing_config
 from app.models.analysis import Analysis
 from app.models.news import News
 

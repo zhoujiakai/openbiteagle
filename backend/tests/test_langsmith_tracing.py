@@ -14,7 +14,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from app.core.config import cfg
-from app.graph.news_analysis import build_news_analysis_graph
+from tasks.task2_analyze_flow import build_news_analysis_graph
 
 
 def print_header(text: str):
