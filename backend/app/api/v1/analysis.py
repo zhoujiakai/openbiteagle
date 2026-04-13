@@ -1,6 +1,6 @@
-"""Analysis API endpoints.
+"""分析 API 接口。
 
-This module provides RESTful API endpoints for news analysis operations.
+本模块提供新闻分析相关的 RESTful API 接口。
 """
 
 import logging
@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 
 
 async def _queue_analysis(news_id: int, priority: int = 5) -> bool:
-    """Queue analysis task to RabbitMQ.
+    """分析任务入队
 
     Args:
-        news_id: News ID to analyze
-        priority: Task priority (1-10, lower is higher)
+        news_id: 需要分析的新闻ID
+        priority: 任务优先级 (1-10, 值越小优先级越高)
 
     Returns:
-        True if queued successfully
+        入队成功返回True
     """
     try:
         rabbit = await get_rabbit()
@@ -44,7 +44,7 @@ async def _queue_analysis(news_id: int, priority: int = 5) -> bool:
         )
         return True
     except Exception as e:
-        logger.error(f"Failed to queue analysis for news {news_id}: {e}")
+        logger.error(f"新闻 {news_id} 分析任务入队失败: {e}")
         return False
 
 
@@ -53,24 +53,24 @@ async def create_analysis(
     request: AnalysisCreate,
     db: AsyncSession = Depends(get_db),
 ) -> AnalysisCreateResponse:
-    """Create a new analysis request.
+    """创建一个新闻分析请求
 
-    Accepts either an existing news_id or raw news content.
+    接受已有的 news_id 或原始新闻内容。
 
-    **Request:**
+    **请求示例:**
     ```json
     {
       "news_id": 123
     }
     ```
-    OR
+    或
     ```json
     {
       "news_content": "Bitcoin surges to new ATH..."
     }
     ```
 
-    **Response:**
+    **响应示例:**
     ```json
     {
       "analysis_id": 456,
@@ -79,22 +79,22 @@ async def create_analysis(
     ```
 
     Args:
-        request: Analysis creation request
-        db: Database session
+        request: 分析创建请求
+        db: 数据库会话
 
     Returns:
-        AnalysisCreateResponse with analysis_id and initial status
+        返回包含 analysis_id 和初始状态的 AnalysisCreateResponse
 
     Raises:
-        HTTPException 400: Invalid request (neither news_id nor content)
-        HTTPException 404: News not found (when news_id provided)
+        HTTPException 400: 无效请求（未提供 news_id 或内容）
+        HTTPException 404: 新闻未找到（提供 news_id 时）
     """
     try:
         service = AnalysisService(db)
         response = await service.create_analysis(request)
 
-        # Queue the analysis task
-        await _queue_analysis(request.news_id or response.analysis_id)
+        # 将分析任务加入队列
+        await _queue_analysis(response.news_id)
 
         return response
 
@@ -104,10 +104,10 @@ async def create_analysis(
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"Error creating analysis: {e}")
+        logger.error(f"创建分析失败: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create analysis",
+            detail="创建分析失败",
         )
 
 
@@ -116,16 +116,16 @@ async def create_batch_analysis(
     request: BatchAnalysisCreate,
     db: AsyncSession = Depends(get_db),
 ) -> BatchAnalysisResponse:
-    """Create multiple analysis requests.
+    """批量创建分析请求。
 
-    **Request:**
+    **请求示例:**
     ```json
     {
       "news_ids": [1, 2, 3]
     }
     ```
 
-    **Response:**
+    **响应示例:**
     ```json
     {
       "analysis_ids": [101, 102, 103],
@@ -135,20 +135,20 @@ async def create_batch_analysis(
     ```
 
     Args:
-        request: Batch analysis request
-        db: Database session
+        request: 批量分析请求
+        db: 数据库会话
 
     Returns:
-        BatchAnalysisResponse with list of analysis_ids
+        返回包含 analysis_ids 列表的 BatchAnalysisResponse
 
     Raises:
-        HTTPException 400: Invalid request (empty list or news not found)
+        HTTPException 400: 无效请求（列表为空或新闻未找到）
     """
     try:
         service = AnalysisService(db)
         response = await service.batch_create_analysis(request)
 
-        # Queue all analysis tasks
+        # 将所有分析任务加入队列
         for news_id in request.news_ids:
             await _queue_analysis(news_id)
 
@@ -160,10 +160,10 @@ async def create_batch_analysis(
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"Error creating batch analysis: {e}")
+        logger.error(f"批量创建分析失败: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create batch analysis",
+            detail="批量创建分析失败",
         )
 
 
@@ -171,9 +171,9 @@ async def create_batch_analysis(
 async def get_overview(
     db: AsyncSession = Depends(get_db),
 ) -> AnalysisOverview:
-    """Get analysis statistics overview.
+    """获取分析统计概览。
 
-    **Response:**
+    **响应示例:**
     ```json
     {
       "total": 1000,
@@ -184,24 +184,21 @@ async def get_overview(
     ```
 
     Args:
-        db: Database session
+        db: 数据库会话
 
     Returns:
-        AnalysisOverview with aggregate statistics
+        返回包含聚合统计信息的 AnalysisOverview
     """
     try:
         from app.services.analysis import get_analysis_overview
         return await get_analysis_overview(db)
 
     except Exception as e:
-        logger.error(f"Error getting overview: {e}")
+        logger.error(f"获取概览失败: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get overview",
+            detail="获取概览失败",
         )
-
-
-@router.get("/{analysis_id}", response_model=AnalysisDetail)
 
 
 @router.get("/{analysis_id}", response_model=AnalysisDetail)
@@ -209,9 +206,9 @@ async def get_analysis(
     analysis_id: int,
     db: AsyncSession = Depends(get_db),
 ) -> AnalysisDetail:
-    """Get analysis result by ID.
+    """根据 ID 获取分析结果。
 
-    **Response:**
+    **响应示例:**
     ```json
     {
       "id": 456,
@@ -232,14 +229,14 @@ async def get_analysis(
     ```
 
     Args:
-        analysis_id: Analysis ID
-        db: Database session
+        analysis_id: 分析记录 ID
+        db: 数据库会话
 
     Returns:
-        AnalysisDetail with full analysis information
+        返回包含完整分析信息的 AnalysisDetail
 
     Raises:
-        HTTPException 404: Analysis not found
+        HTTPException 404: 分析记录未找到
     """
     try:
         service = AnalysisService(db)
@@ -251,95 +248,8 @@ async def get_analysis(
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"Error getting analysis {analysis_id}: {e}")
+        logger.error(f"获取分析 {analysis_id} 失败: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get analysis",
+            detail="获取分析失败",
         )
-
-
-# Legacy endpoints for backward compatibility
-@router.post("/news/{news_id}", response_model=dict, deprecated=True)
-async def trigger_analysis_legacy(
-    news_id: int,
-    db: AsyncSession = Depends(get_db),
-):
-    """Legacy endpoint: Trigger analysis for a news item.
-
-    **Deprecated:** Use POST /analysis with news_id instead.
-    """
-    service = AnalysisService(db)
-    from app.schemas.analysis import AnalysisCreate
-    request = AnalysisCreate(news_id=news_id)
-    response = await service.create_analysis(request)
-    await _queue_analysis(news_id)
-    return {
-        "analysis_id": response.analysis_id,
-        "news_id": news_id,
-        "status": response.status,
-    }
-
-
-@router.get("/news/{news_id}", response_model=dict, deprecated=True)
-async def get_analysis_by_news_legacy(
-    news_id: int,
-    db: AsyncSession = Depends(get_db),
-):
-    """Legacy endpoint: Get analysis by news ID.
-
-    **Deprecated:** Use GET /analysis/{analysis_id} instead.
-    """
-    from sqlalchemy import select
-    from app.models.analysis import Analysis
-
-    result = await db.execute(
-        select(Analysis).where(Analysis.news_id == news_id)
-    )
-    analysis = result.scalar_one_or_none()
-
-    if not analysis:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-
-    return {
-        "id": analysis.id,
-        "news_id": analysis.news_id,
-        "status": analysis.status,
-        "investment_value": analysis.investment_value,
-        "confidence": float(analysis.confidence) if analysis.confidence else None,
-        "tokens": analysis.tokens,
-        "trend_analysis": analysis.trend_analysis,
-        "recommendation": analysis.recommendation,
-        "langsmith_trace": analysis.langsmith_trace,
-        "error_message": analysis.error_message,
-        "retry_count": analysis.retry_count,
-        "created_at": analysis.created_at,
-        "completed_at": analysis.completed_at,
-    }
-
-
-@router.get("/news/{news_id}/status", response_model=dict, deprecated=True)
-async def get_analysis_status_legacy(
-    news_id: int,
-    db: AsyncSession = Depends(get_db),
-):
-    """Legacy endpoint: Get analysis status by news ID.
-
-    **Deprecated:** Use GET /analysis/{analysis_id} instead.
-    """
-    from sqlalchemy import select
-    from app.models.analysis import Analysis
-
-    result = await db.execute(
-        select(Analysis).where(Analysis.news_id == news_id)
-    )
-    analysis = result.scalar_one_or_none()
-
-    if not analysis:
-        return {"news_id": news_id, "status": "not_found"}
-
-    return {
-        "news_id": news_id,
-        "status": analysis.status,
-        "created_at": analysis.created_at,
-        "completed_at": analysis.completed_at,
-    }

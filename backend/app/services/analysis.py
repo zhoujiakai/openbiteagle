@@ -40,7 +40,7 @@ class AnalysisService:
         self,
         request: AnalysisCreate,
     ) -> AnalysisCreateResponse:
-        """Create a new analysis request.
+        """创建一个新闻分析请求
 
         Args:
             request: Analysis creation request with news_id or news_content
@@ -88,7 +88,7 @@ class AnalysisService:
             # Return existing analysis
             logger.info(f"Found existing analysis {existing_analysis.id} for news {news_id}")
             return AnalysisCreateResponse(
-                analysis_id=existing_analysis.id, status=existing_analysis.status
+                analysis_id=existing_analysis.id, news_id=news_id, status=existing_analysis.status
             )
 
         # Create new analysis
@@ -102,7 +102,7 @@ class AnalysisService:
 
         logger.info(f"Created analysis {analysis.id} for news {news_id}")
 
-        return AnalysisCreateResponse(analysis_id=analysis.id, status="pending")
+        return AnalysisCreateResponse(analysis_id=analysis.id, news_id=news_id, status="pending")
 
     async def batch_create_analysis(
         self,

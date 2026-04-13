@@ -93,6 +93,7 @@ class AnalysisCreateResponse(BaseModel):
     """Schema for analysis creation response."""
 
     analysis_id: int
+    news_id: int
     status: str = Field(..., description="Initial status (pending/processing)")
 
 
