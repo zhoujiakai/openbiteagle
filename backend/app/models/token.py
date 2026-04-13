@@ -1,4 +1,4 @@
-"""Token model."""
+"""代币模型。"""
 
 from datetime import datetime
 from typing import Optional
@@ -10,25 +10,46 @@ from app.data.db import Base
 
 
 class Token(Base):
-    """Cryptocurrency token information."""
+    """加密货币代币信息。"""
 
     __tablename__ = "tokens"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    symbol: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
-    name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    current_price: Mapped[Optional[Numeric]] = mapped_column(Numeric(20, 8), nullable=True)
-    market_cap: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
-    volume_24h: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
-    change_24h_percent: Mapped[Optional[Numeric]] = mapped_column(Numeric(10, 2), nullable=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True, comment="自增主键"
+    )
+    symbol: Mapped[str] = mapped_column(
+        String(50), nullable=False, unique=True, index=True, comment="代币符号，如 BTC、ETH"
+    )
+    name: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="代币全称"
+    )
+    current_price: Mapped[Optional[Numeric]] = mapped_column(
+        Numeric(20, 8), nullable=True, comment="当前价格（USD）"
+    )
+    market_cap: Mapped[Optional[int]] = mapped_column(
+        BigInteger, nullable=True, comment="市值（USD）"
+    )
+    volume_24h: Mapped[Optional[int]] = mapped_column(
+        BigInteger, nullable=True, comment="24 小时交易量（USD）"
+    )
+    change_24h_percent: Mapped[Optional[Numeric]] = mapped_column(
+        Numeric(10, 2), nullable=True, comment="24 小时价格涨跌幅百分比"
+    )
 
-    # Additional metadata
-    cmc_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # CoinMarketCap ID
-    coingecko_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    contract_address: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    # 附加元数据
+    cmc_id: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True, comment="CoinMarketCap ID"
+    )
+    coingecko_id: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="CoinGecko ID"
+    )
+    contract_address: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="智能合约地址"
+    )
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(),
+        comment="记录更新时间"
     )
 
     def __repr__(self) -> str:

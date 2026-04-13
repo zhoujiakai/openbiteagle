@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import health, kg, news
-from tasks.task3_mq_driven.analysis import router as analysis_router
+from tasks.task5_http_api.router import router as analysis_router
 
 api_router = APIRouter()
 

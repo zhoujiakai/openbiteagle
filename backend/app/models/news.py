@@ -1,4 +1,4 @@
-"""News model."""
+"""新闻模型。"""
 
 from datetime import datetime
 from typing import Optional
@@ -11,7 +11,7 @@ from app.data.db import Base
 
 
 class News(Base):
-    """News/flash article from Odaily."""
+    """Odaily 快讯/文章。"""
 
     __tablename__ = "news"
 

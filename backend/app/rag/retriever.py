@@ -1,13 +1,11 @@
-"""Retriever for searching knowledge base."""
+"""知识库检索器。"""
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import make_transient
 
-from app.core.config import cfg
 from app.data.db import AsyncSessionLocal
 from app.models.document import DocumentChunk
 
@@ -15,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Compute cosine similarity between two vectors.
+    """计算两个向量的余弦相似度。
 
     Args:
-        a: First vector
-        b: Second vector
+        a: 第一个向量
+        b: 第二个向量
 
     Returns:
-        Similarity score between -1 and 1
+        相似度分数，范围 [-1, 1]
     """
     if len(a) != len(b):
         return 0.0
@@ -38,18 +36,18 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
 
 
 class Retriever:
-    """Vector similarity search retriever."""
+    """基于向量相似度的检索器。"""
 
     def __init__(
         self,
         top_k: int = 3,
         threshold: float = 0.7,
     ):
-        """Initialize retriever.
+        """初始化检索器。
 
         Args:
-            top_k: Number of results to return
-            threshold: Minimum similarity score (0-1)
+            top_k: 返回的最大结果数
+            threshold: 最低相似度阈值（0-1）
         """
         self.top_k = top_k
         self.threshold = threshold
@@ -60,57 +58,57 @@ class Retriever:
         top_k: Optional[int] = None,
         filter_tokens: Optional[list[str]] = None,
     ) -> list[dict]:
-        """Search for similar chunks.
+        """检索与查询相似的文档分块。
 
         Args:
-            query: Search query text
-            top_k: Override default top_k
-            filter_tokens: Optional token symbols to filter by
+            query: 查询文本
+            top_k: 覆盖默认的 top_k 值
+            filter_tokens: 可选的代币符号过滤列表
 
         Returns:
-            List of matching chunks with similarity scores
+            匹配分块列表，包含相似度分数
         """
         from app.rag.embeddings import get_embedding_service
 
-        # Generate query embedding
+        # 生成查询文本的嵌入向量
         embedding_service = get_embedding_service()
         query_vector = await embedding_service.embed_text(query)
 
         k = top_k or self.top_k
 
         async with AsyncSessionLocal() as db:
-            # Fetch all chunks with embeddings
+            # 获取所有已生成嵌入的分块
             result = await db.execute(
                 select(DocumentChunk).where(DocumentChunk.embedding.isnot(None))
             )
             chunks = result.scalars().all()
 
-            # Detach from session
+            # 从会话中分离对象
             for chunk in chunks:
                 make_transient(chunk)
 
-            # Filter by tokens if specified
+            # 如果指定了代币符号，进行过滤
             if filter_tokens:
                 chunks = [
                     c for c in chunks
                     if any(token in c.tokens for token in filter_tokens)
                 ]
 
-            # Compute similarities and sort
+            # 计算相似度并排序
             chunk_scores = []
             for chunk in chunks:
                 emb = chunk.embedding
                 if emb is not None and len(emb) > 0:
                     similarity = cosine_similarity(query_vector, emb)
-                    # Convert from [-1, 1] to [0, 1] range
+                    # 将范围从 [-1, 1] 转换为 [0, 1]
                     similarity = (similarity + 1) / 2
                     if similarity >= self.threshold:
                         chunk_scores.append((chunk, similarity))
 
-            # Sort by similarity (descending)
+            # 按相似度降序排列
             chunk_scores.sort(key=lambda x: x[1], reverse=True)
 
-            # Return top k results
+            # 返回前 k 个结果
             results = []
             for chunk, similarity in chunk_scores[:k]:
                 results.append({
@@ -129,14 +127,14 @@ class Retriever:
         tokens: list[str],
         limit: int = 5,
     ) -> list[dict]:
-        """Search chunks by mentioned tokens.
+        """根据提及的代币符号检索文档分块。
 
         Args:
-            tokens: Token symbols to search for
-            limit: Maximum results
+            tokens: 待搜索的代币符号列表
+            limit: 最大返回数
 
         Returns:
-            List of matching chunks
+            匹配分块列表
         """
         async with AsyncSessionLocal() as db:
             from sqlalchemy import or_
@@ -163,12 +161,12 @@ class Retriever:
             ]
 
 
-# Global retriever instance
+# 全局检索器实例
 _retriever: Optional[Retriever] = None
 
 
 def get_retriever(top_k: int = 3, threshold: float = 0.7) -> Retriever:
-    """Get or create global retriever."""
+    """获取或创建全局检索器。"""
     global _retriever
     _retriever = Retriever(top_k=top_k, threshold=threshold)
     return _retriever

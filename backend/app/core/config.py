@@ -67,6 +67,12 @@ class Config:
     class jina:
         JINA_API_KEY: str = ""
         JINA_EMBEDDING_MODEL: str = "jina-embeddings-v3"
+        JINA_API_URL: str = "https://api.jina.ai/v1/embeddings"
+        JINA_EMBEDDING_DIM: int = 1024
+        JINA_BATCH_SIZE: int = 8
+        JINA_TIMEOUT: float = 30.0
+        CHUNK_SIZE: int = 500
+        CHUNK_OVERLAP: int = 100
 
     # ── LangSmith (optional) ────────────────────────────
     class langsmith:

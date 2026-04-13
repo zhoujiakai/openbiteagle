@@ -19,7 +19,7 @@ from app.schemas.analysis import (
     BatchAnalysisCreate,
     BatchAnalysisResponse,
 )
-from app.services.analysis import AnalysisService
+from tasks.task5_http_api.service import AnalysisService
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ async def get_overview(
         返回包含聚合统计信息的 AnalysisOverview
     """
     try:
-        from app.services.analysis import get_analysis_overview
+        from tasks.task5_http_api.service import get_analysis_overview
         return await get_analysis_overview(db)
 
     except Exception as e:

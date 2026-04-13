@@ -1,71 +1,34 @@
-"""Embedding service for vectorizing text."""
+"""文本向量化嵌入服务。"""
 
-import hashlib
 import logging
 from typing import Optional
 
 import httpx
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import cfg
-from app.data.vector import insert_chunk
-from app.models.document import Document
 
 logger = logging.getLogger(__name__)
 
-# Embedding dimensions for Jina jina-embeddings-v3
-EMBEDDING_DIM = 1024
-
-# Jina API endpoint
-JINA_API_URL = "https://api.jina.ai/v1/embeddings"
-
-
-class MockEmbeddings:
-    """Mock embedding service for testing without API."""
-
-    def __init__(self, dimension: int = EMBEDDING_DIM):
-        self.dimension = dimension
-
-    async def aembed_query(self, text: str) -> list[float]:
-        """Generate mock embedding based on text hash."""
-        hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
-        vector = []
-        for i in range(self.dimension):
-            val = ((hash_val >> (i % 64)) & 0xFFFF) / 32768.0 - 1.0
-            vector.append(val)
-        return vector
-
-    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Generate mock embeddings for multiple texts."""
-        return [await self.aembed_query(text) for text in texts]
-
-    def sync_embed(self, text: str) -> list[float]:
-        """Synchronous version for SQL query construction."""
-        hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
-        vector = []
-        for i in range(self.dimension):
-            val = ((hash_val >> (i % 64)) & 0xFFFF) / 32768.0 - 1.0
-            vector.append(val)
-        return vector
-
 
 class JinaEmbeddings:
-    """Jina Embeddings client using HTTP API."""
+    """基于 HTTP API 的 Jina Embeddings 客户端。"""
 
-    def __init__(self, model: str = "jina-embeddings-v3", api_key: str = None):
-        self.model = model
-        self.api_key = api_key or "jina_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"  # Free tier placeholder
-        self.api_url = JINA_API_URL
+    def __init__(self, model: str = None, api_key: str = None):
+        self.model = model or cfg.jina.JINA_EMBEDDING_MODEL
+        self.api_key = api_key or cfg.jina.JINA_API_KEY
+        self.api_url = cfg.jina.JINA_API_URL
+        self.timeout = cfg.jina.JINA_TIMEOUT
+        self.batch_size = cfg.jina.JINA_BATCH_SIZE
         self._client: Optional[httpx.AsyncClient] = None
 
     @property
     def client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=30.0)
+            self._client = httpx.AsyncClient(timeout=self.timeout)
         return self._client
 
     async def aembed_query(self, text: str) -> list[float]:
-        """Generate embedding for a single text."""
+        """为单条文本生成嵌入向量。"""
         response = await self.client.post(
             self.api_url,
             headers={
@@ -83,13 +46,12 @@ class JinaEmbeddings:
         return data["data"][0]["embedding"]
 
     async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
-        """Generate embeddings for multiple texts."""
-        # Batch requests (max 8 texts per request for Jina free tier)
-        batch_size = 8
+        """为多条文本批量生成嵌入向量。"""
+        # 按 Jina 批量大小分批请求
         all_embeddings = []
 
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+        for i in range(0, len(texts), self.batch_size):
+            batch = texts[i:i + self.batch_size]
             response = await self.client.post(
                 self.api_url,
                 headers={
@@ -110,81 +72,77 @@ class JinaEmbeddings:
         return all_embeddings
 
     async def close(self):
-        """Close the HTTP client."""
+        """关闭 HTTP 客户端。"""
         if self._client:
             await self._client.aclose()
 
 
 class EmbeddingService:
-    """Service for generating and storing embeddings."""
+    """嵌入向量生成与存储服务。"""
 
-    def __init__(self, model: str = None, use_mock: bool = False):
-        """Initialize embedding service.
+    def __init__(self, model: str = None):
+        """初始化嵌入服务。
 
         Args:
-            model: Jina embedding model name (default from settings)
-            use_mock: Force use of mock embeddings for testing
+            model: Jina 嵌入模型名称（默认从配置读取）
         """
-        self._embeddings: Optional[JinaEmbeddings | MockEmbeddings] = None
+        self._embeddings: Optional[JinaEmbeddings] = None
         self.model = model or cfg.jina.JINA_EMBEDDING_MODEL
-        # Use mock if explicitly requested or no API key configured
-        self.use_mock = use_mock or not cfg.jina.JINA_API_KEY
 
     @property
-    def embeddings(self) -> JinaEmbeddings | MockEmbeddings:
-        """Get or create embeddings instance."""
+    def embeddings(self) -> JinaEmbeddings:
+        """获取或创建嵌入实例。"""
         if self._embeddings is None:
-            if self.use_mock:
-                logger.info("Using mock embeddings for testing")
-                self._embeddings = MockEmbeddings()
-            else:
-                logger.info(f"Using Jina embeddings: {self.model}")
-                self._embeddings = JinaEmbeddings(
-                    model=self.model,
-                    api_key=cfg.jina.JINA_API_KEY,
-                )
+            logger.info(f"使用 Jina 嵌入模型: {self.model}")
+            self._embeddings = JinaEmbeddings(
+                model=self.model,
+                api_key=cfg.jina.JINA_API_KEY,
+            )
         return self._embeddings
 
     async def close(self):
-        """Close the embedding service."""
-        if self._embeddings and isinstance(self._embeddings, JinaEmbeddings):
+        """关闭嵌入服务。"""
+        if self._embeddings:
             await self._embeddings.close()
 
     async def embed_text(self, text: str) -> list[float]:
-        """Generate embedding for a single text.
+        """为单条文本生成嵌入向量。
 
         Args:
-            text: Text to embed
+            text: 待嵌入的文本
 
         Returns:
-            Embedding vector
+            嵌入向量
         """
         result = await self.embeddings.aembed_query(text)
         return result
 
     async def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        """Generate embeddings for multiple texts.
+        """为多条文本生成嵌入向量。
 
         Args:
-            texts: List of texts to embed
+            texts: 待嵌入的文本列表
 
         Returns:
-            List of embedding vectors
+            嵌入向量列表
         """
         results = await self.embeddings.aembed_documents(texts)
         return results
 
-    def _split_text(self, text: str, chunk_size: int = 500, chunk_overlap: int = 100) -> list[str]:
-        """Split text into chunks with overlap.
+    def _split_text(self, text: str, chunk_size: int = None, chunk_overlap: int = None) -> list[str]:
+        """将文本按指定大小分块，支持重叠。
 
         Args:
-            text: Text to split
-            chunk_size: Target chunk size in characters
-            chunk_overlap: Overlap between chunks
+            text: 待分割的文本
+            chunk_size: 目标分块大小（字符数）
+            chunk_overlap: 相邻分块的重叠字符数
 
         Returns:
-            List of text chunks
+            文本分块列表
         """
+        chunk_size = chunk_size or cfg.jina.CHUNK_SIZE
+        chunk_overlap = chunk_overlap or cfg.jina.CHUNK_OVERLAP
+
         if len(text) <= chunk_size:
             return [text]
 
@@ -192,7 +150,7 @@ class EmbeddingService:
         start = 0
         while start < len(text):
             end = start + chunk_size
-            # Try to break at sentence boundary
+            # 尝试在句子边界处断开
             if end < len(text):
                 for sep in [". ", "! ", "? ", "\n\n", "\n"]:
                     last_sep = text.rfind(sep, start, end)
@@ -212,18 +170,18 @@ class EmbeddingService:
     async def process_document(
         self,
         document_id: int,
-        chunk_size: int = 500,
-        chunk_overlap: int = 100,
+        chunk_size: int = None,
+        chunk_overlap: int = None,
     ) -> dict:
-        """Split document into chunks and create embeddings.
+        """将文档分块并生成嵌入向量。
 
         Args:
-            document_id: Document ID to process
-            chunk_size: Size of each chunk in characters
-            chunk_overlap: Overlap between chunks
+            document_id: 待处理的文档 ID
+            chunk_size: 每个分块的字符数
+            chunk_overlap: 相邻分块的重叠字符数
 
         Returns:
-            Dict with processing stats
+            包含处理统计信息的字典
         """
         from app.data.db import AsyncSessionLocal
         from app.data.vector import get_document
@@ -232,10 +190,10 @@ class EmbeddingService:
 
         doc = await get_document(document_id)
         if not doc:
-            raise ValueError(f"Document {document_id} not found")
+            raise ValueError(f"文档 {document_id} 不存在")
 
         chunks = self._split_text(doc.content, chunk_size, chunk_overlap)
-        logger.info(f"Split document {document_id} into {len(chunks)} chunks")
+        logger.info(f"文档 {document_id} 已分割为 {len(chunks)} 个分块")
 
         embedding_vectors = await self.embed_texts(chunks)
 
@@ -258,12 +216,12 @@ class EmbeddingService:
         }
 
 
-# Global embedding service instance
+# 全局嵌入服务实例
 _service: Optional[EmbeddingService] = None
 
 
 def get_embedding_service() -> EmbeddingService:
-    """Get or create global embedding service."""
+    """获取或创建全局嵌入服务。"""
     global _service
     if _service is None:
         _service = EmbeddingService()

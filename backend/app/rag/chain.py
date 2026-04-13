@@ -1,30 +1,28 @@
-"""RAG chain for retrieval-augmented generation."""
+"""RAG 检索增强生成链。"""
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
 
-from app.core.config import cfg
 from app.wrappers.llm import get_llm
 
 logger = logging.getLogger(__name__)
 
 
 class RAGChain:
-    """RAG chain for answering questions with knowledge base context."""
+    """基于知识库上下文回答问题的 RAG 链。"""
 
     def __init__(
         self,
         top_k: int = 3,
         threshold: float = 0.7,
     ):
-        """Initialize RAG chain.
+        """初始化 RAG 链。
 
         Args:
-            top_k: Number of chunks to retrieve
-            threshold: Minimum similarity score
+            top_k: 检索的分块数量
+            threshold: 最低相似度阈值
         """
         from app.rag.retriever import get_retriever
 
@@ -36,16 +34,16 @@ class RAGChain:
         question: str,
         filter_tokens: Optional[list[str]] = None,
     ) -> dict:
-        """Query with RAG context.
+        """基于 RAG 上下文进行查询。
 
         Args:
-            question: User question
-            filter_tokens: Optional token symbols to filter by
+            question: 用户问题
+            filter_tokens: 可选的代币符号过滤列表
 
         Returns:
-            Dict with answer and sources
+            包含答案和来源的字典
         """
-        # Retrieve relevant chunks
+        # 检索相关分块
         chunks = await self.retriever.search(
             query=question,
             filter_tokens=filter_tokens,
@@ -53,16 +51,16 @@ class RAGChain:
 
         if not chunks:
             return {
-                "answer": "No relevant information found in the knowledge base.",
+                "answer": "在知识库中未找到相关信息。",
                 "sources": [],
             }
 
-        # Build context from chunks
+        # 从分块构建上下文
         context_parts = []
         sources = []
 
         for i, chunk in enumerate(chunks):
-            context_parts.append(f"[Source {i+1}] {chunk['content']}")
+            context_parts.append(f"[来源 {i+1}] {chunk['content']}")
             sources.append({
                 "chunk_id": chunk["chunk_id"],
                 "similarity": chunk["similarity"],
@@ -70,15 +68,15 @@ class RAGChain:
 
         context = "\n\n".join(context_parts)
 
-        # Generate answer with context
-        prompt = f"""Based on the following context from our knowledge base, answer the question.
+        # 基于上下文生成回答
+        prompt = f"""请根据以下知识库上下文回答问题。
 
-Context:
+上下文：
 {context}
 
-Question: {question}
+问题：{question}
 
-Provide a concise answer. If the context doesn't contain relevant information, say so."""
+请提供简洁的回答。如果上下文中不包含相关信息，请如实说明。"""
 
         try:
             response = await self.llm.ainvoke([HumanMessage(content=prompt)])
@@ -90,9 +88,9 @@ Provide a concise answer. If the context doesn't contain relevant information, s
                 "context_chunks": len(chunks),
             }
         except Exception as e:
-            logger.error(f"Error in RAG query: {e}")
+            logger.error(f"RAG 查询出错: {e}")
             return {
-                "answer": f"Error generating answer: {str(e)}",
+                "answer": f"生成回答时出错: {str(e)}",
                 "sources": sources,
             }
 
@@ -101,18 +99,18 @@ Provide a concise answer. If the context doesn't contain relevant information, s
         token: str,
         news_content: str,
     ) -> dict:
-        """Enhance token analysis with knowledge base information.
+        """利用知识库信息增强代币分析。
 
         Args:
-            token: Token symbol
-            news_content: News content to analyze with
+            token: 代币符号
+            news_content: 待分析的新闻内容
 
         Returns:
-            Enhanced context with KB information
+            包含知识库增强上下文的字典
         """
-        # Search for token-related chunks
+        # 搜索与代币相关的分块
         chunks = await self.retriever.search(
-            query=f"Information about {token} cryptocurrency",
+            query=f"关于 {token} 加密货币的信息",
             filter_tokens=[token],
         )
 
@@ -123,25 +121,25 @@ Provide a concise answer. If the context doesn't contain relevant information, s
                 "enhanced_context": None,
             }
 
-        # Build enhanced context
+        # 构建增强上下文
         kb_info = "\n\n".join([
             f"- {chunk['content'][:200]}..."
             for chunk in chunks[:3]
         ])
 
-        # Analyze news with KB context
-        prompt = f"""You are analyzing news about cryptocurrency {token}.
+        # 基于知识库上下文分析新闻
+        prompt = f"""你正在分析关于加密货币 {token} 的新闻。
 
-Knowledge Base Information:
+知识库信息：
 {kb_info}
 
-Recent News:
+最新新闻：
 {news_content}
 
-Based on the knowledge base, provide:
-1. Key facts about {token}
-2. How the news relates to these facts
-3. Any important context for investors"""
+请根据知识库提供：
+1. 关于 {token} 的关键信息
+2. 新闻与这些信息的关联
+3. 对投资者重要的背景信息"""
 
         try:
             response = await self.llm.ainvoke([HumanMessage(content=prompt)])
@@ -154,21 +152,21 @@ Based on the knowledge base, provide:
                 "analysis": analysis,
             }
         except Exception as e:
-            logger.error(f"Error enhancing token context: {e}")
+            logger.error(f"增强代币上下文出错: {e}")
             return {
                 "token": token,
                 "kb_found": True,
                 "kb_chunks": len(chunks),
-                "analysis": f"Error: {str(e)}",
+                "analysis": f"出错: {str(e)}",
             }
 
 
-# Global RAG chain instance
+# 全局 RAG 链实例
 _chain: Optional[RAGChain] = None
 
 
 def get_rag_chain(top_k: int = 3, threshold: float = 0.7) -> RAGChain:
-    """Get or create global RAG chain."""
+    """获取或创建全局 RAG 链。"""
     global _chain
     _chain = RAGChain(top_k=top_k, threshold=threshold)
     return _chain
