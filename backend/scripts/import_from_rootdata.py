@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Import projects from Rootdata into the knowledge base.
+"""从 Rootdata 导入项目到知识库。
 
-Usage:
+用法:
     python scripts/import_from_rootdata.py [--limit 20] [--no-embed] [--kg]
 """
 

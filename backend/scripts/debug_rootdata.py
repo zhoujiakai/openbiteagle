@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Debug Rootdata page structure."""
+"""调试 Rootdata 页面结构。"""
 
 import asyncio
 import sys
@@ -9,39 +9,39 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def main():
-    """Debug Rootdata page."""
+    """调试 Rootdata 页面。"""
     print("=" * 60)
-    print("Debugging Rootdata Page Structure")
+    print("正在调试 Rootdata 页面结构")
     print("=" * 60)
     print()
 
     from playwright.async_api import async_playwright
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)  # Show browser for debugging
+        browser = await p.chromium.launch(headless=False)  # 显示浏览器以便调试
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         )
         page = await context.new_page()
 
-        print("Navigating to Rootdata projects page...")
+        print("正在导航到 Rootdata 项目页面...")
         await page.goto("https://www.rootdata.com/projects", wait_until="networkidle")
         await page.wait_for_timeout(3000)
 
-        # Save screenshot
+        # 保存截图
         screenshot_path = Path(__file__).parent.parent / "data" / "kb_docs" / "rootdata_debug.png"
         screenshot_path.parent.mkdir(parents=True, exist_ok=True)
         await page.screenshot(path=str(screenshot_path))
-        print(f"Screenshot saved: {screenshot_path}")
+        print(f"截图已保存: {screenshot_path}")
 
-        # Get page title
+        # 获取页面标题
         title = await page.title()
-        print(f"Page title: {title}")
+        print(f"页面标题: {title}")
 
-        # Try to find project links
-        print("\nSearching for project links...")
+        # 尝试查找项目链接
+        print("\n正在搜索项目链接...")
 
-        # Try different patterns
+        # 尝试不同的选择器模式
         patterns = [
             'a[href*="/project_detail/"]',
             'a[href*="/project/"]',
@@ -55,8 +55,8 @@ async def main():
             try:
                 elements = await page.query_selector_all(pattern)
                 if elements:
-                    print(f"\n✅ Pattern '{pattern}' found {len(elements)} elements")
-                    # Show first few
+                    print(f"\n✅ 模式 '{pattern}' 找到 {len(elements)} 个元素")
+                    # 显示前几个
                     for i, el in enumerate(elements[:3]):
                         href = await el.get_attribute("href")
                         text = await el.inner_text()
@@ -64,8 +64,8 @@ async def main():
             except Exception as e:
                 print(f"  Pattern '{pattern}': {e}")
 
-        # Get all links
-        print("\n\nAll links on page:")
+        # 获取所有链接
+        print("\n\n页面上的所有链接:")
         links = await page.query_selector_all("a")
         project_links = []
         for link in links:
@@ -74,11 +74,11 @@ async def main():
                 text = await link.inner_text()
                 project_links.append((href, text.strip()[:50]))
 
-        print(f"Found {len(project_links)} project-related links:")
+        print(f"找到 {len(project_links)} 个项目相关链接:")
         for href, text in project_links[:10]:
             print(f"  {href} - {text}")
 
-        print("\nPress Enter to close browser...")
+        print("\n按回车键关闭浏览器...")
         input()
 
         await browser.close()

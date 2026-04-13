@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Import documents from all sources into the knowledge base.
+"""从所有来源导入文档到知识库。
 
-Usage:
+用法:
     python scripts/import_all_kb.py [--rootdata 20] [--odaily 20] [--tokenomics 20] [--no-embed]
 """
 
@@ -13,63 +13,63 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def main():
-    """Import from all sources."""
+    """从所有来源导入。"""
     import argparse
 
     from app.services.knowledge_loader import get_knowledge_loader
 
-    parser = argparse.ArgumentParser(description="Import from all knowledge base sources")
+    parser = argparse.ArgumentParser(description="从所有知识库来源导入")
     parser.add_argument(
         "--rootdata",
         type=int,
         default=20,
         metavar="N",
-        help="Number of Rootdata projects to import (default: 20)",
+        help="导入 Rootdata 项目数量（默认: 20）",
     )
     parser.add_argument(
         "--odaily",
         type=int,
         default=20,
         metavar="N",
-        help="Number of Odaily articles to import (default: 20)",
+        help="导入 Odaily 文章数量（默认: 20）",
     )
     parser.add_argument(
         "--tokenomics",
         type=int,
         default=20,
         metavar="N",
-        help="Number of tokenomics docs to import (default: 20)",
+        help="导入代币经济学文档数量（默认: 20）",
     )
     parser.add_argument(
         "--no-embed",
         action="store_true",
-        help="Skip generating embeddings",
+        help="跳过生成向量嵌入",
     )
     parser.add_argument(
         "--skip-rootdata",
         action="store_true",
-        help="Skip Rootdata import",
+        help="跳过 Rootdata 导入",
     )
     parser.add_argument(
         "--skip-odaily",
         action="store_true",
-        help="Skip Odaily import",
+        help="跳过 Odaily 导入",
     )
     parser.add_argument(
         "--skip-tokenomics",
         action="store_true",
-        help="Skip tokenomics import",
+        help="跳过代币经济学导入",
     )
 
     args = parser.parse_args()
 
     print("=" * 60)
-    print("Knowledge Base - Import from All Sources")
+    print("知识库 - 从所有来源导入")
     print("=" * 60)
-    print(f"Rootdata:   {args.rootdata if not args.skip_rootdata else '(skipped)'}")
-    print(f"Odaily:     {args.odaily if not args.skip_odaily else '(skipped)'}")
-    print(f"Tokenomics: {args.tokenomics if not args.skip_tokenomics else '(skipped)'}")
-    print(f"Embed:      {not args.no_embed}")
+    print(f"Rootdata:   {args.rootdata if not args.skip_rootdata else '(已跳过)'}")
+    print(f"Odaily:     {args.odaily if not args.skip_odaily else '(已跳过)'}")
+    print(f"代币经济学: {args.tokenomics if not args.skip_tokenomics else '(已跳过)'}")
+    print(f"嵌入:       {not args.no_embed}")
     print()
 
     loader = get_knowledge_loader()
@@ -83,10 +83,10 @@ async def main():
         "errors": [],
     }
 
-    # Import from Rootdata
+    # 从 Rootdata 导入
     if not args.skip_rootdata:
         print("-" * 60)
-        print("Importing from Rootdata...")
+        print("正在从 Rootdata 导入...")
         print("-" * 60)
         stats = await loader.import_rootdata_projects(
             limit=args.rootdata,
@@ -98,10 +98,10 @@ async def main():
         total_stats["errors"].extend(stats.get("errors", []))
         print()
 
-    # Import from Odaily
+    # 从 Odaily 导入
     if not args.skip_odaily:
         print("-" * 60)
-        print("Importing from Odaily...")
+        print("正在从 Odaily 导入...")
         print("-" * 60)
         stats = await loader.import_odaily_articles(
             limit=args.odaily,
@@ -113,10 +113,10 @@ async def main():
         total_stats["errors"].extend(stats.get("errors", []))
         print()
 
-    # Import tokenomics
+    # 导入代币经济学
     if not args.skip_tokenomics:
         print("-" * 60)
-        print("Importing tokenomics documents...")
+        print("正在导入代币经济学文档...")
         print("-" * 60)
         stats = await loader.import_tokenomics_docs(
             limit=args.tokenomics,
@@ -128,26 +128,26 @@ async def main():
         total_stats["errors"].extend(stats.get("errors", []))
         print()
 
-    # Print summary
+    # 打印汇总
     print()
     print("=" * 60)
-    print("Total Import Results")
+    print("总导入结果")
     print("=" * 60)
-    print(f"Fetched:    {total_stats['fetched']}")
-    print(f"Imported:   {total_stats['imported']}")
-    print(f"Embedded:   {total_stats['embedded']}")
-    print(f"Failed:     {total_stats['failed']}")
+    print(f"已获取:    {total_stats['fetched']}")
+    print(f"已导入:   {total_stats['imported']}")
+    print(f"已嵌入:   {total_stats['embedded']}")
+    print(f"失败:     {total_stats['failed']}")
 
     if total_stats["errors"]:
         print()
-        print("Errors:")
+        print("错误:")
         for error in total_stats["errors"][:10]:
             print(f"  - {error}")
         if len(total_stats["errors"]) > 10:
-            print(f"  ... and {len(total_stats['errors']) - 10} more")
+            print(f"  ... 还有 {len(total_stats['errors']) - 10} 个")
 
     print()
-    print("✅ All imports completed")
+    print("✅ 所有导入已完成")
 
 
 if __name__ == "__main__":

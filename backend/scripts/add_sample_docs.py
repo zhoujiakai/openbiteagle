@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add sample Web3 documents to the knowledge base."""
+"""向知识库添加 Web3 示例文档。"""
 
 import asyncio
 import sys
@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app.data.vector import insert_document
 
 
-# Sample Web3 documents
+# Web3 示例文档
 SAMPLE_DOCS = [
     {
         "title": "Bitcoin: Digital Gold Overview",
@@ -90,14 +90,14 @@ Chainlink is essential for DeFi protocols that need accurate price data and for 
 
 
 async def main():
-    """Add sample documents to the knowledge base."""
+    """向知识库添加示例文档。"""
     print("=" * 60)
-    print("Adding Sample Documents to Knowledge Base")
+    print("向知识库添加示例文档")
     print("=" * 60)
     print()
 
     for i, doc in enumerate(SAMPLE_DOCS, 1):
-        print(f"{i}. Adding: {doc['title']}")
+        print(f"{i}. 正在添加: {doc['title']}")
 
         doc_id = await insert_document(
             title=doc["title"],
@@ -107,13 +107,13 @@ async def main():
             metadata=doc.get("metadata", {}),
         )
 
-        print(f"   ✅ Document ID: {doc_id}")
+        print(f"   ✅ 文档 ID: {doc_id}")
         print()
 
     print("=" * 60)
-    print(f"✅ Added {len(SAMPLE_DOCS)} sample documents")
+    print(f"✅ 已添加 {len(SAMPLE_DOCS)} 篇示例文档")
     print()
-    print("Next: Run 'python scripts/process_embeddings.py' to create embeddings")
+    print("下一步: 运行 'python scripts/process_embeddings.py' 创建向量嵌入")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analyze Rootdata page structure and fix scraper."""
+"""分析 Rootdata 页面结构并修复爬虫。"""
 
 import asyncio
 import sys
@@ -10,10 +10,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def main():
-    """Analyze Rootdata and extract data."""
+    """分析 Rootdata 并提取数据。"""
     from playwright.async_api import async_playwright
 
-    print("Analyzing Rootdata...")
+    print("正在分析 Rootdata...")
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -22,21 +22,21 @@ async def main():
         )
         page = await context.new_page()
 
-        # Navigate to projects page
-        print("Loading projects page...")
+        # 导航到项目页面
+        print("正在加载项目页面...")
         await page.goto("https://www.rootdata.com/projects", wait_until="networkidle")
         await page.wait_for_timeout(3000)
 
-        # Get page content and analyze
+        # 获取页面内容并分析
         content = await page.content()
 
-        # Look for __NUXT__ data (common pattern in Nuxt apps)
+        # 查找 __NUXT__ 数据（Nuxt 应用的常见模式）
         nuxt_data = await page.evaluate("""() => {
-            // Try to find window.__NUXT__
+            // 尝试查找 window.__NUXT__
             if (window.__NUXT__) {
                 return window.__NUXT__;
             }
-            // Try to find data in script tags
+            // 尝试在 script 标签中查找数据
             const scripts = document.querySelectorAll('script');
             for (let script of scripts) {
                 if (script.textContent.includes('__NUXT__')) {
@@ -52,38 +52,38 @@ async def main():
         }""")
 
         if nuxt_data:
-            print(f"\n✅ Found __NUXT__ data!")
-            # Save for analysis
+            print(f"\n✅ 找到 __NUXT__ 数据!")
+            # 保存以便分析
             output_path = Path(__file__).parent.parent / "data" / "kb_docs" / "nuxt_data.json"
             with open(output_path, "w") as f:
                 json.dump(nuxt_data, f, indent=2, default=str)
-            print(f"Saved to: {output_path}")
+            print(f"已保存到: {output_path}")
 
-            # Try to extract projects from the data
+            # 尝试从数据中提取项目
             if "data" in str(nuxt_data):
-                print("\nSearching for project data...")
+                print("\n正在搜索项目数据...")
 
-        # Also check for API calls in network
-        print("\nLooking for links to project detail pages...")
+        # 同时检查网络中的 API 调用
+        print("\n正在查找项目详情页链接...")
         links = await page.query_selector_all("a")
         project_ids = set()
 
         for link in links:
             href = await link.get_attribute("href")
             if href:
-                # Look for project detail links
+                # 查找项目详情链接
                 if "/project_detail/" in href or "/project/detail/" in href:
-                    # Extract ID
+                    # 提取 ID
                     import re
                     match = re.search(r'/project[_/]?detail/?/(\d+)', href)
                     if match:
                         project_ids.add(match.group(1))
 
-        print(f"Found {len(project_ids)} project IDs from links:")
+        print(f"从链接中找到 {len(project_ids)} 个项目 ID:")
         for pid in sorted(project_ids)[:20]:
             print(f"  - {pid}")
 
-        # Try to get project names
+        # 尝试获取项目名称
         for pid in list(project_ids)[:5]:
             link = await page.query_selector(f'a[href*="/project_detail/{pid}"], a[href*="/project/detail/{pid}"]')
             if link:

@@ -1,161 +1,164 @@
-"""新闻分析节点的提示词模板。
+"""新闻分析节点的中文提示词模板。
 
 每个提示词旨在引导 LLM 生成特定的结构化输出。
 """
 
 # 投资价值判断提示词
-INVESTMENT_VALUE_PROMPT = """You are a Web3 investment analyst. Analyze the following news item and determine its investment value.
+INVESTMENT_VALUE_PROMPT = """你是一名 Web3 投资分析师。请分析以下新闻并判断其投资价值。
 
-## News Item
-Title: {title}
-Content: {content}
+## 新闻内容
+标题：{title}
+正文：{content}
 
-## Analysis Dimensions
+## 分析维度
 
-1. **Token/Project Specificity**: Does the news mention specific cryptocurrencies or projects?
+1. **代币/项目明确性**：该新闻是否提到了具体的加密货币或项目？
 
-2. **Market Impact**: Is there substantive positive or negative information that could affect prices?
+2. **市场影响**：是否存在可能影响价格的实质性利好或利空信息？
 
-3. **Information Quality**: Is the source reliable? Is the information verifiable?
+3. **信息质量**：信息来源是否可靠？信息是否可验证？
 
-4. **Market Attention**: Is this likely to generate significant market interest or trading volume?
+4. **市场关注度**：该新闻是否可能引发显著的市场关注或交易量变化？
 
-## Your Task
+## 任务
 
-Classify the investment value and provide your reasoning:
-- **bullish**: Positive information that suggests price increase potential
-- **bearish**: Negative information that suggests price decrease potential
-- **neutral**: No clear investment value, generic information, or insufficient data
+请对投资价值进行分类并说明理由：
+- **bullish**（看涨）：利好信息，暗示价格上涨潜力
+- **bearish**（看跌）：利空信息，暗示价格下跌风险
+- **neutral**（中性）：无明显投资价值、信息泛泛或数据不足
 
-Provide:
-1. Classification (bullish/bearish/neutral)
-2. Confidence (0.0-1.0)
-3. Brief reasoning (1-2 sentences)
+请提供：
+1. value (bullish/bearish/neutral)
+2. confidence (0.0-1.0)
+3. reasoning
 """
 
 # 代币提取提示词
-TOKEN_EXTRACTION_PROMPT = """You are a cryptocurrency expert. Extract all relevant cryptocurrency tokens mentioned in the news.
+TOKEN_EXTRACTION_PROMPT = """你是一名加密货币专家。请从新闻中提取所有相关的加密货币代币。
 
-## News Item
-Title: {title}
-Content: {content}
+## 新闻内容
+标题：{title}
+正文：{content}
 
-## Your Task
+## 任务
 
-Identify all cryptocurrencies mentioned that are:
-- Actively traded on major exchanges
-- Have meaningful market cap/liquidity
-- Are directly relevant to the news content
+识别新闻中提到的、符合以下条件的加密货币：
+- 在主流交易所活跃交易
+- 具有合理的市值和流动性
+- 与新闻内容直接相关
 
-For each token, provide:
-1. **symbol**: Trading symbol (e.g., BTC, ETH, SOL)
-2. **name**: Full name (e.g., Bitcoin, Ethereum, Solana)
-3. **confidence**: How relevant this token is to the main story (0.0-1.0)
+对于每个代币，请提供：
+1. **symbol**：交易代码（如 BTC、ETH、SOL）
+2. **name**：全称（如 Bitcoin、Ethereum、Solana）
+3. **confidence**：该代币与新闻主题的相关程度（0.0-1.0）
 
-Exclude:
-- Dead/abandoned projects
-- Tokens mentioned only in passing without relevance
-- Generic references not tied to specific projects
+排除以下情况：
+- 已停止维护/废弃的项目
+- 仅被一带而过、与主题无关的代币
+- 未指向具体项目的泛泛引用
 
-If no relevant tokens are found, return an empty list.
+如果未找到相关代币，请返回空列表。
 """
 
 # 趋势分析提示词（原始版本，不含 RAG）
-TREND_ANALYSIS_PROMPT = """You are a Web3 market analyst. Analyze the trend implications of this news.
+TREND_ANALYSIS_PROMPT = """你是一名 Web3 市场分析师。请分析该新闻的趋势影响。
 
-## News Item
-Title: {title}
-Content: {content}
+## 新闻内容
+标题：{title}
+正文：{content}
 
-## Investment Value Assessment
-Classification: {investment_value}
-Confidence: {confidence}
+## 投资价值评估
+分类：{investment_value}
+置信度：{confidence}
 
-## Token Market Data
+## 代币市场数据
 {token_data}
 
-## Your Task
+## 任务
 
-Analyze the potential price trend impact:
-1. **Short-term direction**: Immediate market reaction expected
-2. **Key factors**: What specifically will drive price movement
-3. **Risk considerations**: What could reverse this trend
-4. **Timeframe**: How long the impact might last
+分析潜在的价格趋势影响：
+1. **短期方向**：预期的即时市场反应
+2. **关键因素**：具体哪些因素将驱动价格变动
+3. **风险考量**：哪些因素可能逆转这一趋势
+4. **时间范围**：影响可能持续多长时间
 
-Provide a concise trend analysis (2-3 sentences).
+请提供简洁的趋势分析（2-3 句话）。
 """
 
 # 趋势分析提示词（带 RAG 增强）
-TREND_ANALYSIS_WITH_RAG_PROMPT = """You are a Web3 market analyst with access to a knowledge base. Analyze the trend implications of this news.
+TREND_ANALYSIS_WITH_RAG_PROMPT = """你是一名拥有知识库访问权限的 Web3 市场分析师。请结合知识库信息分析该新闻的趋势影响。
 
-## News Item
-Title: {title}
-Content: {content}
+## 新闻内容
+标题：{title}
+正文：{content}
 
-## Investment Value Assessment
-Classification: {investment_value}
-Confidence: {confidence}
+## 投资价值评估
+分类：{investment_value}
+置信度：{confidence}
 
-## Token Market Data
+## 代币市场数据
 {token_data}
 
-## Knowledge Base Context
+## 知识库上下文
 {rag_context}
 
-## Your Task
+## 任务
 
-Analyze the potential price trend impact using both the news and knowledge base information:
-1. **Short-term direction**: Immediate market reaction expected
-2. **Key factors**: What specifically will drive price movement (incorporate KB insights)
-3. **Risk considerations**: What could reverse this trend (consider project fundamentals from KB)
-4. **Timeframe**: How long the impact might last
+结合新闻和知识库信息分析潜在的价格趋势影响：
+1. **短期方向**：预期的即时市场反应
+2. **关键因素**：具体哪些因素将驱动价格变动（结合知识库洞察）
+3. **风险考量**：哪些因素可能逆转这一趋势（结合知识库中的项目基本面）
+4. **时间范围**：影响可能持续多长时间
 
-Provide a concise trend analysis (2-3 sentences) that leverages the knowledge base for deeper insight.
+请提供简洁的趋势分析（2-3 句话），充分利用知识库获得更深入的洞察。
 """
 
 # 交易建议提示词
-RECOMMENDATION_PROMPT = """You are a conservative trading advisor. Generate a recommendation based on the analysis.
+RECOMMENDATION_PROMPT = """你是一名稳健型交易顾问。请根据分析结果生成交易建议。
 
-## Analysis Summary
+## 分析摘要
 
-**News**: {title}
+**新闻**：{title}
 
-**Investment Value**: {investment_value} (confidence: {confidence})
+**投资价值**：{investment_value}（置信度：{confidence}）
 
-**Trend Analysis**: {trend_analysis}
+**趋势分析**：{trend_analysis}
 
-## Your Task
+## 任务
 
-Generate a trading recommendation:
-- **buy**: Strong positive signal with acceptable risk
-- **sell**: Strong negative signal with acceptable risk
-- **hold**: Uncertain, neutral, or risk too high
+生成交易建议：
+- **buy**（买入）：信号强劲且风险可控
+- **sell**（卖出）：利空信号强劲且风险可控
+- **hold**（持有）：前景不明、信号中性或风险过高
 
-Also assess risk level:
-- **low**: Established token, clear catalyst, low uncertainty
-- **medium**: Newer token or moderate uncertainty
-- **high**: Highly speculative, low liquidity, or extreme uncertainty
+同时评估风险等级：
+- **low**（低风险）：成熟代币、明确催化剂、不确定性低
+- **medium**（中风险）：较新代币或不确定性中等
+- **high**（高风险）：高度投机、流动性低或不确定性极高
 
-Provide:
-1. Action (buy/sell/hold)
-2. Risk level
-3. Brief reasoning
+请提供：
+1. action (buy/sell/hold)
+2. risk_level (low/medium/high)
+3. reasoning
 """
 
 # 中性兜底提示词（无投资价值时使用）
-NEUTRAL_RECOMMENDATION_PROMPT = """You are a conservative trading advisor.
+NEUTRAL_RECOMMENDATION_PROMPT = """你是一名稳健型交易顾问。
 
-The news item was analyzed and classified as having no significant investment value (neutral).
+该新闻经过分析后被判定为无显著投资价值（中性）。
 
-## News Item
-Title: {title}
-Content: {content}
+## 新闻内容
+标题：{title}
+正文：{content}
 
-## Your Task
+## 任务
 
-Since there is no clear investment value or actionable signal, recommend "hold" with low risk.
+由于该新闻没有明确的投资价值或可操作的信号，请建议 action=hold，risk_level=low。
 
-Provide brief reasoning explaining why this news doesn't warrant action.
+请提供：
+1. action (hold)
+2. risk_level (low)
+3. reasoning
 """
 
 
@@ -184,15 +187,15 @@ def format_trend_analysis_prompt(
             content=content or "",
             investment_value=investment_value,
             confidence=confidence,
-            token_data=token_data or "No token data available",
-            rag_context=rag_context or "No additional context available",
+            token_data=token_data or "无代币数据",
+            rag_context=rag_context or "无额外上下文",
         )
     return TREND_ANALYSIS_PROMPT.format(
         title=title,
         content=content or "",
         investment_value=investment_value,
         confidence=confidence,
-        token_data=token_data or "No token data available",
+        token_data=token_data or "无代币数据",
     )
 
 
@@ -207,7 +210,7 @@ def format_recommendation_prompt(
         title=title,
         investment_value=investment_value,
         confidence=confidence,
-        trend_analysis=trend_analysis or "No trend analysis available",
+        trend_analysis=trend_analysis or "无趋势分析",
     )
 
 

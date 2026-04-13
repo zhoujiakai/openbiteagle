@@ -8,7 +8,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from tasks.task2_analyze_flow.graph import build_news_analysis_graph
-from tasks.task2_analyze_flow.state import GraphState
 
 
 # Test news - about a less known project that would benefit from RAG
