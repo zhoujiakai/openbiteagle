@@ -1,9 +1,9 @@
-"""Prompt templates for news analysis nodes.
+"""新闻分析节点的提示词模板。
 
-Each prompt is designed to elicit specific, structured output from the LLM.
+每个提示词旨在引导 LLM 生成特定的结构化输出。
 """
 
-# Investment value judgment prompt
+# 投资价值判断提示词
 INVESTMENT_VALUE_PROMPT = """You are a Web3 investment analyst. Analyze the following news item and determine its investment value.
 
 ## News Item
@@ -33,7 +33,7 @@ Provide:
 3. Brief reasoning (1-2 sentences)
 """
 
-# Token extraction prompt
+# 代币提取提示词
 TOKEN_EXTRACTION_PROMPT = """You are a cryptocurrency expert. Extract all relevant cryptocurrency tokens mentioned in the news.
 
 ## News Item
@@ -60,7 +60,7 @@ Exclude:
 If no relevant tokens are found, return an empty list.
 """
 
-# Trend analysis prompt (original, without RAG)
+# 趋势分析提示词（原始版本，不含 RAG）
 TREND_ANALYSIS_PROMPT = """You are a Web3 market analyst. Analyze the trend implications of this news.
 
 ## News Item
@@ -85,7 +85,7 @@ Analyze the potential price trend impact:
 Provide a concise trend analysis (2-3 sentences).
 """
 
-# Trend analysis prompt with RAG enhancement
+# 趋势分析提示词（带 RAG 增强）
 TREND_ANALYSIS_WITH_RAG_PROMPT = """You are a Web3 market analyst with access to a knowledge base. Analyze the trend implications of this news.
 
 ## News Item
@@ -113,7 +113,7 @@ Analyze the potential price trend impact using both the news and knowledge base 
 Provide a concise trend analysis (2-3 sentences) that leverages the knowledge base for deeper insight.
 """
 
-# Recommendation prompt
+# 交易建议提示词
 RECOMMENDATION_PROMPT = """You are a conservative trading advisor. Generate a recommendation based on the analysis.
 
 ## Analysis Summary
@@ -142,7 +142,7 @@ Provide:
 3. Brief reasoning
 """
 
-# Neutral fallback prompt (when no investment value)
+# 中性兜底提示词（无投资价值时使用）
 NEUTRAL_RECOMMENDATION_PROMPT = """You are a conservative trading advisor.
 
 The news item was analyzed and classified as having no significant investment value (neutral).
@@ -160,12 +160,12 @@ Provide brief reasoning explaining why this news doesn't warrant action.
 
 
 def format_investment_value_prompt(title: str, content: str) -> str:
-    """Format the investment value judgment prompt."""
+    """格式化投资价值判断提示词。"""
     return INVESTMENT_VALUE_PROMPT.format(title=title, content=content or "")
 
 
 def format_token_extraction_prompt(title: str, content: str) -> str:
-    """Format the token extraction prompt."""
+    """格式化代币提取提示词。"""
     return TOKEN_EXTRACTION_PROMPT.format(title=title, content=content or "")
 
 
@@ -177,7 +177,7 @@ def format_trend_analysis_prompt(
     token_data: str,
     rag_context: str | None = None,
 ) -> str:
-    """Format the trend analysis prompt."""
+    """格式化趋势分析提示词。"""
     if rag_context:
         return TREND_ANALYSIS_WITH_RAG_PROMPT.format(
             title=title,
@@ -202,7 +202,7 @@ def format_recommendation_prompt(
     confidence: float,
     trend_analysis: str,
 ) -> str:
-    """Format the recommendation prompt."""
+    """格式化交易建议提示词。"""
     return RECOMMENDATION_PROMPT.format(
         title=title,
         investment_value=investment_value,
@@ -212,5 +212,5 @@ def format_recommendation_prompt(
 
 
 def format_neutral_recommendation_prompt(title: str, content: str) -> str:
-    """Format the neutral (skip) recommendation prompt."""
+    """格式化中性（跳过）建议提示词。"""
     return NEUTRAL_RECOMMENDATION_PROMPT.format(title=title, content=content or "")

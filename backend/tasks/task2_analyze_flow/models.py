@@ -1,7 +1,7 @@
-"""Pydantic models for LLM structured output.
+"""LLM 结构化输出的 Pydantic 模型。
 
-These models define the expected output format from LLM calls,
-ensuring consistent and parseable responses.
+这些模型定义了 LLM 调用的预期输出格式，
+确保响应一致且可解析。
 """
 
 from typing import Literal
@@ -10,50 +10,50 @@ from pydantic import BaseModel, Field
 
 
 class InvestmentValueOutput(BaseModel):
-    """Investment value judgment output.
+    """投资价值判断输出。
 
-    The LLM analyzes a news item and determines if it has investment value,
-    classifying it as bullish, bearish, or neutral with a confidence score.
+    LLM 分析新闻条目并判断其是否具有投资价值，
+    分类为利好、利空或中性，并附带置信度评分。
     """
 
     value: Literal["bullish", "bearish", "neutral"] = Field(
-        description="Investment value: bullish (positive), bearish (negative), or neutral (no value)"
+        description="投资价值：bullish（利好）、bearish（利空）或 neutral（中性/无价值）"
     )
     confidence: float = Field(
-        ge=0.0, le=1.0, description="Confidence score from 0.0 to 1.0"
+        ge=0.0, le=1.0, description="置信度评分，范围 0.0 到 1.0"
     )
-    reasoning: str = Field(description="Brief explanation for the classification")
+    reasoning: str = Field(description="分类的简要说明")
 
 
 class TokenInfo(BaseModel):
-    """Single token information extracted from news."""
+    """从新闻中提取的单个代币信息。"""
 
-    symbol: str = Field(description="Token symbol (e.g., BTC, ETH)")
-    name: str = Field(description="Token full name (e.g., Bitcoin, Ethereum)")
+    symbol: str = Field(description="代币符号（如 BTC、ETH）")
+    name: str = Field(description="代币全名（如 Bitcoin、Ethereum）")
     confidence: float = Field(
-        ge=0.0, le=1.0, description="Confidence that this token is relevant"
+        ge=0.0, le=1.0, description="该代币相关性的置信度"
     )
 
 
 class TokenExtractionOutput(BaseModel):
-    """Token extraction output.
+    """代币提取输出。
 
-    The LLM identifies cryptocurrency tokens mentioned in the news item.
+    LLM 识别新闻条目中提到的加密货币代币。
     """
 
-    tokens: list[TokenInfo] = Field(default_factory=list, description="List of extracted tokens")
+    tokens: list[TokenInfo] = Field(default_factory=list, description="提取到的代币列表")
 
 
 class RecommendationOutput(BaseModel):
-    """Trading recommendation output.
+    """交易建议输出。
 
-    The LLM generates a final trading recommendation based on all analysis.
+    LLM 基于所有分析生成最终交易建议。
     """
 
     action: Literal["buy", "sell", "hold"] = Field(
-        description="Trading recommendation: buy, sell, or hold"
+        description="交易建议：buy（买入）、sell（卖出）或 hold（观望）"
     )
-    reasoning: str = Field(description="Brief explanation for the recommendation")
+    reasoning: str = Field(description="建议的简要说明")
     risk_level: Literal["low", "medium", "high"] = Field(
-        description="Risk level of this trade"
+        description="此交易的风险等级"
     )

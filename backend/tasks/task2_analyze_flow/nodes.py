@@ -1,6 +1,6 @@
-"""Node functions for the news analysis graph.
+"""新闻分析图的节点函数。
 
-Each node is an async function that takes the current state and returns updates.
+每个节点是一个异步函数，接收当前状态并返回更新。
 """
 
 from langchain_core.messages import HumanMessage
@@ -25,7 +25,7 @@ logger = create_logger("分析流水线::node")
 
 
 async def investment_value_node(state: GraphState) -> dict:
-    """Node 1: 投资价值判断
+    """节点 1：投资价值判断
 
     分析快讯是否具有投资价值（利好/利空/无关），输出判断结果和置信度
     """
@@ -34,7 +34,7 @@ async def investment_value_node(state: GraphState) -> dict:
     llm = get_llm()
     prompt = format_investment_value_prompt(state["title"], state["content"])
 
-    # JSON schema for DeepSeek
+    # DeepSeek 的 JSON schema
     schema = {
         "type": "object",
         "properties": {
@@ -48,7 +48,7 @@ async def investment_value_node(state: GraphState) -> dict:
     try:
         response = await call_llm_structured(llm, prompt, InvestmentValueOutput, schema)
 
-        # Determine if we should continue with full analysis
+        # 判断是否继续进行完整分析
         should_continue = response.value != "neutral" or response.confidence >= 0.5
 
         return {
@@ -69,7 +69,7 @@ async def investment_value_node(state: GraphState) -> dict:
 
 
 async def extract_tokens_node(state: GraphState) -> dict:
-    """Node 2: 代币提取
+    """节点 2：代币提取
 
     从有价值的快讯中提取相关代币（名称、符号），如果无关联代币则标记为无
     """
@@ -78,7 +78,7 @@ async def extract_tokens_node(state: GraphState) -> dict:
     llm = get_llm()
     prompt = format_token_extraction_prompt(state["title"], state["content"])
 
-    # JSON schema for DeepSeek
+    # DeepSeek 的 JSON schema
     schema = {
         "type": "object",
         "properties": {
@@ -111,7 +111,7 @@ async def extract_tokens_node(state: GraphState) -> dict:
 
 
 async def search_token_info_node(state: GraphState) -> dict:
-    """Node 3: 代币信息搜索
+    """节点 3：代币信息搜索
 
     对提取到的代币搜索（CMC/GeckoTerminal等接口）补充市场信息（当前价格、市值等）
     """
@@ -136,7 +136,7 @@ async def search_token_info_node(state: GraphState) -> dict:
                     token_details[symbol] = info
             except Exception as e:
                 logger.warning(f"Failed to get info for {symbol}: {e}")
-                # Continue with other tokens
+                # 继续处理其他代币
 
         logger.info(f"Retrieved market data for {len(token_details)} tokens")
         return {"token_details": token_details}
@@ -149,9 +149,9 @@ async def search_token_info_node(state: GraphState) -> dict:
 
 
 async def rag_knowledge_node(state: GraphState) -> dict:
-    """Node 3.5: Retrieve relevant knowledge from RAG knowledge base.
+    """节点 3.5：从 RAG 知识库检索相关知识。
 
-    Enhances analysis with Web3 domain knowledge from the knowledge base.
+    使用知识库中的 Web3 领域知识增强分析。
     """
     logger.info(f"Node: rag_knowledge for news {state['news_id']}")
 
@@ -159,10 +159,10 @@ async def rag_knowledge_node(state: GraphState) -> dict:
     title = state.get("title", "")
     content = state.get("content", "")
 
-    # Build search query from news content
-    query = f"{title}. {content[:500]}"  # First 500 chars for context
+    # 从新闻内容构建搜索查询
+    query = f"{title}. {content[:500]}"  # 取前 500 字符作为上下文
 
-    # Extract token symbols for filtering
+    # 提取代币符号用于过滤
     token_symbols = []
     if tokens:
         token_symbols = [
@@ -175,7 +175,7 @@ async def rag_knowledge_node(state: GraphState) -> dict:
 
         rag = get_rag_chain(top_k=3, threshold=0.6)
 
-        # Query with token filter if available
+        # 如有代币符号则按代币过滤查询
         result = await rag.query(
             query,
             filter_tokens=token_symbols if token_symbols else None,
@@ -200,9 +200,9 @@ async def rag_knowledge_node(state: GraphState) -> dict:
 
 
 async def kg_knowledge_node(state: GraphState) -> dict:
-    """Node 3.6: Retrieve entity relationships from Knowledge Graph.
+    """节点 3.6：从知识图谱检索实体关系。
 
-    Enhances analysis with entity relationship data from Neo4j.
+    使用 Neo4j 中的实体关系数据增强分析。
     """
     logger.info(f"Node: kg_knowledge for news {state['news_id']}")
 
@@ -214,49 +214,49 @@ async def kg_knowledge_node(state: GraphState) -> dict:
         from app.kg.client import Neo4jClient
         from app.kg.query import GraphQuery
 
-        # Create Neo4j client
+        # 创建 Neo4j 客户端
         client = Neo4jClient()
         await client.connect()
 
         try:
             query_service = GraphQuery(client)
 
-            # Search for projects mentioned in news
+            # 搜索新闻中提到的项目
             kg_context_parts = []
 
-            # Extract project names from title/content (simple heuristic)
-            # In production, use NER or LLM extraction
+            # 从标题/内容中提取项目名称（简单启发式）
+            # 生产环境中应使用 NER 或 LLM 提取
             project_keywords = set()
 
-            # Add token symbols as potential projects
+            # 将代币符号添加为潜在项目
             for token in tokens:
                 symbol = token.get("symbol") if isinstance(token, dict) else token.symbol
                 project_keywords.add(symbol)
 
-            # Search projects by keywords from title
+            # 从标题中按关键词搜索项目
             words = set(title.lower().split() + content.lower()[:200].split())
             for word in words:
-                if len(word) > 3:  # Filter short words
+                if len(word) > 3:  # 过滤短词
                     project_keywords.add(word.capitalize())
 
-            # Query knowledge graph for each potential project
+            # 为每个潜在项目查询知识图谱
             kg_entities = {"projects": [], "tokens": [], "relationships": []}
 
-            for keyword in list(project_keywords)[:5]:  # Limit to 5 searches
-                # Search for projects
+            for keyword in list(project_keywords)[:5]:  # 限制最多 5 次搜索
+                # 搜索项目
                 projects = await query_service.search_projects_by_keyword(keyword, limit=3)
                 for project in projects:
                     if project not in kg_entities["projects"]:
                         kg_entities["projects"].append(project)
 
-                        # Get related entities
+                        # 获取相关实体
                         context = await query_service.get_project_context(project.get("name", ""))
                         if context:
                             kg_entities["tokens"].extend(context.get("tokens", []))
                             kg_entities["relationships"].extend(context.get("team", []))
                             kg_entities["relationships"].extend(context.get("investors", []))
 
-            # Format KG context for LLM
+            # 将 KG 上下文格式化供 LLM 使用
             if kg_entities["projects"]:
                 kg_context_parts.append(f"## Related Projects ({len(kg_entities['projects'])})")
                 for proj in kg_entities["projects"][:5]:
@@ -296,7 +296,7 @@ async def kg_knowledge_node(state: GraphState) -> dict:
 
 
 async def trend_analysis_node(state: GraphState) -> dict:
-    """Node 4: 涨跌分析
+    """节点 4：涨跌分析
 
     结合 新闻内容 和 市场信息、RAG知识、KG知识图谱 分析代币短期涨跌趋势
     """
@@ -304,7 +304,7 @@ async def trend_analysis_node(state: GraphState) -> dict:
 
     llm = get_llm()
 
-    # Format token data for prompt
+    # 格式化代币数据用于提示词
     token_details = state.get("token_details") or {}
     token_data_str = "\n".join(
         f"- {symbol}: ${data.get('price', 'N/A')} "
@@ -315,17 +315,17 @@ async def trend_analysis_node(state: GraphState) -> dict:
     if not token_data_str:
         token_data_str = "No token market data available"
 
-    # Get RAG context if available
+    # 获取 RAG 上下文（如有）
     rag_context = state.get("rag_context")
     if rag_context:
         logger.info(f"Using RAG context (length: {len(rag_context)})")
 
-    # Get KG context if available
+    # 获取 KG 上下文（如有）
     kg_context = state.get("kg_context")
     if kg_context:
         logger.info(f"Using KG context (length: {len(kg_context)})")
 
-    # Combine RAG and KG context
+    # 合并 RAG 和 KG 上下文
     enhanced_context = ""
     if rag_context:
         enhanced_context += f"\n## RAG Knowledge\n{rag_context}"
@@ -352,7 +352,7 @@ async def trend_analysis_node(state: GraphState) -> dict:
 
 
 async def generate_recommendation_node(state: GraphState) -> dict:
-    """Node 5: 生成最终的交易建议
+    """节点 5：生成最终的交易建议
 
     给出 买入/卖出/观望 建议和风险等级
     """
@@ -360,7 +360,7 @@ async def generate_recommendation_node(state: GraphState) -> dict:
 
     llm = get_llm()
 
-    # JSON schema for DeepSeek
+    # DeepSeek 的 JSON schema
     schema = {
         "type": "object",
         "properties": {
@@ -371,7 +371,7 @@ async def generate_recommendation_node(state: GraphState) -> dict:
         "required": ["action", "reasoning", "risk_level"],
     }
 
-    # Use neutral prompt if we skipped analysis
+    # 如果跳过了分析，使用中性提示词
     if not state.get("should_continue", True):
         prompt = format_neutral_recommendation_prompt(state["title"], state["content"])
         try:
@@ -413,11 +413,11 @@ async def generate_recommendation_node(state: GraphState) -> dict:
 
 
 def should_continue_route(state: GraphState) -> str:
-    """Routing function: decide whether to continue with full analysis.
+    """路由函数：决定是否继续进行完整分析。
 
     Returns:
-        "continue": Proceed with token extraction and full analysis
-        "skip": Jump to final recommendation (for neutral news)
+        "continue": 继续代币提取和完整分析
+        "skip": 跳转到最终建议（针对中性新闻）
     """
     if state.get("should_continue", True):
         return "continue"
