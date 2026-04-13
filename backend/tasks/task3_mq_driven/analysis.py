@@ -8,7 +8,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.news import get_db
+from app.data.db import get_db
 from app.core.config import cfg
 from app.data.rabbit import get_rabbit
 from app.schemas.analysis import (

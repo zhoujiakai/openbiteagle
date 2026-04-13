@@ -18,4 +18,4 @@ echo "RabbitMQ URL: ${RABBITMQ_URL:-amqp://admin:admin@localhost:5672}"
 echo "Redis URL: ${REDIS_URL:-redis://localhost:6380}"
 
 # Run the worker
-python -m app.data.mq.worker "$@"
+python -m tasks.task3_mq_driven.worker "$@"

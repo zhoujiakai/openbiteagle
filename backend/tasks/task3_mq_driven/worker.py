@@ -5,7 +5,7 @@
 
 用法::
 
-    python -m app.data.mq.worker
+    python -m tasks.task3_mq_driven.worker
 """
 
 import asyncio

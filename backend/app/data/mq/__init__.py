@@ -1,5 +1,5 @@
 """Message queue worker package."""
 
-from app.data.mq.worker import Worker
+from tasks.task3_mq_driven.worker import Worker
 
 __all__ = ["Worker"]
