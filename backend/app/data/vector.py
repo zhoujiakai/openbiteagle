@@ -1,11 +1,10 @@
-"""Vector database operations using pgvector."""
+"""使用 pgvector 进行向量数据库操作。"""
 
 import logging
 from typing import Optional
 
 from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, make_transient
+from sqlalchemy.orm import make_transient
 
 from app.data.db import AsyncSessionLocal, Base, engine
 from app.models.document import Document, DocumentChunk
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 async def init_vector_extension() -> None:
-    """Initialize pgvector extension in PostgreSQL."""
+    """在 PostgreSQL 中初始化 pgvector 扩展。"""
     async with engine.begin() as conn:
         try:
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
@@ -25,7 +24,7 @@ async def init_vector_extension() -> None:
 
 
 async def create_tables() -> None:
-    """Create vector-related tables."""
+    """创建向量相关的数据表。"""
     from app.data.db import ensure_schema
 
     await ensure_schema()
@@ -41,17 +40,17 @@ async def insert_document(
     source_type: str = "manual",
     metadata: Optional[dict] = None,
 ) -> int:
-    """Insert a document into the knowledge base.
+    """向知识库中插入一篇文档。
 
     Args:
-        title: Document title
-        content: Document content
-        source_url: Optional source URL
-        source_type: Source type (manual, rootdata, odaily)
-        metadata: Optional metadata dictionary
+        title: 文档标题
+        content: 文档内容
+        source_url: 可选的来源 URL
+        source_type: 来源类型（manual、rootdata、odaily）
+        metadata: 可选的元数据字典
 
     Returns:
-        Document ID
+        文档 ID
     """
     async with AsyncSessionLocal() as db:
         doc = Document(
@@ -74,17 +73,17 @@ async def insert_chunk(
     tokens: Optional[list[str]] = None,
     metadata: Optional[dict] = None,
 ) -> int:
-    """Insert a document chunk.
+    """插入一个文档分块。
 
     Args:
-        document_id: Parent document ID
-        chunk_index: Chunk sequence number
-        content: Chunk content
-        tokens: Token symbols mentioned in this chunk
-        metadata: Optional metadata
+        document_id: 所属文档 ID
+        chunk_index: 分块序号
+        content: 分块内容
+        tokens: 该分块中提到的代币符号
+        metadata: 可选的元数据
 
     Returns:
-        Chunk ID
+        分块 ID
     """
     async with AsyncSessionLocal() as db:
         chunk = DocumentChunk(
@@ -101,13 +100,13 @@ async def insert_chunk(
 
 
 async def get_document(document_id: int) -> Optional[Document]:
-    """Get a document by ID.
+    """根据 ID 获取文档。
 
     Args:
-        document_id: Document ID
+        document_id: 文档 ID
 
     Returns:
-        Document object or None (detached from session)
+        文档对象或 None（已脱离会话）
     """
     async with AsyncSessionLocal() as db:
         result = await db.execute(
@@ -115,23 +114,23 @@ async def get_document(document_id: int) -> Optional[Document]:
         )
         doc = result.scalar_one_or_none()
         if doc:
-            # Completely detach from session
+            # 完全脱离会话
             make_transient(doc)
         return doc
 
 
 async def search_by_tokens(tokens: list[str], limit: int = 5) -> list[DocumentChunk]:
-    """Search chunks by mentioned tokens.
+    """根据提到的代币搜索分块。
 
     Args:
-        tokens: List of token symbols to search for
-        limit: Maximum results
+        tokens: 要搜索的代币符号列表
+        limit: 最大返回数量
 
     Returns:
-        List of matching chunks
+        匹配的分块列表
     """
     async with AsyncSessionLocal() as db:
-        # Use PostgreSQL overlap operator for array search
+        # 使用 PostgreSQL 的 overlap 操作符进行数组搜索
         from sqlalchemy import or_
 
         conditions = [DocumentChunk.tokens.any(token) for token in tokens]
@@ -144,13 +143,13 @@ async def search_by_tokens(tokens: list[str], limit: int = 5) -> list[DocumentCh
 
 
 async def get_all_documents(limit: int = 100) -> list[Document]:
-    """Get all documents.
+    """获取所有文档。
 
     Args:
-        limit: Maximum number of documents
+        limit: 最大文档数量
 
     Returns:
-        List of documents (detached from session)
+        文档列表（已脱离会话）
     """
     async with AsyncSessionLocal() as db:
         result = await db.execute(
@@ -159,20 +158,20 @@ async def get_all_documents(limit: int = 100) -> list[Document]:
             .limit(limit)
         )
         docs = list(result.scalars().all())
-        # Completely detach all from session
+        # 将所有文档完全脱离会话
         for doc in docs:
             make_transient(doc)
         return docs
 
 
 async def get_document_chunks(document_id: int) -> list[DocumentChunk]:
-    """Get all chunks for a document.
+    """获取文档的所有分块。
 
     Args:
-        document_id: Document ID
+        document_id: 文档 ID
 
     Returns:
-        List of chunks
+        分块列表
     """
     async with AsyncSessionLocal() as db:
         result = await db.execute(
