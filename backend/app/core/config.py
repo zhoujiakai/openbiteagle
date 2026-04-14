@@ -1,5 +1,6 @@
 """Application configuration loaded from config.yaml."""
 
+import os
 from pathlib import Path
 from typing import List
 
@@ -28,6 +29,16 @@ class Config:
                 continue
             for k2, v2 in v.items():
                 setattr(section_cls, k2, v2)
+
+        # 将 LangSmith 配置同步到环境变量，使 LangChain 自动追踪生效
+        self._sync_langsmith_env()
+
+    def _sync_langsmith_env(self) -> None:
+        """将 LangSmith 配置写入 os.environ，LangChain 运行时依赖这些环境变量。"""
+        for attr in ("LANGCHAIN_TRACING_V2", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"):
+            val = getattr(self.langsmith, attr, None)
+            if val:
+                os.environ[attr] = str(val)
 
     # ── Application ──────────────────────────────────────
     class app:
@@ -100,6 +111,13 @@ class Config:
         CONCURRENCY: int = 5
         RETRY_BASE_DELAY: int = 5
         TASK_TTL: int = 3600
+
+    # ── Aliyun OSS ───────────────────────────────────────
+    class oss:
+        OSS_ACCESS_KEY_ID: str = ""
+        OSS_ACCESS_KEY_SECRET: str = ""
+        OSS_ENDPOINT: str = "oss-cn-hangzhou.aliyuncs.com"
+        OSS_BUCKET_NAME: str = ""
 
     # ── Neo4j Knowledge Graph ───────────────────────────
     class neo4j:
