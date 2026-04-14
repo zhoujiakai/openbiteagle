@@ -1,13 +1,13 @@
-"""Odaily news scraper wrapper."""
+"""Odaily news scraper wrapper.
 
-from app.wrappers.odaily.base import BaseNewsScraper, ContentResult, ImageInfo, NewsItem
-from app.wrappers.odaily.odaily_scraper import OdailyScraper, OdailyDeepScraper
+实现来自 tasks.task1_fetch_data，本模块仅做重新导出。
+"""
+
+from tasks.task1_fetch_data.odaily_scraper import NewsItem, OdailyScraper
+from tasks.task1_fetch_data.odaily_rest_scraper import OdailyRestScraper
 
 __all__ = [
-    "BaseNewsScraper",
-    "ContentResult",
-    "ImageInfo",
     "NewsItem",
     "OdailyScraper",
-    "OdailyDeepScraper",
+    "OdailyRestScraper",
 ]

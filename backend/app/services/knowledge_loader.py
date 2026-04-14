@@ -167,13 +167,13 @@ class KnowledgeLoader:
         }
 
         try:
-            from app.wrappers.odaily import OdailyDeepScraper
+            from app.wrappers.odaily import OdailyRestScraper
 
-            # Use OdailyDeepScraper for in-depth articles
-            scraper = OdailyDeepScraper(use_mock=not use_real)
+            # Use OdailyRestScraper for in-depth articles
+            scraper = OdailyRestScraper()
 
             # Fetch deep articles
-            articles = await scraper.fetch_news(limit=limit)
+            articles = await scraper.fetch_depth_articles(limit=limit)
             stats["fetched"] = len(articles)
 
             logger.info(f"Fetched {len(articles)} articles from Odaily deep")
@@ -186,19 +186,19 @@ class KnowledgeLoader:
 
                     # Build metadata
                     metadata = {
-                        "source_id": article.source_id,
-                        "published_at": article.published_at.isoformat() if article.published_at else None,
+                        "source_id": article.id,
+                        "published_at": article.publishDate,
                     }
                     if article.images:
-                        metadata["images"] = [img.to_dict() for img in article.images]
+                        metadata["images"] = article.images
 
                     # Save to local file
                     self._save_to_local(
                         source="odaily",
-                        doc_id=article.source_id or f"unknown_{hash(article.title)}",
+                        doc_id=article.id or f"unknown_{hash(article.title)}",
                         title=article.title,
                         content=content,
-                        url=article.source_url,
+                        url=article.sourceUrl,
                         metadata=metadata,
                     )
 
@@ -206,7 +206,7 @@ class KnowledgeLoader:
                     doc_id = await insert_document(
                         title=article.title,
                         content=content,
-                        source_url=article.source_url,
+                        source_url=article.sourceUrl,
                         source_type="odaily-deep",
                         metadata=metadata,
                     )
