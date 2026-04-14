@@ -30,6 +30,12 @@ openai:
 jina:
     JINA_API_KEY: your-jina-api-key
     JINA_EMBEDDING_MODEL: jina-embeddings-v3
+    JINA_API_URL: https://api.jina.ai/v1/embeddings
+    JINA_EMBEDDING_DIM: 1024
+    JINA_BATCH_SIZE: 8
+    JINA_TIMEOUT: 30.0
+    CHUNK_SIZE: 500
+    CHUNK_OVERLAP: 100
 
 langsmith:
     LANGCHAIN_TRACING_V2: "true"
@@ -46,6 +52,18 @@ rabbitmq:
 
 redis:
     REDIS_URL: redis://localhost:6380
+
+worker:
+    MAX_RETRIES: 3
+    CONCURRENCY: 5
+    RETRY_BASE_DELAY: 5
+    TASK_TTL: 3600
+
+oss:
+    OSS_ACCESS_KEY_ID: your-oss-access-key-id
+    OSS_ACCESS_KEY_SECRET: your-oss-access-key-secret
+    OSS_ENDPOINT: oss-cn-hangzhou.aliyuncs.com
+    OSS_BUCKET_NAME: your-oss-bucket-name
 
 neo4j:
     NEO4J_URI: bolt://localhost:7687
