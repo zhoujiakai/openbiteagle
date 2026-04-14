@@ -15,14 +15,14 @@ from app.kg.models import (
 
 logger = logging.getLogger(__name__)
 
-# Node labels as constants
+# 节点标签常量
 PROJECT = "Project"
 TOKEN = "Token"
 PERSON = "Person"
 INSTITUTION = "Institution"
 CHAIN = "Chain"
 
-# Relationship types as constants
+# 关系类型常量
 ISSUED = "ISSUED"
 INVESTED = "INVESTED"
 BELONGS_TO = "BELONGS_TO"
@@ -46,20 +46,20 @@ class GraphLoader:
     async def create_constraints(self) -> None:
         """Create unique constraints for node labels."""
         constraints = [
-            # Project uniqueness
+            # 项目唯一性约束
             f"CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:{PROJECT}) REQUIRE p.name IS UNIQUE",
 
-            # Token uniqueness
+            # 代币唯一性约束
             f"CREATE CONSTRAINT token_symbol IF NOT EXISTS FOR (t:{TOKEN}) REQUIRE t.symbol IS UNIQUE",
             f"CREATE CONSTRAINT token_address IF NOT EXISTS FOR (t:{TOKEN}) REQUIRE t.contract_address IS UNIQUE",
 
-            # Person uniqueness
+            # 人物唯一性约束
             f"CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:{PERSON}) REQUIRE p.name IS UNIQUE",
 
-            # Institution uniqueness
+            # 机构唯一性约束
             f"CREATE CONSTRAINT institution_name IF NOT EXISTS FOR (i:{INSTITUTION}) REQUIRE i.name IS UNIQUE",
 
-            # Chain uniqueness
+            # 公链唯一性约束
             f"CREATE CONSTRAINT chain_name IF NOT EXISTS FOR (c:{CHAIN}) REQUIRE c.name IS UNIQUE",
         ]
 
@@ -263,7 +263,7 @@ class GraphLoader:
             relation_type: Type of relationship (WORKS_AT, ADVISES, FOUNDED)
             role: Optional role description
         """
-        # Convert enum to string if needed
+        # 如果需要，将枚举转换为字符串
         if hasattr(relation_type, "value"):
             relation_type = relation_type.value
 
@@ -325,27 +325,27 @@ class GraphLoader:
             team: Optional list of (person, relation_type) tuples
             investors: Optional list of (institution, round_type, amount) tuples
         """
-        # Create project
+        # 创建项目
         await self.create_project(project)
 
-        # Create chain relationship
+        # 创建公链关系
         if chain:
             await self.create_chain(ChainNode(name=chain))
             await self.relate_project_to_chain(project.name, chain)
 
-        # Create tokens
+        # 创建代币
         if tokens:
             for token in tokens:
                 await self.create_token(token)
                 await self.relate_token_to_project(token.symbol, project.name)
 
-        # Create team relationships
+        # 创建团队关系
         if team:
             for person, relation_type in team:
                 await self.create_person(person)
                 await self.relate_person_to_project(person.name, project.name, relation_type)
 
-        # Create investor relationships
+        # 创建投资方关系
         if investors:
             for institution, round_type, amount in investors:
                 await self.create_institution(institution)

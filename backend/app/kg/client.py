@@ -23,7 +23,7 @@ class Neo4jClient:
             max_connection_pool_size=cfg.neo4j.NEO4J_MAX_CONNECTION_POOL_SIZE,
             connection_acquisition_timeout=cfg.neo4j.NEO4J_CONNECTION_ACQUISITION_TIMEOUT,
         )
-        # Verify connection
+        # 验证连接
         await self.verify_connectivity()
 
     async def verify_connectivity(self) -> bool:

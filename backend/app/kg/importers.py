@@ -20,7 +20,7 @@ from app.wrappers.rootdata.models import ProjectInfo
 logger = logging.getLogger(__name__)
 
 
-# Common chain name mappings to normalize names
+# 常见公链名称映射，用于标准化名称
 CHAIN_ALIASES = {
     "ETH": "Ethereum",
     "Ethereum": "Ethereum",
@@ -57,11 +57,11 @@ def normalize_chain_name(name: str) -> str:
     Returns:
         Normalized chain name
     """
-    # Check direct mapping
+    # 检查直接映射
     if name in CHAIN_ALIASES:
         return CHAIN_ALIASES[name]
 
-    # Capitalize first letter
+    # 首字母大写
     return name.capitalize()
 
 
@@ -108,7 +108,7 @@ class RootdataKGImporter:
         if not project.token:
             return None
 
-        # Use first chain if available
+        # 如果有公链信息，使用第一条
         chain = None
         if project.chains:
             chain = normalize_chain_name(project.chains[0])
@@ -173,17 +173,17 @@ class RootdataKGImporter:
         }
 
         try:
-            # Convert to nodes
+            # 转换为节点
             project_node = self.project_to_node(project)
             token_node = self.token_to_node(project)
             chain_nodes = self.chains_to_nodes(project)
             institution_nodes = self.investors_to_nodes(project)
 
-            # Create project
+            # 创建项目
             await self.loader.create_project(project_node)
             result["nodes_created"].append("Project")
 
-            # Create and link token
+            # 创建并关联代币
             if token_node:
                 await self.loader.create_token(token_node)
                 await self.loader.relate_token_to_project(
@@ -192,7 +192,7 @@ class RootdataKGImporter:
                 result["nodes_created"].append("Token")
                 result["relationships_created"].append("ISSUED")
 
-            # Create and link chains
+            # 创建并关联公链
             for chain_node in chain_nodes:
                 await self.loader.create_chain(chain_node)
                 await self.loader.relate_project_to_chain(project_node.name, chain_node.name)
@@ -200,7 +200,7 @@ class RootdataKGImporter:
                 result["nodes_created"].append(f"{len(chain_nodes)} Chains")
                 result["relationships_created"].append(f"{len(chain_nodes)} BELONGS_TO")
 
-            # Create and link investors
+            # 创建并关联投资方
             for institution_node in institution_nodes:
                 await self.loader.create_institution(institution_node)
                 await self.loader.relate_institution_to_project(
@@ -246,10 +246,9 @@ class RootdataKGImporter:
         for i, project in enumerate(projects):
             logger.info(f"Importing {i + 1}/{len(projects)}: {project.name}")
 
-            # Check if already exists
+            # 检查是否已存在
             if skip_existing:
-                # We could add a check here, but for now let's try to create
-                # and handle duplicates via MERGE operations
+                # 可以在此添加检查，但目前通过 MERGE 操作处理重复数据
                 pass
 
             try:
@@ -295,9 +294,9 @@ async def import_rootdata_to_kg(
     """
     loader = GraphLoader(client)
 
-    # Initialize constraints
+    # 初始化约束
     await loader.create_constraints()
 
-    # Import projects
+    # 导入项目
     importer = RootdataKGImporter(loader)
     return await importer.import_batch(projects, skip_existing=skip_existing)

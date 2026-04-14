@@ -16,7 +16,7 @@ from app.wrappers.rootdata import ProjectInfo, scrape_rootdata_projects
 
 logger = logging.getLogger(__name__)
 
-# Base directory for storing scraped documents locally
+# 本地存储爬取文档的基础目录
 KB_DOCS_DIR = Path(__file__).parent.parent.parent / "data" / "kb_docs"
 
 
@@ -32,7 +32,7 @@ class KnowledgeLoader:
         self.embedding_service: Optional[EmbeddingService] = None
         self.save_local = save_local
 
-        # Ensure local storage directories exist
+        # 确保本地存储目录存在
         if self.save_local:
             for subdir in ["rootdata", "odaily", "tokenomics"]:
                 (KB_DOCS_DIR / subdir).mkdir(parents=True, exist_ok=True)
@@ -74,13 +74,13 @@ class KnowledgeLoader:
         }
 
         try:
-            # Fetch projects from Rootdata
+            # 从 Rootdata 获取项目
             projects = await scrape_rootdata_projects(limit=limit)
             stats["fetched"] = len(projects)
 
             logger.info(f"Fetched {len(projects)} projects from Rootdata")
 
-            # Import to Neo4j KG first (if requested)
+            # 先导入 Neo4j 知识图谱（如果请求的话）
             kg_client = None
             if import_to_kg:
                 try:
@@ -97,13 +97,13 @@ class KnowledgeLoader:
                     if kg_client:
                         await kg_client.close()
 
-            # Import each project to RAG KB
+            # 将每个项目导入 RAG 知识库
             for project in projects:
                 try:
-                    # Convert to KB document format
+                    # 转换为知识库文档格式
                     doc_data = project.to_kb_document()
 
-                    # Save to local file
+                    # 保存到本地文件
                     self._save_to_local(
                         source="rootdata",
                         doc_id=project.rootdata_id,
@@ -113,7 +113,7 @@ class KnowledgeLoader:
                         metadata=doc_data.get("metadata", {}),
                     )
 
-                    # Insert into database
+                    # 插入数据库
                     doc_id = await insert_document(
                         title=doc_data["title"],
                         content=doc_data["content"],
@@ -130,7 +130,7 @@ class KnowledgeLoader:
                     stats["failed"] += 1
                     stats["errors"].append(f"{project.name}: {str(e)}")
 
-            # Generate embeddings if requested
+            # 如果请求则生成嵌入
             if embed and stats["imported"] > 0:
                 stats["embedded"] = await self._embed_recent_documents(stats["imported"])
 
@@ -169,22 +169,22 @@ class KnowledgeLoader:
         try:
             from app.wrappers.odaily import OdailyRestScraper
 
-            # Use OdailyRestScraper for in-depth articles
+            # 使用 OdailyRestScraper 获取深度文章
             scraper = OdailyRestScraper()
 
-            # Fetch deep articles
+            # 获取深度文章
             articles = await scraper.fetch_depth_articles(limit=limit)
             stats["fetched"] = len(articles)
 
             logger.info(f"Fetched {len(articles)} articles from Odaily deep")
 
-            # Import each article
+            # 导入每篇文章
             for article in articles:
                 try:
-                    # Prepare content
+                    # 准备内容
                     content = article.content or ""
 
-                    # Build metadata
+                    # 构建元数据
                     metadata = {
                         "source_id": article.id,
                         "published_at": article.publishDate,
@@ -192,7 +192,7 @@ class KnowledgeLoader:
                     if article.images:
                         metadata["images"] = article.images
 
-                    # Save to local file
+                    # 保存到本地文件
                     self._save_to_local(
                         source="odaily",
                         doc_id=article.id or f"unknown_{hash(article.title)}",
@@ -202,7 +202,7 @@ class KnowledgeLoader:
                         metadata=metadata,
                     )
 
-                    # Insert into database
+                    # 插入数据库
                     doc_id = await insert_document(
                         title=article.title,
                         content=content,
@@ -219,7 +219,7 @@ class KnowledgeLoader:
                     stats["failed"] += 1
                     stats["errors"].append(f"{article.title}: {str(e)}")
 
-            # Generate embeddings if requested
+            # 如果请求则生成嵌入
             if embed and stats["imported"] > 0:
                 stats["embedded"] = await self._embed_recent_documents(stats["imported"])
 
@@ -294,14 +294,14 @@ class KnowledgeLoader:
         if not self.save_local:
             return None
 
-        # Sanitize filename
+        # 文件名安全化处理
         safe_title = title.replace("/", "-").replace("\\", "-")[:50]
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{source}_{doc_id}_{timestamp}.json"
 
         filepath = KB_DOCS_DIR / source / filename
 
-        # Prepare data
+        # 准备数据
         data = {
             "source": source,
             "doc_id": doc_id,
@@ -312,7 +312,7 @@ class KnowledgeLoader:
             "metadata": metadata or {},
         }
 
-        # Write to file
+        # 写入文件
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -332,10 +332,10 @@ class KnowledgeLoader:
         try:
             embedding_service = await self.get_embedding_service()
 
-            # Split content into chunks
+            # 将内容切分为块
             chunks = embedding_service._split_text(content, max_length=500)
 
-            # Generate and store embeddings
+            # 生成并存储嵌入
             for i, chunk in enumerate(chunks):
                 await embedding_service.embed_and_store_chunk(
                     document_id=doc_id,
@@ -402,8 +402,8 @@ class KnowledgeLoader:
             "errors": [],
         }
 
-        # Tokenomics docs will be extracted from Rootdata projects
-        # This is a wrapper that calls the Rootdata import
+        # 代币经济学文档将从 Rootdata 项目中提取
+        # 这是一个调用 Rootdata 导入的封装
         try:
             project_stats = await self.import_rootdata_projects(limit=limit, embed=embed)
             stats.update(project_stats)
@@ -414,7 +414,7 @@ class KnowledgeLoader:
         return stats
 
 
-# Global instance
+# 全局实例
 _loader: Optional[KnowledgeLoader] = None
 
 

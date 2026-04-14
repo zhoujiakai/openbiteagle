@@ -13,9 +13,9 @@ from app.data.db import engine
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    # Startup
+    # 启动
     yield
-    # Shutdown
+    # 关闭
     await engine.dispose()
 
 
@@ -26,7 +26,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
+# 跨域配置
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cfg.cors.CORS_ORIGINS,
@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# API Router
+# API 路由
 app.include_router(api_router, prefix="/api/v1")
 
 

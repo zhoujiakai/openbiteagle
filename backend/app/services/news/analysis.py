@@ -36,22 +36,22 @@ class AnalysisService:
         Returns:
             Analysis result dict
         """
-        # Fetch news
+        # 获取新闻
         news = await self._get_news(news_id)
         if not news:
             raise ValueError(f"News {news_id} not found")
 
-        # Get the compiled graph
+        # 获取已编译的图
         graph = get_graph("news_analysis")
 
-        # Prepare input state
+        # 准备输入状态
         input_state = {
             "news_id": news.id,
             "title": news.title,
             "content": news.content or "",
         }
 
-        # Prepare config with metadata for tracing
+        # 准备带有追踪元数据的配置
         metadata = {
             "news_id": str(news.id),
             "news_title": news.title[:50],
@@ -63,10 +63,10 @@ class AnalysisService:
         if trace_id:
             config["run_name"] = f"analysis_{news.id}"
 
-        # Run the graph
+        # 运行图
         result = await graph.ainvoke(input_state, config=config)
 
-        # Save results
+        # 保存结果
         await self._save_analysis(news_id, result, trace_id)
 
         return result

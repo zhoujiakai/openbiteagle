@@ -66,7 +66,7 @@ class CMCClient:
         try:
             client = await self._get_client()
 
-            # Try v2 /quotes/latest API
+            # 尝试 v2 /quotes/latest API
             params = {"symbol": symbol.upper()}
             response = await client.get("/v2/cryptocurrency/quotes/latest", params=params)
 
@@ -80,18 +80,18 @@ class CMCClient:
 
             data = response.json()
 
-            # Parse response - CMC v2 returns data as an array
+            # 解析响应 - CMC v2 返回数据为数组
             symbol_upper = symbol.upper()
             if (
                 "data" in data
                 and symbol_upper in data["data"]
             ):
-                # CMC v2 API returns data as an array
+                # CMC v2 API 返回数据为数组
                 token_list = data["data"][symbol_upper]
                 if isinstance(token_list, list) and len(token_list) > 0:
-                    token_data = token_list[0]  # Take the first result
+                    token_data = token_list[0]  # 取第一个结果
                 else:
-                    token_data = token_list  # Fallback for single object
+                    token_data = token_list  # 单对象时直接使用
 
                 # quote(报价) 是 CMC 返回的价格行情数据, 按法币分类, 这里取 USD 报价
                 quote = token_data.get("quote", {}).get("USD", {})

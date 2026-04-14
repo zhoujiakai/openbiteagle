@@ -8,14 +8,14 @@ from app.kg.client import Neo4jClient
 logger = logging.getLogger(__name__)
 
 
-# Node labels as constants
+# 节点标签常量
 PROJECT = "Project"
 TOKEN = "Token"
 PERSON = "Person"
 INSTITUTION = "Institution"
 CHAIN = "Chain"
 
-# Relationship types as constants
+# 关系类型常量
 ISSUED = "ISSUED"
 INVESTED = "INVESTED"
 BELONGS_TO = "BELONGS_TO"

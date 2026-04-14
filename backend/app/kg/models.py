@@ -18,13 +18,13 @@ class NodeTypes(str, Enum):
 class RelationTypes(str, Enum):
     """Relationship types in Neo4j."""
 
-    ISSUED = "ISSUED"  # Token -[ISSUED]-> Project
-    INVESTED = "INVESTED"  # Institution -[INVESTED]-> Project
-    BELONGS_TO = "BELONGS_TO"  # Project -[BELONGS_TO]-> Chain
-    COLLABORATES_WITH = "COLLABORATES_WITH"  # Project -[COLLABORATES_WITH]-> Project
-    WORKS_AT = "WORKS_AT"  # Person -[WORKS_AT]-> Project
-    ADVISES = "ADVISES"  # Person -[ADVISES]-> Project
-    FOUNDED = "FOUNDED"  # Person -[FOUNDED]-> Project
+    ISSUED = "ISSUED"  # 代币 -[发行]-> 项目
+    INVESTED = "INVESTED"  # 机构 -[投资]-> 项目
+    BELONGS_TO = "BELONGS_TO"  # 项目 -[属于]-> 公链
+    COLLABORATES_WITH = "COLLABORATES_WITH"  # 项目 -[合作]-> 项目
+    WORKS_AT = "WORKS_AT"  # 人物 -[任职于]-> 项目
+    ADVISES = "ADVISES"  # 人物 -[顾问]-> 项目
+    FOUNDED = "FOUNDED"  # 人物 -[创立]-> 项目
 
 
 class PersonRole(str, Enum):
@@ -64,7 +64,7 @@ class TokenNode:
     symbol: str
     name: str
     contract_address: Optional[str] = None
-    chain: Optional[str] = None  # e.g., "Ethereum", "Solana"
+    chain: Optional[str] = None  # 例如 "Ethereum"、"Solana"
     coingecko_id: Optional[str] = None
     cmc_id: Optional[str] = None
 

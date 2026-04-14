@@ -8,13 +8,13 @@ from app.wrappers.oss import OSSClient
 from app.wrappers.rootdata import ProjectInfo, RootdataClient, scrape_rootdata_projects
 
 __all__ = [
-    # Odaily
+    # Odaily 爬虫
     "NewsItem",
     "OdailyScraper",
     "OdailyRestScraper",
-    # OSS
+    # OSS 对象存储
     "OSSClient",
-    # Rootdata
+    # Rootdata 数据
     "ProjectInfo",
     "RootdataClient",
     "scrape_rootdata_projects",

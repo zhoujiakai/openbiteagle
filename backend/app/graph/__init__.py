@@ -7,7 +7,7 @@ inputs through multiple nodes and produces structured outputs.
 
 from tasks.task2_analyze_flow import build_news_analysis_graph
 
-# Graph registry - add new graphs here as they are implemented
+# Graph 注册表 - 新的 graph 实现后在此添加
 GRAPHS = {
     "news_analysis": build_news_analysis_graph,
 }

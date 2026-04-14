@@ -6,24 +6,24 @@ from app.data.logger import create_logger
 def __getattr__(name):
     """Lazy import heavy dependencies to avoid requiring them at module load time."""
     _lazy = {
-        # Database
+        # 数据库
         "AsyncSession": "app.data.db",
         "AsyncSessionLocal": "app.data.db",
         "Base": "app.data.db",
         "engine": "app.data.db",
         "get_db": "app.data.db",
-        # Cache
+        # 缓存
         "Cache": "app.data.cache",
         "get_cache": "app.data.cache",
         "close_cache": "app.data.cache",
-        # RabbitMQ
+        # 消息队列
         "RabbitMQ": "app.data.rabbit",
         "get_rabbit": "app.data.rabbit",
         "close_rabbit": "app.data.rabbit",
         "IncomingMessage": "app.data.rabbit",
         "RobustChannel": "app.data.rabbit",
         "RobustConnection": "app.data.rabbit",
-        # Worker
+        # 任务工作器
         "Worker": "app.data.mq",
     }
     if name in _lazy:
@@ -37,25 +37,25 @@ def __getattr__(name):
 
 
 __all__ = [
-    # Database
+    # 数据库
     "AsyncSession",
     "AsyncSessionLocal",
     "Base",
     "engine",
     "get_db",
-    # Logger
+    # 日志
     "create_logger",
-    # Cache
+    # 缓存
     "Cache",
     "get_cache",
     "close_cache",
-    # RabbitMQ
+    # 消息队列
     "RabbitMQ",
     "get_rabbit",
     "close_rabbit",
     "IncomingMessage",
     "RobustChannel",
     "RobustConnection",
-    # Worker
+    # 任务工作器
     "Worker",
 ]

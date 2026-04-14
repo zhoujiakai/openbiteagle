@@ -97,7 +97,7 @@ class GeckoClient:
             if not pools:
                 return None
 
-            # Get data from most liquid pool
+            # 获取流动性最高的池子数据
             top_pool = pools[0]["attributes"]
             return {
                 "address": token_address,

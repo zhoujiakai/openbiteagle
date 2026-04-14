@@ -31,7 +31,7 @@ def get_llm(
     Returns:
         ChatOpenAI instance
     """
-    # Try DeepSeek first
+    # 优先使用 DeepSeek
     if cfg.deepseek.DEEPSEEK_API_KEY:
         return ChatOpenAI(
             model=model or cfg.deepseek.DEEPSEEK_MODEL or "deepseek-chat",
@@ -40,7 +40,7 @@ def get_llm(
             base_url=cfg.deepseek.DEEPSEEK_BASE_URL or "https://api.deepseek.com",
         )
 
-    # Fallback to OpenAI
+    # 回退到 OpenAI
     return ChatOpenAI(
         model=model or cfg.openai.OPENAI_MODEL or "gpt-4o-mini",
         temperature=temperature,
@@ -77,7 +77,7 @@ async def call_llm_structured(
     is_deepseek = is_using_deepseek()
 
     if is_deepseek:
-        # DeepSeek doesn't support structured_output, use JSON mode with prompt
+        # DeepSeek 不支持 structured_output，使用 JSON 模式配合提示词
         json_schema = json.dumps(schema or {"type": "object"}, indent=2)
 
         enhanced_prompt = f"""{prompt}
@@ -92,16 +92,16 @@ Respond ONLY with the JSON object, no additional text."""
             response = await llm.ainvoke([HumanMessage(content=enhanced_prompt)])
             content = response.content.strip() if hasattr(response, "content") else str(response)
 
-            # Try to parse as JSON
+            # 尝试解析为 JSON
             if isinstance(content, str):
-                # Remove markdown code blocks if present
+                # 移除可能存在的 markdown 代码块
                 if content.startswith("```"):
                     content = content.split("```")[1]
                     if content.startswith("json"):
                         content = content[4:]
                     content = content.strip()
 
-                # Remove trailing ``` if present
+                # 移除末尾的 ```
                 if content.endswith("```"):
                     content = content[:-3].strip()
 
@@ -110,11 +110,11 @@ Respond ONLY with the JSON object, no additional text."""
 
         except (json.JSONDecodeError, TypeError, Exception) as e:
             logger.warning(f"Failed to parse DeepSeek JSON response: {e}, content: {content[:200] if content else 'empty'}")
-            # Return default instance
+            # 返回默认实例
             return model_class.model_construct()
 
     else:
-        # OpenAI supports structured_output
+        # OpenAI 支持 structured_output
         response = await llm.with_structured_output(model_class).ainvoke(
             [HumanMessage(content=prompt)]
         )

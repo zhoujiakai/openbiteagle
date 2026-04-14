@@ -53,14 +53,14 @@ class RabbitMQ:
             self._connection = await aio_pika.connect_robust(cfg.rabbitmq.RABBITMQ_URL)
             self._channel = await self._connection.channel()
 
-            # Declare exchange
+            # 声明交换机
             self._exchange = await self._channel.declare_exchange(
                 self._exchange_name,
                 aio_pika.ExchangeType.DIRECT,
                 durable=True,
             )
 
-            # Declare queues
+            # 声明队列
             self._main_queue = await self._channel.declare_queue(
                 cfg.rabbitmq.RABBITMQ_QUEUE,
                 durable=True,
@@ -75,7 +75,7 @@ class RabbitMQ:
                 durable=True,
             )
 
-            # Bind queues
+            # 绑定队列
             await self._main_queue.bind(self._exchange, cfg.rabbitmq.RABBITMQ_QUEUE)
             await self._dlq_queue.bind(self._exchange, cfg.rabbitmq.RABBITMQ_DLQ)
 
@@ -107,7 +107,7 @@ class RabbitMQ:
 
         channel = await self._get_channel()
 
-        # Serialize message
+        # 序列化消息
         if isinstance(message, BaseModel):
             data = message.model_dump_json().encode()
         elif isinstance(message, str):
@@ -117,7 +117,7 @@ class RabbitMQ:
         else:
             data = json.dumps(message).encode()
 
-        # Get delivery mode
+        # 获取投递模式
         delivery_mode = kwargs.pop("delivery_mode", None)
         if delivery_mode is not None:
             try:
@@ -125,7 +125,7 @@ class RabbitMQ:
             except:
                 delivery_mode = None
 
-        # Publish message
+        # 发布消息
         await self._exchange.publish(
             Message(
                 body=data,
@@ -175,7 +175,7 @@ class RabbitMQ:
             await self._connection.close()
 
 
-# Global RabbitMQ instance
+# 全局 RabbitMQ 实例
 _rabbit: Optional[RabbitMQ] = None
 
 

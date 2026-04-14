@@ -13,7 +13,7 @@ from app.core.config import cfg
 
 logger = logging.getLogger(__name__)
 
-# Prefix for all keys
+# 所有键的前缀
 PREFIX = "biteagle:"
 
 
@@ -108,7 +108,7 @@ class Cache:
         return await client.incr(str(key))
 
 
-# Global cache instance
+# 全局缓存实例
 _cache: Optional[Cache] = None
 
 

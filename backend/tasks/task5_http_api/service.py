@@ -52,11 +52,11 @@ class AnalysisService:
             ValueError: If neither news_id nor news_content provided
             HTTPException: If news not found (when news_id provided)
         """
-        # Determine news_id
+        # 确定 news_id
         news_id: Optional[int] = None
 
         if request.news_id is not None:
-            # Verify news exists
+            # 验证新闻是否存在
             result = await self.db.execute(
                 select(News).where(News.id == request.news_id)
             )
@@ -65,7 +65,7 @@ class AnalysisService:
                 raise ValueError(f"News with id {request.news_id} not found")
             news_id = request.news_id
         elif request.news_content:
-            # Create news entry from content
+            # 从内容创建新闻记录
             news = News(
                 title=request.news_content[:200] + "..."
                 if len(request.news_content) > 200
@@ -78,20 +78,20 @@ class AnalysisService:
         else:
             raise ValueError("Either news_id or news_content must be provided")
 
-        # Check for existing analysis
+        # 检查是否已有分析
         existing = await self.db.execute(
             select(Analysis).where(Analysis.news_id == news_id)
         )
         existing_analysis = existing.scalar_one_or_none()
 
         if existing_analysis:
-            # Return existing analysis
+            # 返回已有分析
             logger.info(f"Found existing analysis {existing_analysis.id} for news {news_id}")
             return AnalysisCreateResponse(
                 analysis_id=existing_analysis.id, news_id=news_id, status=existing_analysis.status
             )
 
-        # Create new analysis
+        # 创建新分析
         analysis = Analysis(
             news_id=news_id,
             status="pending",
@@ -119,7 +119,7 @@ class AnalysisService:
         Raises:
             ValueError: If any news_id not found
         """
-        # Verify all news exist
+        # 验证所有新闻是否存在
         result = await self.db.execute(
             select(News).where(News.id.in_(request.news_ids))
         )
@@ -132,7 +132,7 @@ class AnalysisService:
         analysis_ids: list[int] = []
 
         for news_id in request.news_ids:
-            # Check for existing analysis
+            # 检查是否已有分析
             existing = await self.db.execute(
                 select(Analysis).where(Analysis.news_id == news_id)
             )
@@ -172,7 +172,7 @@ class AnalysisService:
         if not analysis:
             raise ValueError(f"Analysis with id {analysis_id} not found")
 
-        # Parse steps from JSONB
+        # 从 JSONB 解析步骤
         steps = None
         if analysis.steps:
             from app.schemas.analysis import StepResult
@@ -201,13 +201,13 @@ class AnalysisService:
         Returns:
             AnalysisOverview with aggregate statistics
         """
-        # Total count
+        # 总数统计
         total_result = await self.db.execute(
             select(sql_func.count()).select_from(Analysis)
         )
         total = total_result.scalar() or 0
 
-        # By investment value
+        # 按投资价值分组
         value_result = await self.db.execute(
             select(Analysis.investment_value, sql_func.count(Analysis.id))
             .where(Analysis.investment_value.isnot(None))
@@ -215,7 +215,7 @@ class AnalysisService:
         )
         by_value = {value: count for value, count in value_result.all()}
 
-        # By recommendation
+        # 按推荐分组
         rec_result = await self.db.execute(
             select(Analysis.recommendation, sql_func.count(Analysis.id))
             .where(Analysis.recommendation.isnot(None))
@@ -223,7 +223,7 @@ class AnalysisService:
         )
         recommendations = {rec: count for rec, count in rec_result.all()}
 
-        # Top tokens (extract from tokens JSONB)
+        # 热门代币（从 tokens JSONB 中提取）
         token_counts: Counter = Counter()
         token_result = await self.db.execute(
             select(Analysis.tokens).where(

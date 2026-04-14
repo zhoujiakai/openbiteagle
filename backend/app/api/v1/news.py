@@ -20,7 +20,7 @@ async def create_news(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new news item."""
-    # Check for duplicate by source_id
+    # 按 source_id 检查重复
     if news_data.source_id:
         result = await db.execute(
             select(News).where(News.source_id == news_data.source_id)

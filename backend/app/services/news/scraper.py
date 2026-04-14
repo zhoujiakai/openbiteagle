@@ -127,7 +127,7 @@ class OdailyScraper:
             NewsItem or None
         """
         if self.use_mock:
-            # Return first mock news
+            # 返回第一条模拟新闻
             mock_news = self._get_mock_news(1)
             return mock_news[0] if mock_news else None
         return None

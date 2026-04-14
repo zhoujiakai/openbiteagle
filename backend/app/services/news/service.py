@@ -46,13 +46,13 @@ class NewsService:
                 skipped += 1
                 continue
 
-            # Check if already exists
+            # 检查是否已存在
             existing = await self.get_by_source_id(item.source_id)
             if existing:
                 skipped += 1
                 continue
 
-            # Create new News record
+            # 创建新的新闻记录
             news = News(
                 title=item.title,
                 content=item.content,
@@ -64,7 +64,7 @@ class NewsService:
             self.db.add(news)
             new_count += 1
 
-        # Commit changes
+        # 提交更改
         await self.db.commit()
 
         return {

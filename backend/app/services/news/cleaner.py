@@ -19,13 +19,13 @@ def clean_html(html_content: str) -> str:
     if not html_content:
         return ""
 
-    # Remove script and style elements
+    # 移除 script 和 style 元素
     cleaned = re.sub(r"<(script|style).*?>.*?</\1>", "", html_content, flags=re.DOTALL | re.IGNORECASE)
 
-    # Use bleach to clean HTML (remove all tags)
+    # 使用 bleach 清理 HTML（移除所有标签）
     cleaned = bleach.clean(cleaned, tags=[], strip=True)
 
-    # Decode HTML entities
+    # 解码 HTML 实体
     cleaned = html.unescape(cleaned)
 
     return cleaned.strip()
@@ -43,10 +43,10 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
 
-    # Remove extra whitespace
+    # 移除多余空白
     text = re.sub(r"\s+", " ", text)
 
-    # Remove control characters
+    # 移除控制字符
     text = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", text)
 
     return text.strip()
@@ -66,7 +66,7 @@ def clean_title(title: str) -> str:
 
     title = clean_text(title)
 
-    # Remove common prefixes
+    # 移除常见前缀
     prefixes_to_remove = ["【快讯】", "【", "】", "[快讯]", "[", "]"]
     for prefix in prefixes_to_remove:
         if title.startswith(prefix):
@@ -90,7 +90,7 @@ def is_valid_news(title: str, content: Optional[str] = None) -> bool:
     if not title or len(title.strip()) < 5:
         return False
 
-    # Check for spam/invalid content patterns
+    # 检查垃圾/无效内容模式
     spam_patterns = [
         r"^test\s*$",
         r"^测试\s*$",
@@ -120,12 +120,12 @@ def extract_tokens_from_text(text: str) -> list[str]:
     if not text:
         return []
 
-    # Common pattern: $TOKEN or TOKEN/USDT
-    # Match words that are all caps and 2-5 characters
+    # 常见模式: $TOKEN 或 TOKEN/USDT
+    # 匹配全部大写且长度为 2-5 个字符的单词
     pattern = r"\$([A-Z]{2,5})\b"
     tokens = set(re.findall(pattern, text))
 
-    # Also match TOKEN/USDT pattern
+    # 也匹配 TOKEN/USDT 模式
     pattern2 = r"\b([A-Z]{2,5})/USDT\b"
     tokens.update(re.findall(pattern2, text))
 
