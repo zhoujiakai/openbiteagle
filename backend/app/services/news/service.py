@@ -1,4 +1,4 @@
-"""News service for fetching and storing news."""
+"""用于获取和存储新闻的新闻服务。"""
 
 from typing import Optional
 
@@ -9,20 +9,20 @@ from app.models.news import News
 
 
 class NewsService:
-    """Service for news operations.
+    """新闻操作服务。
 
-    This service bridges the wrapper layer and database layer,
-    handling fetching, deduplication, and storage of news items.
+    该服务连接封装层和数据库层，
+    负责新闻条目的获取、去重和存储。
     """
 
     def __init__(
         self,
         db_session: AsyncSession,
     ):
-        """Initialize the service.
+        """初始化服务。
 
         Args:
-            db_session: Database session for persistence
+            db_session: 用于持久化的数据库会话
         """
         self.db = db_session
 
@@ -30,13 +30,13 @@ class NewsService:
         self,
         items: list,
     ) -> dict:
-        """Store news items to database.
+        """将新闻条目存储到数据库。
 
         Args:
-            items: List of NewsItem to store
+            items: 要存储的 NewsItem 列表
 
         Returns:
-            Dict with stats: {"new": int, "skipped": int}
+            包含统计信息的字典：{"new": int, "skipped": int}
         """
         new_count = 0
         skipped = 0
@@ -73,13 +73,13 @@ class NewsService:
         }
 
     async def get_by_source_id(self, source_id: str) -> Optional[News]:
-        """Get news by source_id.
+        """根据 source_id 获取新闻。
 
         Args:
-            source_id: Unique source identifier (e.g., "odaily-5209519")
+            source_id: 唯一来源标识（例如 "odaily-5209519"）
 
         Returns:
-            News object or None
+            News 对象或 None
         """
         result = await self.db.execute(
             select(News).where(News.source_id == source_id)
@@ -87,13 +87,13 @@ class NewsService:
         return result.scalar_one_or_none()
 
     async def get_latest(self, limit: int = 50) -> list[News]:
-        """Get latest news from database.
+        """从数据库获取最新新闻。
 
         Args:
-            limit: Maximum number of items to return
+            limit: 最大返回条数
 
         Returns:
-            List of News objects ordered by published_at desc
+            按 published_at 降序排列的 News 对象列表
         """
         result = await self.db.execute(
             select(News)

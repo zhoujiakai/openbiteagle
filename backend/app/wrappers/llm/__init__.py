@@ -1,4 +1,4 @@
-"""LLM wrappers and utilities."""
+"""LLM 封装和工具。"""
 
 from app.wrappers.llm.client import (
     call_llm_structured,

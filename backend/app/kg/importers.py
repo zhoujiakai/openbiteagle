@@ -1,7 +1,7 @@
-"""Rootdata to Neo4j Knowledge Graph importer.
+"""Rootdata 到 Neo4j 知识图谱的导入器。
 
-This module handles converting Rootdata ProjectInfo objects into
-Neo4j graph nodes and relationships.
+该模块负责将 Rootdata 的 ProjectInfo 对象转换为
+Neo4j 图节点和关系。
 """
 
 import logging
@@ -49,13 +49,13 @@ CHAIN_ALIASES = {
 
 
 def normalize_chain_name(name: str) -> str:
-    """Normalize chain name to a standard format.
+    """将公链名称标准化为统一格式。
 
     Args:
-        name: Raw chain name from Rootdata
+        name: 来自 Rootdata 的原始公链名称
 
     Returns:
-        Normalized chain name
+        标准化后的公链名称
     """
     # 检查直接映射
     if name in CHAIN_ALIASES:
@@ -66,24 +66,24 @@ def normalize_chain_name(name: str) -> str:
 
 
 class RootdataKGImporter:
-    """Import Rootdata projects into Neo4j Knowledge Graph."""
+    """将 Rootdata 项目导入 Neo4j 知识图谱。"""
 
     def __init__(self, loader: GraphLoader):
-        """Initialize the importer.
+        """初始化导入器。
 
         Args:
-            loader: GraphLoader instance for Neo4j operations
+            loader: 用于 Neo4j 操作的 GraphLoader 实例
         """
         self.loader = loader
 
     def project_to_node(self, project: ProjectInfo) -> ProjectNode:
-        """Convert ProjectInfo to ProjectNode.
+        """将 ProjectInfo 转换为 ProjectNode。
 
         Args:
-            project: Rootdata ProjectInfo
+            project: Rootdata 的 ProjectInfo
 
         Returns:
-            ProjectNode for KG
+            知识图谱的 ProjectNode
         """
         return ProjectNode(
             name=project.name,
@@ -97,13 +97,13 @@ class RootdataKGImporter:
         )
 
     def token_to_node(self, project: ProjectInfo) -> Optional[TokenNode]:
-        """Convert ProjectInfo token to TokenNode.
+        """将 ProjectInfo 代币转换为 TokenNode。
 
         Args:
-            project: Rootdata ProjectInfo
+            project: Rootdata 的 ProjectInfo
 
         Returns:
-            TokenNode or None if no token
+            TokenNode，如果没有代币则返回 None
         """
         if not project.token:
             return None
@@ -121,13 +121,13 @@ class RootdataKGImporter:
         )
 
     def chains_to_nodes(self, project: ProjectInfo) -> list[ChainNode]:
-        """Convert project chains to ChainNodes.
+        """将项目公链转换为 ChainNodes。
 
         Args:
-            project: Rootdata ProjectInfo
+            project: Rootdata 的 ProjectInfo
 
         Returns:
-            List of ChainNodes
+            ChainNode 列表
         """
         chains = set()
         for chain_name in project.chains:
@@ -138,13 +138,13 @@ class RootdataKGImporter:
         return [ChainNode(name=name) for name in sorted(chains)]
 
     def investors_to_nodes(self, project: ProjectInfo) -> list[InstitutionNode]:
-        """Convert project investors to InstitutionNodes.
+        """将项目投资方转换为 InstitutionNodes。
 
         Args:
-            project: Rootdata ProjectInfo
+            project: Rootdata 的 ProjectInfo
 
         Returns:
-            List of InstitutionNodes
+            InstitutionNode 列表
         """
         institutions = []
         for investor_name in project.investors:
@@ -157,13 +157,13 @@ class RootdataKGImporter:
         return institutions
 
     async def import_project(self, project: ProjectInfo) -> dict:
-        """Import a single Rootdata project into the Knowledge Graph.
+        """将单个 Rootdata 项目导入知识图谱。
 
         Args:
-            project: Rootdata ProjectInfo
+            project: Rootdata 的 ProjectInfo
 
         Returns:
-            Dict with import results
+            包含导入结果的字典
         """
         result = {
             "project": project.name,
@@ -224,14 +224,14 @@ class RootdataKGImporter:
         projects: list[ProjectInfo],
         skip_existing: bool = True,
     ) -> dict:
-        """Import multiple Rootdata projects into the Knowledge Graph.
+        """将多个 Rootdata 项目导入知识图谱。
 
         Args:
-            projects: List of Rootdata ProjectInfo objects
-            skip_existing: Skip projects that already exist (by rootdata_id)
+            projects: Rootdata ProjectInfo 对象列表
+            skip_existing: 跳过已存在的项目（按 rootdata_id）
 
         Returns:
-            Dict with batch import statistics
+            包含批量导入统计信息的字典
         """
         stats = {
             "total": len(projects),
@@ -282,15 +282,15 @@ async def import_rootdata_to_kg(
     projects: list[ProjectInfo],
     skip_existing: bool = True,
 ) -> dict:
-    """Convenience function to import Rootdata projects to Neo4j KG.
+    """导入 Rootdata 项目到 Neo4j 知识图谱的便捷函数。
 
     Args:
-        client: Neo4jClient instance
-        projects: List of ProjectInfo objects
-        skip_existing: Skip projects that already exist
+        client: Neo4jClient 实例
+        projects: ProjectInfo 对象列表
+        skip_existing: 跳过已存在的项目
 
     Returns:
-        Import statistics dict
+        导入统计信息字典
     """
     loader = GraphLoader(client)
 

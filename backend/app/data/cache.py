@@ -1,6 +1,6 @@
-"""Redis cache client.
+"""Redis 缓存客户端。
 
-Reference: repos/back-template/data/cache.py
+参考: repos/back-template/data/cache.py
 """
 
 import logging
@@ -18,26 +18,26 @@ PREFIX = "biteagle:"
 
 
 class Cache:
-    """Redis cache client."""
+    """Redis 缓存客户端。"""
 
     def __init__(self) -> None:
-        """Initialize Redis client."""
+        """初始化 Redis 客户端。"""
         self._client: Optional[aioredis.Redis] = None
 
     async def connect(self) -> aioredis.Redis:
-        """Get or create Redis connection."""
+        """获取或创建 Redis 连接。"""
         if self._client is None:
             self._client = aioredis.from_url(cfg.redis.REDIS_URL)
         return self._client
 
     async def close(self) -> None:
-        """Close Redis connection."""
+        """关闭 Redis 连接。"""
         if self._client:
             await self._client.close()
             self._client = None
 
     async def delete(self, key: str) -> None:
-        """Delete key from cache."""
+        """从缓存中删除键。"""
         client = await self.connect()
         await client.delete(str(key))
 
@@ -46,14 +46,14 @@ class Cache:
         key: str,
         model: Optional[type] = None,
     ) -> Any:
-        """Get value from cache.
+        """从缓存获取值。
 
         Args:
-            key: Cache key
-            model: Optional pydantic model for deserialization
+            key: 缓存键
+            model: 可选的 Pydantic 模型，用于反序列化
 
         Returns:
-            Cached value or None
+            缓存的值或 None
         """
         client = await self.connect()
         data = await client.get(str(key))
@@ -75,12 +75,12 @@ class Cache:
         *,
         expire: Optional[int] = None,
     ) -> None:
-        """Set value in cache.
+        """在缓存中设置值。
 
         Args:
-            key: Cache key
-            value: Value to cache
-            expire: Expiration time in seconds
+            key: 缓存键
+            value: 要缓存的值
+            expire: 过期时间（秒）
         """
         import json
 
@@ -98,12 +98,12 @@ class Cache:
             await client.set(str(key), data)
 
     async def exists(self, key: str) -> bool:
-        """Check if key exists."""
+        """检查键是否存在。"""
         client = await self.connect()
         return await client.exists(str(key)) > 0
 
     async def incr(self, key: str) -> int:
-        """Increment value."""
+        """递增值。"""
         client = await self.connect()
         return await client.incr(str(key))
 
@@ -113,7 +113,7 @@ _cache: Optional[Cache] = None
 
 
 async def get_cache() -> Cache:
-    """Get or create global cache instance."""
+    """获取或创建全局缓存实例。"""
     global _cache
     if _cache is None:
         _cache = Cache()
@@ -121,7 +121,7 @@ async def get_cache() -> Cache:
 
 
 async def close_cache() -> None:
-    """Close global cache instance."""
+    """关闭全局缓存实例。"""
     global _cache
     if _cache:
         await _cache.close()

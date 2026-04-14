@@ -1,1 +1,1 @@
-"""Pydantic schemas."""
+"""Pydantic 模式。"""

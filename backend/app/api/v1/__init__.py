@@ -1,4 +1,4 @@
-"""API v1 routes."""
+"""API v1 路由。"""
 
 from fastapi import APIRouter
 

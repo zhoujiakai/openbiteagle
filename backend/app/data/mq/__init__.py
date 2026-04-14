@@ -1,4 +1,4 @@
-"""Message queue worker package."""
+"""消息队列工作器包。"""
 
 from tasks.task3_mq_driven.worker import Worker
 

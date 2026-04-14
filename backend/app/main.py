@@ -1,4 +1,4 @@
-"""Biteagle API Main Entry Point."""
+"""Biteagle API 主入口。"""
 
 from contextlib import asynccontextmanager
 
@@ -12,7 +12,7 @@ from app.data.db import engine
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan manager."""
+    """应用生命周期管理器。"""
     # 启动
     yield
     # 关闭
@@ -41,13 +41,13 @@ app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """健康检查端点。"""
     return {"status": "healthy", "version": cfg.app.APP_VERSION}
 
 
 @app.get("/")
 async def root():
-    """Root endpoint."""
+    """根端点。"""
     return {
         "message": "Welcome to Biteagle API",
         "version": cfg.app.APP_VERSION,

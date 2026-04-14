@@ -1,4 +1,4 @@
-"""Knowledge Graph API endpoints."""
+"""知识图谱 API 端点。"""
 
 from typing import Any
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/kg", tags=["knowledge-graph"])
 
 
 async def get_neo4j_client() -> Neo4jClient:
-    """Dependency to get Neo4j client."""
+    """获取 Neo4j 客户端的依赖注入。"""
     client = Neo4jClient()
     await client.connect()
     try:
@@ -29,14 +29,14 @@ async def get_neo4j_client() -> Neo4jClient:
 async def get_graph_query(
     client: Neo4jClient = Depends(get_neo4j_client),
 ) -> GraphQuery:
-    """Dependency to get graph query service."""
+    """获取图查询服务的依赖注入。"""
     return GraphQuery(client)
 
 
 async def get_graph_loader(
     client: Neo4jClient = Depends(get_neo4j_client),
 ) -> GraphLoader:
-    """Dependency to get graph loader service."""
+    """获取图加载器服务的依赖注入。"""
     return GraphLoader(client)
 
 
@@ -44,9 +44,9 @@ async def get_graph_loader(
 async def get_graph_stats(
     service: GraphQuery = Depends(get_graph_query),
 ) -> dict[str, Any]:
-    """Get knowledge graph statistics.
+    """获取知识图谱统计信息。
 
-    Returns counts of each node type in the graph.
+    返回图谱中各节点类型的数量。
     """
     return await service.get_graph_stats()
 
@@ -56,13 +56,13 @@ async def get_project(
     project_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> dict[str, Any]:
-    """Get project information.
+    """获取项目信息。
 
     Args:
-        project_name: Project name
+        project_name: 项目名称
 
     Returns:
-        Project node data
+        项目节点数据
     """
     project = await service.get_project_by_name(project_name)
     if not project:
@@ -75,15 +75,15 @@ async def get_project_context(
     project_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> dict[str, Any]:
-    """Get full context for a project.
+    """获取项目的完整上下文。
 
-    Includes tokens, team, investors, chain, and collaborations.
+    包括代币、团队、投资方、公链和合作。
 
     Args:
-        project_name: Project name
+        project_name: 项目名称
 
     Returns:
-        Complete project context
+        完整的项目上下文
     """
     context = await service.get_project_context(project_name)
     if not context or not context.get("project"):
@@ -96,13 +96,13 @@ async def get_project_tokens(
     project_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get tokens issued by a project.
+    """获取项目发行的代币。
 
     Args:
-        project_name: Project name
+        project_name: 项目名称
 
     Returns:
-        List of token nodes
+        代币节点列表
     """
     return await service.get_project_tokens(project_name)
 
@@ -112,13 +112,13 @@ async def get_project_team(
     project_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get team members of a project.
+    """获取项目的团队成员。
 
     Args:
-        project_name: Project name
+        project_name: 项目名称
 
     Returns:
-        List of person nodes with roles
+        包含角色信息的人物节点列表
     """
     return await service.get_project_team(project_name)
 
@@ -128,13 +128,13 @@ async def get_project_investors(
     project_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get investors of a project.
+    """获取项目的投资方。
 
     Args:
-        project_name: Project name
+        project_name: 项目名称
 
     Returns:
-        List of institution nodes with investment details
+        包含投资详情的机构节点列表
     """
     return await service.get_project_investors(project_name)
 
@@ -146,15 +146,15 @@ async def get_related_projects(
     limit: int = Query(20, ge=1, le=100),
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Find projects related through investors, team, or collaborations.
+    """查找通过投资方、团队或合作关联的项目。
 
     Args:
-        project_name: Starting project name
-        max_hops: Maximum relationship hops (1-3)
-        limit: Maximum results (1-100)
+        project_name: 起始项目名称
+        max_hops: 最大关系跳数（1-3）
+        limit: 最大结果数（1-100）
 
     Returns:
-        List of related projects with path information
+        包含路径信息的关联项目列表
     """
     return await service.find_related_projects(project_name, max_hops, limit)
 
@@ -164,13 +164,13 @@ async def get_token(
     symbol: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> dict[str, Any]:
-    """Get token information with associated project.
+    """获取代币信息及其关联项目。
 
     Args:
-        symbol: Token symbol
+        symbol: 代币符号
 
     Returns:
-        Token node with project information
+        包含项目信息的代币节点
     """
     token = await service.get_token_info(symbol)
     if not token:
@@ -183,13 +183,13 @@ async def get_institution_portfolio(
     institution_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get portfolio of an investment institution.
+    """获取投资机构的投资组合。
 
     Args:
-        institution_name: Institution name
+        institution_name: 机构名称
 
     Returns:
-        List of project nodes
+        项目节点列表
     """
     return await service.get_institution_portfolio(institution_name)
 
@@ -199,13 +199,13 @@ async def get_person_projects(
     person_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get projects associated with a person.
+    """获取与某人物关联的项目。
 
     Args:
-        person_name: Person name
+        person_name: 人物名称
 
     Returns:
-        List of project nodes with relationship details
+        包含关系详情的项目节点列表
     """
     return await service.get_person_projects(person_name)
 
@@ -215,13 +215,13 @@ async def get_chain_projects(
     chain_name: str,
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Get projects on a specific chain.
+    """获取特定公链上的项目。
 
     Args:
-        chain_name: Chain name
+        chain_name: 公链名称
 
     Returns:
-        List of project nodes
+        项目节点列表
     """
     return await service.get_chain_projects(chain_name)
 
@@ -232,14 +232,14 @@ async def search_projects(
     limit: int = Query(10, ge=1, le=50),
     service: GraphQuery = Depends(get_graph_query),
 ) -> list[dict[str, Any]]:
-    """Search projects by keyword.
+    """按关键词搜索项目。
 
     Args:
-        keyword: Search keyword
-        limit: Maximum results
+        keyword: 搜索关键词
+        limit: 最大结果数
 
     Returns:
-        List of matching project nodes
+        匹配的项目节点列表
     """
     return await service.search_projects_by_keyword(keyword, limit)
 
@@ -248,9 +248,9 @@ async def search_projects(
 async def initialize_graph(
     loader: GraphLoader = Depends(get_graph_loader),
 ) -> dict[str, str]:
-    """Initialize graph constraints.
+    """初始化图约束。
 
-    Creates unique constraints for all node types.
+    为所有节点类型创建唯一约束。
     """
     await loader.create_constraints()
     return {"status": "success", "message": "Graph constraints initialized"}
@@ -262,14 +262,14 @@ async def create_project(
     chain: str | None = None,
     loader: GraphLoader = Depends(get_graph_loader),
 ) -> dict[str, Any]:
-    """Create a new project node.
+    """创建新的项目节点。
 
     Args:
-        project: Project data
-        chain: Optional chain name
+        project: 项目数据
+        chain: 可选的公链名称
 
     Returns:
-        Created node data
+        创建的节点数据
     """
     result = await loader.create_project(project)
     if chain:
@@ -285,15 +285,15 @@ async def create_full_project(
     tokens: list[TokenNode] | None = None,
     loader: GraphLoader = Depends(get_graph_loader),
 ) -> dict[str, str]:
-    """Create a project with all its relationships.
+    """创建项目及其所有关系。
 
     Args:
-        project: Project data
-        chain: Optional chain name
-        tokens: Optional list of tokens
+        project: 项目数据
+        chain: 可选的公链名称
+        tokens: 可选的代币列表
 
     Returns:
-        Status message
+        状态消息
     """
     await loader.create_full_project(project, chain=chain, tokens=tokens)
     return {"status": "success", "message": f"Project {project.name} created"}

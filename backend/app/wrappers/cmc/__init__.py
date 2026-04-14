@@ -1,6 +1,6 @@
-"""CoinMarketCap API client.
+"""CoinMarketCap API 客户端。
 
-Fetches token market data including price, market cap, and 24h change.
+获取代币市场数据，包括价格、市值和 24 小时涨跌。
 """
 
 from typing import Any
@@ -14,9 +14,9 @@ logger = create_logger("CMC查询代币市场信息")
 
 
 class CMCClient:
-    """Client for CoinMarketCap API.
+    """CoinMarketCap API 客户端。
 
-    Provides token market data lookup functionality.
+    提供代币市场数据查询功能。
     """
 
     def __init__(
@@ -24,18 +24,18 @@ class CMCClient:
         api_key: str | None = None,
         base_url: str = "https://pro-api.coinmarketcap.com",
     ):
-        """Initialize CMC client.
+        """初始化 CMC 客户端。
 
         Args:
-            api_key: CMC API key (defaults to cfg.cmc.CMC_API_KEY)
-            base_url: CMC API base URL
+            api_key: CMC API 密钥（默认使用 cfg.cmc.CMC_API_KEY）
+            base_url: CMC API 基础 URL
         """
         self.api_key = api_key or cfg.cmc.CMC_API_KEY
         self.base_url = base_url
         self._client: httpx.AsyncClient | None = None
 
     async def _get_client(self) -> httpx.AsyncClient:
-        """Get or create HTTP client."""
+        """获取或创建 HTTP 客户端。"""
         if self._client is None:
             headers = {}
             if self.api_key:
@@ -48,20 +48,20 @@ class CMCClient:
         return self._client
 
     async def close(self):
-        """Close the HTTP client."""
+        """关闭 HTTP 客户端。"""
         if self._client:
             await self._client.aclose()
             self._client = None
 
     async def get_token_info(self, symbol: str) -> dict[str, Any] | None:
-        """Get token market information by symbol.
+        """根据符号获取代币市场信息。
 
         Args:
-            symbol: Token symbol (e.g., "BTC", "ETH")
+            symbol: 代币符号（例如 "BTC"、"ETH"）
 
         Returns:
-            Dictionary with keys: symbol, name, price, market_cap, change_24h
-            Returns None if token not found or API error
+            包含以下键的字典：symbol、name、price、market_cap、change_24h
+            如果未找到代币或 API 错误则返回 None
         """
         try:
             client = await self._get_client()
@@ -113,7 +113,7 @@ class CMCClient:
             return None
 
     async def health_check(self) -> bool:
-        """Check if CMC API is accessible."""
+        """检查 CMC API 是否可访问。"""
         try:
             result = await self.get_token_info("BTC")
             return result is not None

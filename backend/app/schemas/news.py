@@ -1,4 +1,4 @@
-"""News schemas."""
+"""新闻模式。"""
 
 from datetime import datetime
 from typing import Optional
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 
 class NewsBase(BaseModel):
-    """Base news schema."""
+    """新闻基础模式。"""
 
     title: str = Field(..., min_length=1, max_length=500)
     content: Optional[str] = None
@@ -17,13 +17,13 @@ class NewsBase(BaseModel):
 
 
 class NewsCreate(NewsBase):
-    """Schema for creating news."""
+    """创建新闻的模式。"""
 
     pass
 
 
 class NewsUpdate(BaseModel):
-    """Schema for updating news."""
+    """更新新闻的模式。"""
 
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     content: Optional[str] = None
@@ -33,7 +33,7 @@ class NewsUpdate(BaseModel):
 
 
 class NewsResponse(NewsBase):
-    """Schema for news response."""
+    """新闻响应模式。"""
 
     id: int
     created_at: datetime

@@ -1,4 +1,4 @@
-"""News API endpoints."""
+"""新闻 API 端点。"""
 
 from typing import Optional
 
@@ -19,7 +19,7 @@ async def create_news(
     news_data: NewsCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a new news item."""
+    """创建新的新闻条目。"""
     # 按 source_id 检查重复
     if news_data.source_id:
         result = await db.execute(
@@ -43,7 +43,7 @@ async def list_news(
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
-    """List news items."""
+    """列出新闻条目。"""
     result = await db.execute(
         select(News)
         .order_by(News.published_at.desc())
@@ -59,7 +59,7 @@ async def get_news(
     news_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    """Get a specific news item."""
+    """获取特定新闻条目。"""
     result = await db.execute(select(News).where(News.id == news_id))
     news = result.scalar_one_or_none()
 

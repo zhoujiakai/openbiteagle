@@ -1,7 +1,7 @@
-"""LLM client wrapper for unified LLM access.
+"""LLM 客户端封装，用于统一的 LLM 访问。
 
-Provides a unified interface for using different LLM providers
-(DeepSeek, OpenAI, etc.) with structured output support.
+提供统一的接口来使用不同的 LLM 提供商
+（DeepSeek、OpenAI 等），支持结构化输出。
 """
 
 import json
@@ -20,16 +20,16 @@ def get_llm(
     model: Optional[str] = None,
     temperature: float = 0.1,
 ) -> ChatOpenAI:
-    """Get configured LLM instance.
+    """获取已配置的 LLM 实例。
 
-    Priority: DeepSeek (primary, low cost) → OpenAI (fallback)
+    优先级：DeepSeek（主要，低成本）→ OpenAI（备用）
 
     Args:
-        model: Override model name
-        temperature: LLM temperature
+        model: 覆盖模型名称
+        temperature: LLM 温度参数
 
     Returns:
-        ChatOpenAI instance
+        ChatOpenAI 实例
     """
     # 优先使用 DeepSeek
     if cfg.deepseek.DEEPSEEK_API_KEY:
@@ -49,10 +49,10 @@ def get_llm(
 
 
 def is_using_deepseek() -> bool:
-    """Check if DeepSeek is configured and will be used.
+    """检查 DeepSeek 是否已配置并将会被使用。
 
     Returns:
-        True if DeepSeek API key is set
+        如果设置了 DeepSeek API 密钥则返回 True
     """
     return bool(cfg.deepseek.DEEPSEEK_API_KEY)
 
@@ -63,16 +63,16 @@ async def call_llm_structured(
     model_class: type,
     schema: Optional[dict] = None,
 ) -> Any:
-    """Call LLM with structured output, handling DeepSeek compatibility.
+    """调用 LLM 并获取结构化输出，处理 DeepSeek 兼容性。
 
     Args:
-        llm: LLM instance
-        prompt: The prompt to send
-        model_class: Pydantic model class for parsing
-        schema: Optional JSON schema for DeepSeek
+        llm: LLM 实例
+        prompt: 要发送的提示词
+        model_class: 用于解析的 Pydantic 模型类
+        schema: 可选的 DeepSeek JSON 模式
 
     Returns:
-        Instance of model_class
+        model_class 的实例
     """
     is_deepseek = is_using_deepseek()
 

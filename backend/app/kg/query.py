@@ -1,4 +1,4 @@
-"""Graph query functions for knowledge graph retrieval."""
+"""知识图谱检索的图查询函数。"""
 
 import logging
 from typing import Any, Optional
@@ -26,24 +26,24 @@ FOUNDED = "FOUNDED"
 
 
 class GraphQuery:
-    """Query functions for the Neo4j knowledge graph."""
+    """Neo4j 知识图谱的查询函数。"""
 
     def __init__(self, client: Neo4jClient) -> None:
-        """Initialize the query service.
+        """初始化查询服务。
 
         Args:
-            client: Neo4j client instance
+            client: Neo4j 客户端实例
         """
         self.client = client
 
     async def get_project_by_name(self, name: str) -> Optional[dict[str, Any]]:
-        """Get a project by name.
+        """根据名称获取项目。
 
         Args:
-            name: Project name
+            name: 项目名称
 
         Returns:
-            Project node data or None
+            项目节点数据或 None
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $name}})
@@ -53,13 +53,13 @@ class GraphQuery:
         return result[0]["p"] if result else None
 
     async def get_project_tokens(self, project_name: str) -> list[dict[str, Any]]:
-        """Get all tokens issued by a project.
+        """获取项目发行的所有代币。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            List of token nodes
+            代币节点列表
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})<-[:{ISSUED}]-(t:{TOKEN})
@@ -69,13 +69,13 @@ class GraphQuery:
         return [r["t"] for r in result]
 
     async def get_project_team(self, project_name: str) -> list[dict[str, Any]]:
-        """Get all team members of a project.
+        """获取项目的所有团队成员。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            List of person nodes with their roles
+            包含角色信息的人物节点列表
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})<-[r]-(person:{PERSON})
@@ -92,13 +92,13 @@ class GraphQuery:
         ]
 
     async def get_project_investors(self, project_name: str) -> list[dict[str, Any]]:
-        """Get all investors of a project.
+        """获取项目的所有投资方。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            List of institution nodes with investment details
+            包含投资详情的机构节点列表
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})<-[r:{INVESTED}]-(i:{INSTITUTION})
@@ -115,13 +115,13 @@ class GraphQuery:
         ]
 
     async def get_project_chain(self, project_name: str) -> Optional[dict[str, Any]]:
-        """Get the chain a project belongs to.
+        """获取项目所属的公链。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            Chain node or None
+            公链节点或 None
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})-[:{BELONGS_TO}]->(c:{CHAIN})
@@ -131,13 +131,13 @@ class GraphQuery:
         return result[0]["c"] if result else None
 
     async def get_institution_portfolio(self, institution_name: str) -> list[dict[str, Any]]:
-        """Get all projects invested in by an institution.
+        """获取机构投资的所有项目。
 
         Args:
-            institution_name: Institution name
+            institution_name: 机构名称
 
         Returns:
-            List of project nodes with investment details
+            包含投资详情的项目节点列表
         """
         query = f"""
         MATCH (i:{INSTITUTION} {{name: $institution_name}})-[:{INVESTED}]->(p:{PROJECT})
@@ -147,13 +147,13 @@ class GraphQuery:
         return [r["p"] for r in result]
 
     async def get_person_projects(self, person_name: str) -> list[dict[str, Any]]:
-        """Get all projects associated with a person.
+        """获取与某人物关联的所有项目。
 
         Args:
-            person_name: Person name
+            person_name: 人物名称
 
         Returns:
-            List of project nodes with relationship details
+            包含关系详情的项目节点列表
         """
         query = f"""
         MATCH (p:{PERSON} {{name: $person_name}})-[r]->(pr:{PROJECT})
@@ -170,13 +170,13 @@ class GraphQuery:
         ]
 
     async def get_chain_projects(self, chain_name: str) -> list[dict[str, Any]]:
-        """Get all projects on a chain.
+        """获取公链上的所有项目。
 
         Args:
-            chain_name: Chain name
+            chain_name: 公链名称
 
         Returns:
-            List of project nodes
+            项目节点列表
         """
         query = f"""
         MATCH (c:{CHAIN} {{name: $chain_name}})<-[:{BELONGS_TO}]-(p:{PROJECT})
@@ -186,13 +186,13 @@ class GraphQuery:
         return [r["p"] for r in result]
 
     async def get_project_collaborations(self, project_name: str) -> list[dict[str, Any]]:
-        """Get all projects that collaborate with a given project.
+        """获取与指定项目合作的所有项目。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            List of collaborating project nodes
+            合作项目节点列表
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})-[:{COLLABORATES_WITH}]-(collab:{PROJECT})
@@ -202,14 +202,14 @@ class GraphQuery:
         return [r["collab"] for r in result]
 
     async def search_projects_by_keyword(self, keyword: str, limit: int = 10) -> list[dict[str, Any]]:
-        """Search projects by keyword in name or description.
+        """按关键词在名称或描述中搜索项目。
 
         Args:
-            keyword: Search keyword
-            limit: Maximum results
+            keyword: 搜索关键词
+            limit: 最大结果数
 
         Returns:
-            List of matching project nodes
+            匹配的项目节点列表
         """
         query = f"""
         MATCH (p:{PROJECT})
@@ -224,13 +224,13 @@ class GraphQuery:
         return [r["p"] for r in result]
 
     async def get_project_context(self, project_name: str) -> dict[str, Any]:
-        """Get full context for a project including all related entities.
+        """获取项目的完整上下文，包括所有相关实体。
 
         Args:
-            project_name: Project name
+            project_name: 项目名称
 
         Returns:
-            Dictionary with project, tokens, team, investors, chain, collaborations
+            包含项目、代币、团队、投资方、公链、合作的字典
         """
         project = await self.get_project_by_name(project_name)
         if not project:
@@ -257,15 +257,15 @@ class GraphQuery:
         max_hops: int = 2,
         limit: int = 20,
     ) -> list[dict[str, Any]]:
-        """Find projects related through investors, team, or collaborations.
+        """查找通过投资方、团队或合作关联的项目。
 
         Args:
-            project_name: Starting project name
-            max_hops: Maximum relationship hops
-            limit: Maximum results
+            project_name: 起始项目名称
+            max_hops: 最大关系跳数
+            limit: 最大结果数
 
         Returns:
-            List of related project nodes with path information
+            包含路径信息的关联项目节点列表
         """
         query = f"""
         MATCH path = (p:{PROJECT} {{name: $project_name}})-[*1..{max_hops}]-(related:{PROJECT})
@@ -288,10 +288,10 @@ class GraphQuery:
         ]
 
     async def get_graph_stats(self) -> dict[str, int]:
-        """Get statistics about the knowledge graph.
+        """获取知识图谱的统计信息。
 
         Returns:
-            Dictionary with counts of each node type
+            包含各节点类型数量的字典
         """
         stats = {}
 
@@ -306,13 +306,13 @@ class GraphQuery:
         return stats
 
     async def get_token_info(self, symbol: str) -> Optional[dict[str, Any]]:
-        """Get token information with associated project.
+        """获取代币信息及其关联项目。
 
         Args:
-            symbol: Token symbol
+            symbol: 代币符号
 
         Returns:
-            Token node with project information or None
+            包含项目信息的代币节点或 None
         """
         query = f"""
         MATCH (t:{TOKEN} {{symbol: $symbol}})-[:{ISSUED}]->(p:{PROJECT})
@@ -330,13 +330,13 @@ class GraphQuery:
         self,
         project_names: list[str],
     ) -> dict[str, dict[str, Any]]:
-        """Get context for multiple projects efficiently.
+        """高效获取多个项目的上下文。
 
         Args:
-            project_names: List of project names
+            project_names: 项目名称列表
 
         Returns:
-            Dictionary mapping project names to their context
+            项目名称到其上下文的映射字典
         """
         contexts = {}
         for name in project_names:

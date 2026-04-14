@@ -1,4 +1,4 @@
-"""Analysis schemas."""
+"""分析模式。"""
 
 from datetime import datetime
 from decimal import Decimal
@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class StepResult(BaseModel):
-    """Schema for a single analysis step result."""
+    """单个分析步骤结果的模式。"""
 
     name: str = Field(..., description="Step/node name")
     result: Optional[dict[str, Any]] = Field(None, description="Step execution result")
@@ -16,24 +16,24 @@ class StepResult(BaseModel):
 
 
 class AnalysisCreate(BaseModel):
-    """Schema for creating analysis request."""
+    """创建分析请求的模式。"""
 
     news_id: Optional[int] = Field(None, gt=0, description="Existing news ID")
     news_content: Optional[str] = Field(None, min_length=1, description="Raw news content")
 
     def has_content(self) -> bool:
-        """Check if request has valid content source."""
+        """检查请求是否包含有效的内容来源。"""
         return self.news_id is not None or self.news_content is not None
 
 
 class BatchAnalysisCreate(BaseModel):
-    """Schema for batch analysis request."""
+    """批量分析请求的模式。"""
 
     news_ids: list[int] = Field(..., min_length=1, max_length=50, description="List of news IDs")
 
 
 class AnalysisBase(BaseModel):
-    """Base analysis schema."""
+    """分析基础模式。"""
 
     news_id: int = Field(..., gt=0)
     investment_value: Optional[str] = Field(None, pattern="^(bullish|bearish|neutral)$")
@@ -44,7 +44,7 @@ class AnalysisBase(BaseModel):
 
 
 class AnalysisResponse(AnalysisBase):
-    """Schema for analysis response."""
+    """分析响应模式。"""
 
     id: int
     status: str
@@ -58,7 +58,7 @@ class AnalysisResponse(AnalysisBase):
 
 
 class TokenInfo(BaseModel):
-    """Token information schema."""
+    """代币信息模式。"""
 
     symbol: str
     name: Optional[str] = None
@@ -67,7 +67,7 @@ class TokenInfo(BaseModel):
 
 
 class InvestmentValueResult(BaseModel):
-    """Investment value judgment result."""
+    """投资价值判断结果。"""
 
     value: str = Field(..., pattern="^(bullish|bearish|neutral)$")
     confidence: Decimal = Field(..., ge=0, le=1)
@@ -75,14 +75,14 @@ class InvestmentValueResult(BaseModel):
 
 
 class TokenExtractionResult(BaseModel):
-    """Token extraction result."""
+    """代币提取结果。"""
 
     tokens: list[TokenInfo]
     has_tokens: bool
 
 
 class TrendAnalysisResult(BaseModel):
-    """Trend analysis result."""
+    """趋势分析结果。"""
 
     recommendation: str = Field(..., pattern="^(buy|sell|hold)$")
     analysis: str
@@ -90,7 +90,7 @@ class TrendAnalysisResult(BaseModel):
 
 
 class AnalysisCreateResponse(BaseModel):
-    """Schema for analysis creation response."""
+    """分析创建响应模式。"""
 
     analysis_id: int
     news_id: int
@@ -98,7 +98,7 @@ class AnalysisCreateResponse(BaseModel):
 
 
 class AnalysisDetail(AnalysisBase):
-    """Schema for detailed analysis response."""
+    """详细分析响应模式。"""
 
     id: int
     status: str
@@ -114,7 +114,7 @@ class AnalysisDetail(AnalysisBase):
 
 
 class BatchAnalysisResponse(BaseModel):
-    """Schema for batch analysis response."""
+    """批量分析响应模式。"""
 
     analysis_ids: list[int]
     count: int
@@ -122,14 +122,14 @@ class BatchAnalysisResponse(BaseModel):
 
 
 class TokenCount(BaseModel):
-    """Schema for token count statistics."""
+    """代币计数统计模式。"""
 
     symbol: str
     count: int
 
 
 class AnalysisOverview(BaseModel):
-    """Schema for analysis overview/statistics."""
+    """分析概览/统计模式。"""
 
     total: int = Field(..., description="Total number of analyses")
     by_value: dict[str, int] = Field(default_factory=dict, description="Count by investment value")

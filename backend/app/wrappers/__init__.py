@@ -1,6 +1,6 @@
-"""Wrappers module.
+"""封装器模块。
 
-Each data source has its own subdirectory with its own implementation.
+每个数据源都有自己的子目录和实现。
 """
 
 from app.wrappers.odaily import NewsItem, OdailyScraper, OdailyRestScraper

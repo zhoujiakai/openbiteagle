@@ -1,10 +1,10 @@
-"""Data layer - database, cache, and message queue."""
+"""数据层 - 数据库、缓存和消息队列。"""
 
 from app.data.logger import create_logger
 
 
 def __getattr__(name):
-    """Lazy import heavy dependencies to avoid requiring them at module load time."""
+    """延迟加载重量级依赖，避免在模块加载时就需要它们。"""
     _lazy = {
         # 数据库
         "AsyncSession": "app.data.db",

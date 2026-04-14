@@ -1,6 +1,6 @@
-"""Database session and base model.
+"""数据库会话和基础模型。
 
-Reference: repos/back-template/data/db.py
+参考: repos/back-template/data/db.py
 """
 
 from typing import AsyncGenerator
@@ -25,7 +25,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 class Base(DeclarativeBase):
-    """Base class for all database models."""
+    """所有数据库模型的基类。"""
 
     pass
 
@@ -34,7 +34,7 @@ Base.metadata.schema = cfg.database.DATABASE_SCHEMA
 
 
 async def ensure_schema() -> None:
-    """Create the database schema and required extensions if they do not exist."""
+    """如果数据库架构和所需扩展不存在，则创建它们。"""
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.execute(
@@ -43,7 +43,7 @@ async def ensure_schema() -> None:
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Get database session."""
+    """获取数据库会话。"""
     async with AsyncSessionLocal() as session:
         try:
             yield session

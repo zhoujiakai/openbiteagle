@@ -1,4 +1,4 @@
-"""Graph data loader for building the knowledge graph."""
+"""用于构建知识图谱的图数据加载器。"""
 
 import logging
 from typing import Any, Optional
@@ -33,18 +33,18 @@ FOUNDED = "FOUNDED"
 
 
 class GraphLoader:
-    """Load data into the Neo4j knowledge graph."""
+    """将数据加载到 Neo4j 知识图谱。"""
 
     def __init__(self, client: Neo4jClient) -> None:
-        """Initialize the loader.
+        """初始化加载器。
 
         Args:
-            client: Neo4j client instance
+            client: Neo4j 客户端实例
         """
         self.client = client
 
     async def create_constraints(self) -> None:
-        """Create unique constraints for node labels."""
+        """为节点标签创建唯一约束。"""
         constraints = [
             # 项目唯一性约束
             f"CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:{PROJECT}) REQUIRE p.name IS UNIQUE",
@@ -73,13 +73,13 @@ class GraphLoader:
         logger.info("Graph constraints created/verified")
 
     async def create_project(self, project: ProjectNode) -> dict[str, Any]:
-        """Create a Project node.
+        """创建项目节点。
 
         Args:
-            project: Project node data
+            project: 项目节点数据
 
         Returns:
-            Created node data
+            创建的节点数据
         """
         query = f"""
         MERGE (p:{PROJECT} {{name: $name}})
@@ -93,13 +93,13 @@ class GraphLoader:
         return result[0]["p"] if result else {}
 
     async def create_token(self, token: TokenNode) -> dict[str, Any]:
-        """Create a Token node.
+        """创建代币节点。
 
         Args:
-            token: Token node data
+            token: 代币节点数据
 
         Returns:
-            Created node data
+            创建的节点数据
         """
         query = f"""
         MERGE (t:{TOKEN} {{symbol: $symbol}})
@@ -113,13 +113,13 @@ class GraphLoader:
         return result[0]["t"] if result else {}
 
     async def create_person(self, person: PersonNode) -> dict[str, Any]:
-        """Create a Person node.
+        """创建人物节点。
 
         Args:
-            person: Person node data
+            person: 人物节点数据
 
         Returns:
-            Created node data
+            创建的节点数据
         """
         query = f"""
         MERGE (p:{PERSON} {{name: $name}})
@@ -133,13 +133,13 @@ class GraphLoader:
         return result[0]["p"] if result else {}
 
     async def create_institution(self, institution: InstitutionNode) -> dict[str, Any]:
-        """Create an Institution node.
+        """创建机构节点。
 
         Args:
-            institution: Institution node data
+            institution: 机构节点数据
 
         Returns:
-            Created node data
+            创建的节点数据
         """
         query = f"""
         MERGE (i:{INSTITUTION} {{name: $name}})
@@ -153,13 +153,13 @@ class GraphLoader:
         return result[0]["i"] if result else {}
 
     async def create_chain(self, chain: ChainNode) -> dict[str, Any]:
-        """Create a Chain node.
+        """创建公链节点。
 
         Args:
-            chain: Chain node data
+            chain: 公链节点数据
 
         Returns:
-            Created node data
+            创建的节点数据
         """
         query = f"""
         MERGE (c:{CHAIN} {{name: $name}})
@@ -177,11 +177,11 @@ class GraphLoader:
         token_symbol: str,
         project_name: str,
     ) -> None:
-        """Create ISSUED relationship: Token -[ISSUED]-> Project.
+        """创建 ISSUED 关系：Token -[ISSUED]-> Project。
 
         Args:
-            token_symbol: Token symbol
-            project_name: Project name
+            token_symbol: 代币符号
+            project_name: 项目名称
         """
         query = f"""
         MATCH (t:{TOKEN} {{symbol: $token_symbol}})
@@ -200,13 +200,13 @@ class GraphLoader:
         round_type: Optional[str] = None,
         amount: Optional[str] = None,
     ) -> None:
-        """Create INVESTED relationship: Institution -[INVESTED]-> Project.
+        """创建 INVESTED 关系：Institution -[INVESTED]-> Project。
 
         Args:
-            institution_name: Institution name
-            project_name: Project name
-            round_type: Optional investment round type (e.g., "Series A")
-            amount: Optional investment amount
+            institution_name: 机构名称
+            project_name: 项目名称
+            round_type: 可选的投资轮次类型（例如 "Series A"）
+            amount: 可选的投资金额
         """
         props = {}
         if round_type:
@@ -232,11 +232,11 @@ class GraphLoader:
         project_name: str,
         chain_name: str,
     ) -> None:
-        """Create BELONGS_TO relationship: Project -[BELONGS_TO]-> Chain.
+        """创建 BELONGS_TO 关系：Project -[BELONGS_TO]-> Chain。
 
         Args:
-            project_name: Project name
-            chain_name: Chain name
+            project_name: 项目名称
+            chain_name: 公链名称
         """
         query = f"""
         MATCH (p:{PROJECT} {{name: $project_name}})
@@ -255,13 +255,13 @@ class GraphLoader:
         relation_type: RelationTypes | str = RelationTypes.WORKS_AT,
         role: Optional[str] = None,
     ) -> None:
-        """Create relationship: Person -[relation_type]-> Project.
+        """创建关系：Person -[relation_type]-> Project。
 
         Args:
-            person_name: Person name
-            project_name: Project name
-            relation_type: Type of relationship (WORKS_AT, ADVISES, FOUNDED)
-            role: Optional role description
+            person_name: 人物名称
+            project_name: 项目名称
+            relation_type: 关系类型（WORKS_AT、ADVISES、FOUNDED）
+            role: 可选的角色描述
         """
         # 如果需要，将枚举转换为字符串
         if hasattr(relation_type, "value"):
@@ -287,12 +287,12 @@ class GraphLoader:
         project_b: str,
         collaboration_type: Optional[str] = None,
     ) -> None:
-        """Create COLLABORATES_WITH relationship: Project -[COLLABORATES_WITH]-> Project.
+        """创建 COLLABORATES_WITH 关系：Project -[COLLABORATES_WITH]-> Project。
 
         Args:
-            project_a: First project name
-            project_b: Second project name
-            collaboration_type: Optional description of collaboration
+            project_a: 第一个项目名称
+            project_b: 第二个项目名称
+            collaboration_type: 可选的合作描述
         """
         rel_props = ""
         params = {"project_a": project_a, "project_b": project_b}
@@ -316,14 +316,14 @@ class GraphLoader:
         team: Optional[list[tuple[PersonNode, RelationTypes]]] = None,
         investors: Optional[list[tuple[InstitutionNode, str | None, str | None]]] = None,
     ) -> None:
-        """Create a project with all its relationships.
+        """创建项目及其所有关系。
 
         Args:
-            project: Project node data
-            chain: Optional chain name
-            tokens: Optional list of tokens
-            team: Optional list of (person, relation_type) tuples
-            investors: Optional list of (institution, round_type, amount) tuples
+            project: 项目节点数据
+            chain: 可选的公链名称
+            tokens: 可选的代币列表
+            team: 可选的 (人物, 关系类型) 元组列表
+            investors: 可选的 (机构, 轮次类型, 金额) 元组列表
         """
         # 创建项目
         await self.create_project(project)

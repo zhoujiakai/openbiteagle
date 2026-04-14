@@ -1,6 +1,6 @@
-"""RabbitMQ client.
+"""RabbitMQ 客户端。
 
-Reference: repos/back-template/data/rabbit.py
+参考: repos/back-template/data/rabbit.py
 """
 
 import asyncio
@@ -29,10 +29,10 @@ __all__ = [
 
 
 class RabbitMQ:
-    """Asynchronous RabbitMQ client with auto-reconnect."""
+    """带自动重连的异步 RabbitMQ 客户端。"""
 
     def __init__(self) -> None:
-        """Initialize RabbitMQ client."""
+        """初始化 RabbitMQ 客户端。"""
         self._connection: Optional[RobustConnection] = None
         self._channel: Optional[RobustChannel] = None
         self._exchange: Optional[AbstractExchange] = None
@@ -42,7 +42,7 @@ class RabbitMQ:
         self._initialized = False
 
     async def _initialize(self) -> None:
-        """Initialize connection to RabbitMQ."""
+        """初始化到 RabbitMQ 的连接。"""
         if self._initialized:
             return
 
@@ -83,7 +83,7 @@ class RabbitMQ:
             self._ready.set()
 
     async def _get_channel(self) -> AbstractChannel:
-        """Get the channel."""
+        """获取通道。"""
         if not self._initialized:
             await self._initialize()
         await self._ready.wait()
@@ -96,12 +96,12 @@ class RabbitMQ:
         message: Any,
         **kwargs,
     ) -> None:
-        """Send a message to the specified queue.
+        """向指定队列发送消息。
 
         Args:
-            queue: Queue name
-            message: Message content (can be dict, str, bytes)
-            **kwargs: Additional options (delivery_mode, etc.)
+            queue: 队列名称
+            message: 消息内容（可以是 dict、str、bytes）
+            **kwargs: 附加选项（delivery_mode 等）
         """
         from pydantic import BaseModel
 
@@ -141,13 +141,13 @@ class RabbitMQ:
         self,
         queue_name: str,
     ) -> AsyncGenerator[Tuple[bytes, AbstractIncomingMessage], None]:
-        """Receive messages from the specified queue.
+        """从指定队列接收消息。
 
         Args:
-            queue_name: Queue name
+            queue_name: 队列名称
 
         Yields:
-            Tuple of (message body, incoming message)
+            (消息体, 收到的消息) 元组
         """
         async def _receive():
             await self._initialize()
@@ -170,7 +170,7 @@ class RabbitMQ:
         return _receive()
 
     async def close(self) -> None:
-        """Close the RabbitMQ connection."""
+        """关闭 RabbitMQ 连接。"""
         if self._connection is not None:
             await self._connection.close()
 
@@ -180,7 +180,7 @@ _rabbit: Optional[RabbitMQ] = None
 
 
 async def get_rabbit() -> RabbitMQ:
-    """Get or create global RabbitMQ instance."""
+    """获取或创建全局 RabbitMQ 实例。"""
     global _rabbit
     if _rabbit is None:
         _rabbit = RabbitMQ()
@@ -188,7 +188,7 @@ async def get_rabbit() -> RabbitMQ:
 
 
 async def close_rabbit() -> None:
-    """Close global RabbitMQ instance."""
+    """关闭全局 RabbitMQ 实例。"""
     global _rabbit
     if _rabbit:
         await _rabbit.close()

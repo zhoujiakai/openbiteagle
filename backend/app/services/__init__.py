@@ -1,4 +1,4 @@
-"""Services module."""
+"""服务模块。"""
 
 from app.services.news import (
     NewsItem,

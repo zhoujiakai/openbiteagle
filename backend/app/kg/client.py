@@ -1,4 +1,4 @@
-"""Neo4j client for knowledge graph operations."""
+"""用于知识图谱操作的 Neo4j 客户端。"""
 
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -10,12 +10,12 @@ from app.core.config import cfg
 
 @dataclass
 class Neo4jClient:
-    """Neo4j client wrapper for async operations."""
+    """Neo4j 异步操作客户端封装。"""
 
     driver: Optional[AsyncDriver] = None
 
     async def connect(self) -> None:
-        """Establish connection to Neo4j."""
+        """建立到 Neo4j 的连接。"""
         self.driver = AsyncGraphDatabase.driver(
             cfg.neo4j.NEO4J_URI,
             auth=(cfg.neo4j.NEO4J_USER, cfg.neo4j.NEO4J_PASSWORD),
@@ -27,10 +27,10 @@ class Neo4jClient:
         await self.verify_connectivity()
 
     async def verify_connectivity(self) -> bool:
-        """Verify that the connection to Neo4j is working.
+        """验证到 Neo4j 的连接是否正常。
 
         Returns:
-            True if connection is successful
+            连接成功返回 True
         """
         if self.driver is None:
             raise RuntimeError("Driver not initialized")
@@ -38,7 +38,7 @@ class Neo4jClient:
         return True
 
     async def close(self) -> None:
-        """Close the Neo4j driver connection."""
+        """关闭 Neo4j 驱动连接。"""
         if self.driver:
             await self.driver.close()
 
@@ -48,15 +48,15 @@ class Neo4jClient:
         parameters: dict[str, Any] | None = None,
         database: str | None = None,
     ) -> list[dict[str, Any]]:
-        """Execute a Cypher query.
+        """执行 Cypher 查询。
 
         Args:
-            query: Cypher query string
-            parameters: Query parameters
-            database: Database name (defaults to neo4j)
+            query: Cypher 查询字符串
+            parameters: 查询参数
+            database: 数据库名称（默认为 neo4j）
 
         Returns:
-            List of result records
+            结果记录列表
         """
         if self.driver is None:
             raise RuntimeError("Driver not initialized")
@@ -72,15 +72,15 @@ class Neo4jClient:
         parameters: dict[str, Any] | None = None,
         database: str | None = None,
     ) -> Any:
-        """Execute a write Cypher query.
+        """执行写入 Cypher 查询。
 
         Args:
-            query: Cypher query string
-            parameters: Query parameters
-            database: Database name (defaults to neo4j)
+            query: Cypher 查询字符串
+            parameters: 查询参数
+            database: 数据库名称（默认为 neo4j）
 
         Returns:
-            Summary of the write operation
+            写入操作的摘要
         """
         if self.driver is None:
             raise RuntimeError("Driver not initialized")
@@ -91,10 +91,10 @@ class Neo4jClient:
             return summary
 
     async def __aenter__(self) -> "Neo4jClient":
-        """Async context manager entry."""
+        """异步上下文管理器入口。"""
         await self.connect()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
-        """Async context manager exit."""
+        """异步上下文管理器出口。"""
         await self.close()

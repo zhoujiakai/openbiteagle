@@ -1,4 +1,4 @@
-"""News analysis service."""
+"""新闻分析服务。"""
 
 from typing import Optional
 
@@ -12,13 +12,13 @@ from app.models.news import News
 
 
 class AnalysisService:
-    """Service for news analysis operations."""
+    """新闻分析操作服务。"""
 
     def __init__(self, db_session: AsyncSession):
-        """Initialize the service.
+        """初始化服务。
 
         Args:
-            db_session: Database session for persistence
+            db_session: 用于持久化的数据库会话
         """
         self.db = db_session
 
@@ -27,14 +27,14 @@ class AnalysisService:
         news_id: int,
         trace_id: Optional[str] = None,
     ) -> dict:
-        """Run LangGraph analysis on news item.
+        """对新闻条目运行 LangGraph 分析。
 
         Args:
-            news_id: News item ID to analyze
-            trace_id: Optional LangSmith trace ID for correlation
+            news_id: 要分析的新闻条目 ID
+            trace_id: 可选的 LangSmith 追踪 ID，用于关联
 
         Returns:
-            Analysis result dict
+            分析结果字典
         """
         # 获取新闻
         news = await self._get_news(news_id)
@@ -72,13 +72,13 @@ class AnalysisService:
         return result
 
     async def get_analysis(self, news_id: int) -> Optional[Analysis]:
-        """Get analysis result for a news item.
+        """获取新闻条目的分析结果。
 
         Args:
-            news_id: News item ID
+            news_id: 新闻条目 ID
 
         Returns:
-            Analysis object or None
+            Analysis 对象或 None
         """
         result = await self.db.execute(
             select(Analysis).where(Analysis.news_id == news_id)
@@ -86,7 +86,7 @@ class AnalysisService:
         return result.scalar_one_or_none()
 
     async def _get_news(self, news_id: int) -> Optional[News]:
-        """Get news item from database."""
+        """从数据库获取新闻条目。"""
         result = await self.db.execute(
             select(News).where(News.id == news_id)
         )
@@ -98,7 +98,7 @@ class AnalysisService:
         result: dict,
         trace_id: Optional[str] = None,
     ) -> Analysis:
-        """Save analysis result to database."""
+        """将分析结果保存到数据库。"""
         from datetime import datetime
 
         analysis = Analysis(

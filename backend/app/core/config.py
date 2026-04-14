@@ -1,4 +1,4 @@
-"""Application configuration loaded from config.yaml."""
+"""从 config.yaml 加载的应用配置。"""
 
 import os
 from pathlib import Path
@@ -8,7 +8,7 @@ import yaml
 
 
 class Config:
-    """YAML-based application configuration."""
+    """基于 YAML 的应用配置。"""
 
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
 

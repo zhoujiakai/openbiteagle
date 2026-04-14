@@ -1,4 +1,4 @@
-"""News service module."""
+"""新闻服务模块。"""
 
 from app.services.news.cleaner import (
     clean_html,

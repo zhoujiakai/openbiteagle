@@ -1,4 +1,4 @@
-"""Knowledge Graph module for Neo4j entity relationship storage."""
+"""知识图谱模块，用于 Neo4j 实体关系存储。"""
 
 from app.kg.client import Neo4jClient
 from app.kg.importers import RootdataKGImporter, import_rootdata_to_kg

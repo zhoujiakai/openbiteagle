@@ -1,4 +1,4 @@
-"""Data cleaning utilities."""
+"""数据清洗工具。"""
 
 import html
 import re
@@ -8,13 +8,13 @@ import bleach
 
 
 def clean_html(html_content: str) -> str:
-    """Clean HTML content by removing tags but preserving text.
+    """清除 HTML 内容中的标签，但保留文本。
 
     Args:
-        html_content: Raw HTML content
+        html_content: 原始 HTML 内容
 
     Returns:
-        Cleaned text content
+        清洗后的文本内容
     """
     if not html_content:
         return ""
@@ -32,13 +32,13 @@ def clean_html(html_content: str) -> str:
 
 
 def clean_text(text: str) -> str:
-    """Clean text content.
+    """清洗文本内容。
 
     Args:
-        text: Raw text
+        text: 原始文本
 
     Returns:
-        Cleaned text
+        清洗后的文本
     """
     if not text:
         return ""
@@ -53,13 +53,13 @@ def clean_text(text: str) -> str:
 
 
 def clean_title(title: str) -> str:
-    """Clean news title.
+    """清洗新闻标题。
 
     Args:
-        title: Raw title
+        title: 原始标题
 
     Returns:
-        Cleaned title
+        清洗后的标题
     """
     if not title:
         return ""
@@ -78,14 +78,14 @@ def clean_title(title: str) -> str:
 
 
 def is_valid_news(title: str, content: Optional[str] = None) -> bool:
-    """Check if news item is valid.
+    """检查新闻条目是否有效。
 
     Args:
-        title: News title
-        content: News content
+        title: 新闻标题
+        content: 新闻内容
 
     Returns:
-        True if valid, False otherwise
+        有效返回 True，否则返回 False
     """
     if not title or len(title.strip()) < 5:
         return False
@@ -106,16 +106,16 @@ def is_valid_news(title: str, content: Optional[str] = None) -> bool:
 
 
 def extract_tokens_from_text(text: str) -> list[str]:
-    """Extract potential token symbols from text.
+    """从文本中提取潜在的代币符号。
 
-    This is a simple extraction based on common patterns.
-    More sophisticated NER could be used.
+    基于常见模式的简单提取。
+    可以使用更复杂的 NER 方法。
 
     Args:
-        text: Text to extract from
+        text: 要提取的文本
 
     Returns:
-        List of potential token symbols
+        潜在代币符号列表
     """
     if not text:
         return []

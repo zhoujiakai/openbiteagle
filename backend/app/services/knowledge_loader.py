@@ -1,7 +1,6 @@
-"""Knowledge base loader service.
+"""知识库加载服务。
 
-This service orchestrates importing documents from various sources
-into the RAG knowledge base.
+该服务负责将来自各种数据源的文档导入到 RAG 知识库中。
 """
 
 import json
@@ -21,13 +20,13 @@ KB_DOCS_DIR = Path(__file__).parent.parent.parent / "data" / "kb_docs"
 
 
 class KnowledgeLoader:
-    """Service for loading documents into the knowledge base."""
+    """将文档加载到知识库的服务。"""
 
     def __init__(self, save_local: bool = True):
-        """Initialize the knowledge loader.
+        """初始化知识库加载器。
 
         Args:
-            save_local: Whether to save scraped documents to local files
+            save_local: 是否将爬取的文档保存到本地文件
         """
         self.embedding_service: Optional[EmbeddingService] = None
         self.save_local = save_local
@@ -39,7 +38,7 @@ class KnowledgeLoader:
             logger.info(f"Local storage ready: {KB_DOCS_DIR}")
 
     async def get_embedding_service(self) -> EmbeddingService:
-        """Get or create the embedding service."""
+        """获取或创建嵌入服务。"""
         if self.embedding_service is None:
             from app.rag.embeddings import get_embedding_service
 
@@ -52,15 +51,15 @@ class KnowledgeLoader:
         embed: bool = True,
         import_to_kg: bool = False,
     ) -> dict:
-        """Import projects from Rootdata into the knowledge base.
+        """将 Rootdata 项目导入知识库。
 
         Args:
-            limit: Maximum number of projects to import
-            embed: Whether to generate embeddings immediately
-            import_to_kg: Whether to also import to Neo4j Knowledge Graph
+            limit: 最大导入项目数
+            embed: 是否立即生成嵌入
+            import_to_kg: 是否同时导入 Neo4j 知识图谱
 
         Returns:
-            Dict with import statistics
+            包含导入统计信息的字典
         """
         logger.info(f"Starting Rootdata import (limit: {limit}, import_to_kg: {import_to_kg})")
 
@@ -146,15 +145,15 @@ class KnowledgeLoader:
         embed: bool = True,
         use_real: bool = False,
     ) -> dict:
-        """Import deep articles from Odaily into the knowledge base.
+        """将 Odaily 深度文章导入知识库。
 
         Args:
-            limit: Maximum number of articles to import
-            embed: Whether to generate embeddings immediately
-            use_real: Whether to fetch real articles (False = use mock data)
+            limit: 最大导入文章数
+            embed: 是否立即生成嵌入
+            use_real: 是否获取真实文章（False = 使用模拟数据）
 
         Returns:
-            Dict with import statistics
+            包含导入统计信息的字典
         """
         logger.info(f"Starting Odaily deep articles import (limit: {limit}, use_real: {use_real})")
 
@@ -241,18 +240,18 @@ class KnowledgeLoader:
         metadata: Optional[dict] = None,
         embed: bool = True,
     ) -> int:
-        """Import a single document into the knowledge base.
+        """将单个文档导入知识库。
 
         Args:
-            title: Document title
-            content: Document content
-            source_url: Optional source URL
-            source_type: Source type identifier
-            metadata: Optional metadata dictionary
-            embed: Whether to generate embeddings immediately
+            title: 文档标题
+            content: 文档内容
+            source_url: 可选的来源 URL
+            source_type: 数据源类型标识
+            metadata: 可选的元数据字典
+            embed: 是否立即生成嵌入
 
         Returns:
-            Document ID
+            文档 ID
         """
         doc_id = await insert_document(
             title=title,
@@ -278,18 +277,18 @@ class KnowledgeLoader:
         url: Optional[str] = None,
         metadata: Optional[dict] = None,
     ) -> Path:
-        """Save a scraped document to local storage.
+        """将爬取的文档保存到本地存储。
 
         Args:
-            source: Source type (rootdata, odaily, tokenomics)
-            doc_id: Unique document identifier
-            title: Document title
-            content: Document content
-            url: Source URL
-            metadata: Optional metadata
+            source: 数据源类型（rootdata、odaily、tokenomics）
+            doc_id: 唯一文档标识符
+            title: 文档标题
+            content: 文档内容
+            url: 来源 URL
+            metadata: 可选的元数据
 
         Returns:
-            Path to saved file
+            保存文件的路径
         """
         if not self.save_local:
             return None
@@ -320,14 +319,14 @@ class KnowledgeLoader:
         return filepath
 
     async def _embed_document(self, doc_id: int, content: str) -> bool:
-        """Generate embeddings for a document.
+        """为文档生成嵌入向量。
 
         Args:
-            doc_id: Document ID
-            content: Document content
+            doc_id: 文档 ID
+            content: 文档内容
 
         Returns:
-            True if successful
+            成功返回 True
         """
         try:
             embedding_service = await self.get_embedding_service()
@@ -350,13 +349,13 @@ class KnowledgeLoader:
             return False
 
     async def _embed_recent_documents(self, count: int) -> int:
-        """Generate embeddings for recently added documents.
+        """为最近添加的文档生成嵌入向量。
 
         Args:
-            count: Number of recent documents to embed
+            count: 要嵌入的最近文档数量
 
         Returns:
-            Number of documents embedded
+            已嵌入的文档数量
         """
         try:
             from app.data.vector import get_all_documents
@@ -383,14 +382,14 @@ class KnowledgeLoader:
         limit: int = 20,
         embed: bool = True,
     ) -> dict:
-        """Import tokenomics documents into the knowledge base.
+        """将代币经济学文档导入知识库。
 
         Args:
-            limit: Maximum number of documents to import
-            embed: Whether to generate embeddings immediately
+            limit: 最大导入文档数
+            embed: 是否立即生成嵌入
 
         Returns:
-            Dict with import statistics
+            包含导入统计信息的字典
         """
         logger.info(f"Starting tokenomics import (limit: {limit})")
 
@@ -419,7 +418,7 @@ _loader: Optional[KnowledgeLoader] = None
 
 
 def get_knowledge_loader() -> KnowledgeLoader:
-    """Get the global knowledge loader instance."""
+    """获取全局知识库加载器实例。"""
     global _loader
     if _loader is None:
         _loader = KnowledgeLoader()

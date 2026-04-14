@@ -1,4 +1,4 @@
-"""Odaily news scraper.
+"""Odaily 新闻爬虫。
 
 Odaily 快讯页面是动态加载的，直接爬取 HTML 不可行。
 这里提供一个模拟数据的爬虫用于测试，生产环境需要：
@@ -14,7 +14,7 @@ from typing import Optional
 
 @dataclass
 class NewsItem:
-    """News item data structure."""
+    """新闻条目数据结构。"""
 
     title: str
     content: Optional[str] = None
@@ -24,7 +24,7 @@ class NewsItem:
 
 
 class OdailyScraper:
-    """Odaily news scraper (mock implementation for testing).
+    """Odaily 新闻爬虫（用于测试的模拟实现）。
 
     实际生产环境需要使用 Playwright 或 API 接口。
     """
@@ -33,31 +33,31 @@ class OdailyScraper:
     FLASH_URL = f"{BASE_URL}/flash"
 
     def __init__(self, timeout: int = 30, use_mock: bool = True):
-        """Initialize scraper.
+        """初始化爬虫。
 
         Args:
-            timeout: HTTP request timeout in seconds
-            use_mock: Use mock data for testing (True by default)
+            timeout: HTTP 请求超时时间（秒）
+            use_mock: 是否使用模拟数据进行测试（默认 True）
         """
         self.timeout = timeout
         self.use_mock = use_mock
 
     async def __aenter__(self):
-        """Enter context manager."""
+        """进入上下文管理器。"""
         return self
 
     async def __aexit__(self, *args):
-        """Exit context manager."""
+        """退出上下文管理器。"""
         pass
 
     async def fetch_flash_news(self, limit: int = 50) -> list[NewsItem]:
-        """Fetch flash news from Odaily.
+        """从 Odaily 获取快讯新闻。
 
         Args:
-            limit: Maximum number of news items to fetch
+            limit: 最大获取新闻数量
 
         Returns:
-            List of NewsItem
+            NewsItem 列表
         """
         if self.use_mock:
             return self._get_mock_news(limit)
@@ -66,13 +66,13 @@ class OdailyScraper:
         return []
 
     def _get_mock_news(self, limit: int) -> list[NewsItem]:
-        """Generate mock news for testing.
+        """生成用于测试的模拟新闻。
 
         Args:
-            limit: Number of mock news items
+            limit: 模拟新闻条数
 
         Returns:
-            List of mock NewsItem
+            模拟 NewsItem 列表
         """
         mock_titles = [
             "以太坊网络升级成功，Gas费用降低30%",
@@ -118,13 +118,13 @@ class OdailyScraper:
         return news_items
 
     async def fetch_news_by_id(self, news_id: str) -> Optional[NewsItem]:
-        """Fetch a specific news article by ID.
+        """根据 ID 获取特定的新闻文章。
 
         Args:
-            news_id: Article ID
+            news_id: 文章 ID
 
         Returns:
-            NewsItem or None
+            NewsItem 或 None
         """
         if self.use_mock:
             # 返回第一条模拟新闻
@@ -134,13 +134,13 @@ class OdailyScraper:
 
 
 async def scrape_odaily_news(limit: int = 50) -> list[NewsItem]:
-    """Convenience function to scrape Odaily news.
+    """爬取 Odaily 新闻的便捷函数。
 
     Args:
-        limit: Maximum number of news items to fetch
+        limit: 最大获取新闻数量
 
     Returns:
-        List of NewsItem
+        NewsItem 列表
     """
     async with OdailyScraper(use_mock=True) as scraper:
         return await scraper.fetch_flash_news(limit)

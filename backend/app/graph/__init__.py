@@ -1,8 +1,7 @@
-"""Graph module for business analysis workflows.
+"""业务分析工作流的图模块。
 
-This module provides LangGraph-based analysis pipelines for different
-business scenarios. Each graph is a self-contained workflow that processes
-inputs through multiple nodes and produces structured outputs.
+该模块提供基于 LangGraph 的分析流水线，用于不同的业务场景。
+每个图是一个独立的工作流，通过多个节点处理输入并生成结构化输出。
 """
 
 from tasks.task2_analyze_flow import build_news_analysis_graph
@@ -14,16 +13,16 @@ GRAPHS = {
 
 
 def get_graph(name: str):
-    """Get a graph by name.
+    """根据名称获取图。
 
     Args:
-        name: Graph name (e.g., "news_analysis")
+        name: 图名称（例如 "news_analysis"）
 
     Returns:
-        Compiled LangGraph instance
+        已编译的 LangGraph 实例
 
     Raises:
-        ValueError: If graph name is not found
+        ValueError: 如果图名称未找到
     """
     if name not in GRAPHS:
         available = list(GRAPHS.keys())

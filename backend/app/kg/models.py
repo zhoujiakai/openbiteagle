@@ -1,4 +1,4 @@
-"""Data models for Knowledge Graph nodes and relationships."""
+"""知识图谱节点和关系的数据模型。"""
 
 from dataclasses import dataclass
 from enum import Enum
@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 
 class NodeTypes(str, Enum):
-    """Node type labels in Neo4j."""
+    """Neo4j 中的节点类型标签。"""
 
     PROJECT = "Project"
     TOKEN = "Token"
@@ -16,7 +16,7 @@ class NodeTypes(str, Enum):
 
 
 class RelationTypes(str, Enum):
-    """Relationship types in Neo4j."""
+    """Neo4j 中的关系类型。"""
 
     ISSUED = "ISSUED"  # 代币 -[发行]-> 项目
     INVESTED = "INVESTED"  # 机构 -[投资]-> 项目
@@ -28,7 +28,7 @@ class RelationTypes(str, Enum):
 
 
 class PersonRole(str, Enum):
-    """Person role types."""
+    """人物角色类型。"""
 
     FOUNDER = "Founder"
     CEO = "CEO"
@@ -41,7 +41,7 @@ class PersonRole(str, Enum):
 
 @dataclass
 class ProjectNode:
-    """Project node data."""
+    """项目节点数据。"""
 
     name: str
     description: Optional[str] = None
@@ -53,13 +53,13 @@ class ProjectNode:
     logo_url: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for Neo4j."""
+        """转换为 Neo4j 使用的字典。"""
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
 class TokenNode:
-    """Token node data."""
+    """代币节点数据。"""
 
     symbol: str
     name: str
@@ -69,13 +69,13 @@ class TokenNode:
     cmc_id: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for Neo4j."""
+        """转换为 Neo4j 使用的字典。"""
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
 class PersonNode:
-    """Person node data."""
+    """人物节点数据。"""
 
     name: str
     role: Optional[PersonRole] = None
@@ -84,7 +84,7 @@ class PersonNode:
     rootdata_id: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for Neo4j."""
+        """转换为 Neo4j 使用的字典。"""
         data = {k: v for k, v in self.__dict__.items() if v is not None}
         if isinstance(data.get("role"), PersonRole):
             data["role"] = data["role"].value
@@ -93,7 +93,7 @@ class PersonNode:
 
 @dataclass
 class InstitutionNode:
-    """Institution node data."""
+    """机构节点数据。"""
 
     name: str
     website: Optional[str] = None
@@ -101,26 +101,26 @@ class InstitutionNode:
     rootdata_id: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for Neo4j."""
+        """转换为 Neo4j 使用的字典。"""
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
 class ChainNode:
-    """Chain node data."""
+    """公链节点数据。"""
 
     name: str
     description: Optional[str] = None
     website: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for Neo4j."""
+        """转换为 Neo4j 使用的字典。"""
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
 @dataclass
 class Relationship:
-    """Generic relationship data."""
+    """通用关系数据。"""
 
     from_node_label: NodeTypes
     from_node_name: str

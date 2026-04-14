@@ -1,6 +1,6 @@
-"""Analysis service layer.
+"""分析服务层。
 
-This module handles business logic for news analysis operations.
+该模块处理新闻分析操作的业务逻辑。
 """
 
 import logging
@@ -26,13 +26,13 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisService:
-    """Service for managing news analysis operations."""
+    """管理新闻分析操作的服务。"""
 
     def __init__(self, db: AsyncSession):
-        """Initialize service with database session.
+        """使用数据库会话初始化服务。
 
         Args:
-            db: Async database session
+            db: 异步数据库会话
         """
         self.db = db
 
@@ -108,16 +108,16 @@ class AnalysisService:
         self,
         request: BatchAnalysisCreate,
     ) -> BatchAnalysisResponse:
-        """Create multiple analysis requests.
+        """创建多个分析请求。
 
         Args:
-            request: Batch analysis request with list of news_ids
+            request: 包含 news_ids 列表的批量分析请求
 
         Returns:
-            BatchAnalysisResponse with list of analysis_ids
+            包含 analysis_ids 列表的 BatchAnalysisResponse
 
         Raises:
-            ValueError: If any news_id not found
+            ValueError: 如果任何 news_id 未找到
         """
         # 验证所有新闻是否存在
         result = await self.db.execute(
@@ -153,16 +153,16 @@ class AnalysisService:
         )
 
     async def get_analysis(self, analysis_id: int) -> AnalysisDetail:
-        """Get analysis details by ID.
+        """根据 ID 获取分析详情。
 
         Args:
-            analysis_id: Analysis ID
+            analysis_id: 分析 ID
 
         Returns:
-            AnalysisDetail with all information including steps
+            包含所有信息（包括步骤）的 AnalysisDetail
 
         Raises:
-            ValueError: If analysis not found
+            ValueError: 如果分析未找到
         """
         result = await self.db.execute(
             select(Analysis).where(Analysis.id == analysis_id)
@@ -196,10 +196,10 @@ class AnalysisService:
         )
 
     async def get_overview(self) -> AnalysisOverview:
-        """Get analysis statistics overview.
+        """获取分析统计概览。
 
         Returns:
-            AnalysisOverview with aggregate statistics
+            包含汇总统计的 AnalysisOverview
         """
         # 总数统计
         total_result = await self.db.execute(
@@ -254,11 +254,11 @@ async def create_analysis(
     db: AsyncSession,
     request: AnalysisCreate,
 ) -> AnalysisCreateResponse:
-    """Convenience function to create an analysis.
+    """创建分析的便捷函数。
 
     Args:
-        db: Database session
-        request: Analysis creation request
+        db: 数据库会话
+        request: 分析创建请求
 
     Returns:
         AnalysisCreateResponse
@@ -270,10 +270,10 @@ async def create_analysis(
 async def get_analysis_overview(
     db: AsyncSession,
 ) -> AnalysisOverview:
-    """Convenience function to get analysis overview.
+    """获取分析概览的便捷函数。
 
     Args:
-        db: Database session
+        db: 数据库会话
 
     Returns:
         AnalysisOverview
