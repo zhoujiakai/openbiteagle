@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process documents and create embeddings."""
+"""处理文档并创建向量嵌入。"""
 
 import asyncio
 import sys
@@ -12,20 +12,20 @@ from app.rag.embeddings import get_embedding_service
 
 
 async def main():
-    """Process all documents and create embeddings."""
+    """处理所有文档并创建向量嵌入。"""
     print("=" * 60)
-    print("Processing Documents for Embeddings")
+    print("正在处理文档以生成嵌入")
     print("=" * 60)
     print()
 
-    # Get all documents
+    # 获取所有文档
     docs = await get_all_documents(limit=100)
 
     if not docs:
-        print("❌ No documents found. Run 'python scripts/add_sample_docs.py' first")
+        print("❌ 未找到文档，请先运行 'python scripts/add_sample_docs.py'")
         return
 
-    print(f"Found {len(docs)} documents to process")
+    print(f"找到 {len(docs)} 篇待处理文档")
     print()
 
     embedding_service = get_embedding_service()
@@ -33,7 +33,7 @@ async def main():
     total_chunks = 0
 
     for doc in docs:
-        print(f"Processing: {doc.title}")
+        print(f"正在处理: {doc.title}")
 
         try:
             result = await embedding_service.process_document(
@@ -43,18 +43,18 @@ async def main():
             )
 
             total_chunks += result["chunks_created"]
-            print(f"   ✅ Created {result['chunks_created']} chunks")
-            print(f"   📐 Embedding dim: {result['embedding_dim']}")
+            print(f"   ✅ 创建了 {result['chunks_created']} 个分块")
+            print(f"   📐 嵌入维度: {result['embedding_dim']}")
             print()
 
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            print(f"   ❌ 错误: {e}")
             print()
 
     print("=" * 60)
-    print(f"✅ Processed {len(docs)} documents, created {total_chunks} chunks")
+    print(f"✅ 已处理 {len(docs)} 篇文档，创建了 {total_chunks} 个分块")
     print()
-    print("Next: Run 'python scripts/test_rag.py' to test retrieval")
+    print("下一步: 运行 'python scripts/test_rag.py' 测试检索")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compare analysis results with and without RAG."""
+"""对比有 RAG 和无 RAG 的分析结果。"""
 
 import asyncio
 import sys
@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from tasks.task2_analyze_flow.graph import build_news_analysis_graph
 
 
-# Test news - about a less known project that would benefit from RAG
+# 测试新闻 - 关于一个不太知名的项目，适合用 RAG 增强
 TEST_NEWS = {
     "id": 1,
     "title": "Stabilizer Protocol 推出零滑点 DEX，解决 MEV 问题",
@@ -19,7 +19,7 @@ TEST_NEWS = {
 
 
 async def run_with_rag(news: dict):
-    """Run analysis WITH RAG enabled."""
+    """启用 RAG 运行分析。"""
     print("\n" + "="*70)
     print("🟢 WITH RAG (知识库增强)")
     print("="*70)
@@ -33,7 +33,7 @@ async def run_with_rag(news: dict):
 
     result = await graph.ainvoke(state)
 
-    # Extract key info
+    # 提取关键信息
     tokens = result.get('tokens', [])
     symbols = [t.get('symbol') if isinstance(t, dict) else t.symbol for t in tokens]
     rag_sources = result.get('rag_sources', [])
@@ -59,17 +59,17 @@ async def run_with_rag(news: dict):
 
 
 async def run_without_rag(news: dict):
-    """Run analysis WITHOUT RAG (bypass RAG node)."""
+    """不启用 RAG 运行分析（跳过 RAG 节点）。"""
     print("\n" + "="*70)
     print("🔴 WITHOUT RAG (仅 LLM)")
     print("="*70)
 
-    # Temporarily disable RAG by mocking the node
+    # 通过模拟节点临时禁用 RAG
     from tasks.task2_analyze_flow import nodes
     original_rag_node = nodes.rag_knowledge_node
 
     async def mock_rag_node(state):
-        """Mock RAG node that returns no context."""
+        """模拟 RAG 节点，不返回任何上下文。"""
         return {
             "rag_context": None,
             "rag_sources": [],
@@ -108,12 +108,12 @@ async def run_without_rag(news: dict):
 
 
 def compare_results(with_rag, without_rag):
-    """Compare and highlight differences."""
+    """对比并突出差异。"""
     print("\n" + "="*70)
     print("📊 对比结果")
     print("="*70)
 
-    # Investment comparison
+    # 投资判断对比
     inv_with = with_rag.get('investment_value')
     inv_without = without_rag.get('investment_value')
     if inv_with != inv_without:
@@ -123,21 +123,21 @@ def compare_results(with_rag, without_rag):
     else:
         print(f"\n✅ 投资判断一致: {inv_with}")
 
-    # Confidence comparison
+    # 置信度对比
     conf_with = with_rag.get('investment_confidence', 0)
     conf_without = without_rag.get('investment_confidence', 0)
     diff = conf_with - conf_without
     if abs(diff) > 0.05:
         print(f"\n📈 置信度变化: {conf_without:.2f} → {conf_with:.2f} ({diff:+.2f})")
 
-    # Trend analysis length (RAG should provide more context)
+    # 趋势分析长度（RAG 应提供更多上下文）
     trend_with = len(with_rag.get('trend_analysis', ''))
     trend_without = len(without_rag.get('trend_analysis', ''))
     print(f"\n📝 趋势分析长度:")
     print(f"  无 RAG: {trend_without} 字符")
     print(f"  有 RAG: {trend_with} 字符")
 
-    # Recommendation comparison
+    # 推荐对比
     rec_with = with_rag.get('recommendation')
     rec_without = without_rag.get('recommendation')
     if rec_with != rec_without:
@@ -147,20 +147,20 @@ def compare_results(with_rag, without_rag):
 
 
 async def main():
-    """Run comparison test."""
+    """运行对比测试。"""
     print("="*70)
     print("RAG 效果对比测试")
     print("="*70)
     print(f"\n测试新闻: {TEST_NEWS['title']}")
     print(f"内容: {TEST_NEWS['content'][:100]}...")
 
-    # Run WITHOUT RAG first
+    # 先运行无 RAG 分析
     result_without = await run_without_rag(TEST_NEWS)
 
-    # Run WITH RAG
+    # 再运行有 RAG 分析
     result_with = await run_with_rag(TEST_NEWS)
 
-    # Compare
+    # 对比结果
     compare_results(result_with, result_without)
 
     print("\n" + "="*70)

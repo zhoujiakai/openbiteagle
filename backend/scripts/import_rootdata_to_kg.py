@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Import Rootdata projects into Neo4j Knowledge Graph.
+"""将 Rootdata 项目导入 Neo4j 知识图谱。
 
-Usage:
+用法:
     python scripts/import_rootdata_to_kg.py --limit 50
 
-This script fetches projects from Rootdata and imports them into
-the Neo4j knowledge graph with proper nodes and relationships.
+该脚本从 Rootdata 获取项目，并将其导入 Neo4j 知识图谱，
+创建相应的节点和关系。
 """
 
 import asyncio
@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def main():
-    """Main import function."""
+    """主导入函数。"""
     import argparse
 
     from app.kg.client import Neo4jClient
@@ -26,92 +26,92 @@ async def main():
     from app.wrappers.rootdata import scrape_rootdata_projects
 
     parser = argparse.ArgumentParser(
-        description="Import Rootdata projects to Neo4j Knowledge Graph"
+        description="将 Rootdata 项目导入 Neo4j 知识图谱"
     )
     parser.add_argument(
         "--limit",
         type=int,
         default=20,
-        help="Maximum number of projects to import (default: 20)",
+        help="最大导入项目数（默认: 20）",
     )
     parser.add_argument(
         "--headless",
         type=bool,
         default=True,
-        help="Run browser in headless mode (default: True)",
+        help="以无头模式运行浏览器（默认: True）",
     )
     parser.add_argument(
         "--skip-existing",
         action="store_true",
         default=True,
-        help="Skip projects that already exist in KG",
+        help="跳过知识图谱中已存在的项目",
     )
     parser.add_argument(
         "--no-skip-existing",
         action="store_false",
         dest="skip_existing",
-        help="Don't skip existing projects (update them)",
+        help="不跳过已存在的项目（更新它们）",
     )
     parser.add_argument(
         "--stats-only",
         action="store_true",
-        help="Only show graph statistics, don't import",
+        help="仅显示图谱统计信息，不导入",
     )
 
     args = parser.parse_args()
 
     print("=" * 60)
-    print("Rootdata → Neo4j Knowledge Graph Import")
+    print("Rootdata → Neo4j 知识图谱导入")
     print("=" * 60)
-    print(f"Limit: {args.limit}")
-    print(f"Skip existing: {args.skip_existing}")
+    print(f"数量限制: {args.limit}")
+    print(f"跳过已有: {args.skip_existing}")
     print()
 
-    # Connect to Neo4j
-    print("Connecting to Neo4j...")
+    # 连接到 Neo4j
+    print("正在连接到 Neo4j...")
     client = Neo4jClient()
     await client.connect()
-    print("   ✅ Connected to Neo4j")
+    print("   ✅ 已连接到 Neo4j")
 
     try:
         loader = GraphLoader(client)
         query_service = GraphQuery(client)
 
-        # Initialize constraints
-        print("\nInitializing graph constraints...")
+        # 初始化约束
+        print("\n正在初始化图谱约束...")
         await loader.create_constraints()
-        print("   ✅ Constraints ready")
+        print("   ✅ 约束就绪")
 
-        # Show current stats
-        print("\n📊 Current Graph Statistics:")
+        # 显示当前统计
+        print("\n📊 当前图谱统计:")
         stats_before = await query_service.get_graph_stats()
         for key, value in stats_before.items():
             print(f"   - {key}: {value}")
 
         if args.stats_only:
-            print("\n--stats-only mode, exiting--")
+            print("\n--stats-only 模式，退出--")
             return
 
-        # Fetch projects from Rootdata
-        print(f"\nFetching {args.limit} projects from Rootdata...")
-        print("(This may take a minute with Playwright...)")
+        # 从 Rootdata 获取项目
+        print(f"\n正在从 Rootdata 获取 {args.limit} 个项目...")
+        print("(使用 Playwright，可能需要一些时间...)")
         projects = await scrape_rootdata_projects(limit=args.limit)
-        print(f"   ✅ Fetched {len(projects)} projects")
+        print(f"   ✅ 已获取 {len(projects)} 个项目")
 
         if not projects:
-            print("No projects fetched, exiting.")
+            print("未获取到项目，退出。")
             return
 
-        # Show sample project info
-        print("\n📦 Sample Project:")
+        # 显示示例项目信息
+        print("\n📦 示例项目:")
         sample = projects[0]
-        print(f"   Name: {sample.name}")
-        print(f"   Token: {sample.token.symbol if sample.token else 'None'}")
-        print(f"   Chains: {', '.join(sample.chains) if sample.chains else 'None'}")
-        print(f"   Investors: {len(sample.investors)}")
+        print(f"   名称: {sample.name}")
+        print(f"   代币: {sample.token.symbol if sample.token else 'None'}")
+        print(f"   链: {', '.join(sample.chains) if sample.chains else 'None'}")
+        print(f"   投资方: {len(sample.investors)}")
 
-        # Import to KG
-        print(f"\nImporting {len(projects)} projects to Neo4j KG...")
+        # 导入到知识图谱
+        print(f"\n正在将 {len(projects)} 个项目导入 Neo4j 知识图谱...")
         print("-" * 60)
 
         importer = RootdataKGImporter(loader)
@@ -122,24 +122,24 @@ async def main():
 
         print("-" * 60)
         print("\n" + "=" * 60)
-        print("Import Results")
+        print("导入结果")
         print("=" * 60)
-        print(f"Total projects:   {result['total']}")
-        print(f"✅ Success:       {result['success']}")
-        print(f"❌ Failed:        {result['failed']}")
-        print(f"⏭️  Skipped:       {result['skipped']}")
-        print(f"\nNodes created:     {result['nodes_created']}")
-        print(f"Relationships:      {result['relationships_created']}")
+        print(f"总项目数:   {result['total']}")
+        print(f"✅ 成功:       {result['success']}")
+        print(f"❌ 失败:        {result['failed']}")
+        print(f"⏭️  跳过:       {result['skipped']}")
+        print(f"\n创建的节点:     {result['nodes_created']}")
+        print(f"创建的关系:      {result['relationships_created']}")
 
         if result["errors"]:
-            print(f"\nErrors ({len(result['errors'])}):")
+            print(f"\n错误 ({len(result['errors'])}):")
             for error in result["errors"][:5]:
                 print(f"   - {error['project']}: {error['error']}")
             if len(result["errors"]) > 5:
-                print(f"   ... and {len(result['errors']) - 5} more")
+                print(f"   ... 还有 {len(result['errors']) - 5} 个")
 
-        # Show updated stats
-        print("\n📊 Updated Graph Statistics:")
+        # 显示更新后的统计
+        print("\n📊 更新后的图谱统计:")
         stats_after = await query_service.get_graph_stats()
         for key, value in stats_after.items():
             before = stats_before.get(key, 0)
@@ -147,33 +147,33 @@ async def main():
             delta_str = f" (+{delta})" if delta > 0 else ""
             print(f"   - {key}: {value}{delta_str}")
 
-        print("\n✅ Import completed!")
+        print("\n✅ 导入完成!")
 
-        # Test a query
+        # 测试查询
         if result["success"] > 0:
-            print("\n🔍 Testing query on imported project...")
+            print("\n🔍 正在测试已导入项目的查询...")
             first_project = projects[0]
             context = await query_service.get_project_context(first_project.name)
             if context.get("project"):
-                print(f"   Project: {context['project'].get('name')}")
-                print(f"   Tokens: {len(context.get('tokens', []))}")
+                print(f"   项目: {context['project'].get('name')}")
+                print(f"   代币: {len(context.get('tokens', []))}")
                 chain = context.get('chain')
-                print(f"   Chains: {chain.get('name', 'N/A') if chain else 'N/A'}")
-                print(f"   Investors: {len(context.get('investors', []))}")
+                print(f"   链: {chain.get('name', 'N/A') if chain else 'N/A'}")
+                print(f"   投资方: {len(context.get('investors', []))}")
 
     finally:
         await client.close()
-        print("\n✅ Connection closed")
+        print("\n✅ 连接已关闭")
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n\n⚠️  Import cancelled by user")
+        print("\n\n⚠️  用户取消了导入")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n❌ 错误: {e}")
         import traceback
 
         traceback.print_exc()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Migrate document_chunks table from 1536 to 1024 dimensions."""
+"""将 document_chunks 表从 1536 维迁移到 1024 维。"""
 
 import asyncio
 import sys
@@ -13,13 +13,13 @@ from sqlalchemy import text
 
 
 async def main():
-    """Drop and recreate document_chunks table with new dimensions."""
+    """删除并重建 document_chunks 表，使用新维度。"""
 
     schema = cfg.database.DATABASE_SCHEMA
     table_fqn = f"{schema}.document_chunks"
 
     async with AsyncSessionLocal() as db:
-        print("Current schema check...")
+        print("正在检查当前模式...")
         result = await db.execute(text("""
             SELECT column_name, data_type
             FROM information_schema.columns
@@ -31,17 +31,17 @@ async def main():
             print(f"  {row.column_name}: {row.data_type}")
 
         print()
-        response = input("Drop and recreate document_chunks table? (yes/no): ")
+        response = input("是否删除并重建 document_chunks 表？(yes/no): ")
 
         if response.lower() != "yes":
-            print("Aborted.")
+            print("已取消。")
             return
 
-        print("Dropping document_chunks table...")
+        print("正在删除 document_chunks 表...")
         await db.execute(text(f"DROP TABLE IF EXISTS {table_fqn} CASCADE"))
         await db.commit()
 
-        print("Recreating table with new schema...")
+        print("正在使用新模式重建表...")
         await db.execute(text(f"""
             CREATE TABLE {table_fqn} (
                 id SERIAL PRIMARY KEY,
@@ -56,13 +56,13 @@ async def main():
         """))
         await db.commit()
 
-        print("Creating index...")
+        print("正在创建索引...")
         await db.execute(text(
             f"CREATE INDEX ON {table_fqn} USING ivfflat (embedding vector_cosine_ops)"
         ))
         await db.commit()
 
-        print("Migration complete!")
+        print("迁移完成!")
 
 
 if __name__ == "__main__":

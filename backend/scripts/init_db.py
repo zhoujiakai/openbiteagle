@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Initialize database tables."""
+"""初始化数据库表。"""
 
 import asyncio
 import sys
@@ -12,7 +12,7 @@ from app.models import analysis, document, news, token  # noqa: F401 import mode
 
 
 async def main():
-    """Create all tables."""
+    """创建所有表。"""
     await ensure_schema()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

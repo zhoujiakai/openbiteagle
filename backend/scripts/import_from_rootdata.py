@@ -13,39 +13,39 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def main():
-    """Import Rootdata projects."""
+    """导入 Rootdata 项目。"""
     import argparse
 
     from app.services.knowledge_loader import get_knowledge_loader
 
-    parser = argparse.ArgumentParser(description="Import Rootdata projects")
+    parser = argparse.ArgumentParser(description="导入 Rootdata 项目")
     parser.add_argument(
         "--limit",
         type=int,
         default=20,
-        help="Maximum number of projects to import (default: 20)",
+        help="最大导入项目数（默认: 20）",
     )
     parser.add_argument(
         "--no-embed",
         action="store_true",
-        help="Skip generating embeddings",
+        help="跳过生成向量嵌入",
     )
     parser.add_argument(
         "--kg",
         "--import-to-kg",
         action="store_true",
         dest="import_to_kg",
-        help="Also import to Neo4j Knowledge Graph",
+        help="同时导入到 Neo4j 知识图谱",
     )
 
     args = parser.parse_args()
 
     print("=" * 60)
-    print("Rootdata Knowledge Base Import")
+    print("Rootdata 知识库导入")
     print("=" * 60)
-    print(f"Limit: {args.limit}")
-    print(f"Embed: {not args.no_embed}")
-    print(f"Import to KG: {args.import_to_kg}")
+    print(f"数量限制: {args.limit}")
+    print(f"嵌入: {not args.no_embed}")
+    print(f"导入到知识图谱: {args.import_to_kg}")
     print()
 
     loader = get_knowledge_loader()
@@ -58,32 +58,32 @@ async def main():
 
     print()
     print("=" * 60)
-    print("Import Results")
+    print("导入结果")
     print("=" * 60)
-    print(f"Fetched:    {stats['fetched']}")
-    print(f"Imported:   {stats['imported']}")
-    print(f"Embedded:   {stats['embedded']}")
-    print(f"Failed:     {stats['failed']}")
+    print(f"已获取:    {stats['fetched']}")
+    print(f"已导入:   {stats['imported']}")
+    print(f"已嵌入:   {stats['embedded']}")
+    print(f"失败:     {stats['failed']}")
 
     if stats.get("kg_stats"):
         kg = stats["kg_stats"]
         print()
-        print("Knowledge Graph:")
-        print(f"  Success:   {kg['success']}")
-        print(f"  Failed:    {kg['failed']}")
-        print(f"  Nodes:     {kg['nodes_created']}")
-        print(f"  Relations: {kg['relationships_created']}")
+        print("知识图谱:")
+        print(f"  成功:   {kg['success']}")
+        print(f"  失败:    {kg['failed']}")
+        print(f"  节点:     {kg['nodes_created']}")
+        print(f"  关系: {kg['relationships_created']}")
 
     if stats["errors"]:
         print()
-        print("Errors:")
-        for error in stats["errors"][:5]:  # Show first 5 errors
+        print("错误:")
+        for error in stats["errors"][:5]:  # 显示前 5 个错误
             print(f"  - {error}")
         if len(stats["errors"]) > 5:
-            print(f"  ... and {len(stats['errors']) - 5} more")
+            print(f"  ... 还有 {len(stats['errors']) - 5} 个")
 
     print()
-    print("✅ Import completed")
+    print("✅ 导入完成")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-"""Visualize the news analysis graph structure."""
+"""可视化新闻分析图谱结构。"""
 
 import sys
 from pathlib import Path
 
-# Add project root to path
+# 将项目根目录添加到路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 

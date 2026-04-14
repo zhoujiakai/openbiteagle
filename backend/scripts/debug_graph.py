@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""Debug script for news analysis graph.
+"""新闻分析图谱调试脚本。
 
-Visualizes graph structure and provides manual testing capabilities.
+可视化图谱结构并提供手动测试功能。
 """
 
 import asyncio
 import os
 from pathlib import Path
 
-# Add project root to path
+# 将项目根目录添加到路径
 project_root = Path(__file__).parent.parent
 import sys
 
@@ -16,55 +16,55 @@ sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
 
-# Load environment
+# 加载环境变量
 load_dotenv(project_root / ".env")
 
 
 def visualize_graph():
-    """Print ASCII visualization of the graph."""
+    """打印图谱的 ASCII 可视化。"""
     from tasks.task2_analyze_flow.graph import build_news_analysis_graph
 
     print("=" * 60)
-    print("News Analysis Graph Structure")
+    print("新闻分析图谱结构")
     print("=" * 60)
 
     graph = build_news_analysis_graph()
     graph.get_graph().print_ascii()
 
     print("\n" + "=" * 60)
-    print("Graph Nodes:")
+    print("图谱节点:")
     print("=" * 60)
 
     graph_dict = graph.get_graph()
-    # nodes may be strings or objects with id attribute
+    # 节点可能是字符串或带有 id 属性的对象
     for node in graph_dict.nodes:
         node_id = node if isinstance(node, str) else getattr(node, "id", str(node))
         print(f"  - {node_id}")
 
     print("\n" + "=" * 60)
-    print("Entry Point:", graph_dict.entry_point)
+    print("入口点:", graph_dict.entry_point)
     print("=" * 60)
 
 
 async def test_manual_analysis():
-    """Manually test the analysis pipeline.
+    """手动测试分析流程。
 
-    Requires OPENAI_API_KEY to be set in .env
+    需要在 .env 中设置 OPENAI_API_KEY
     """
     from tasks.task2_analyze_flow import build_news_analysis_graph
 
-    # Check API key
+    # 检查 API 密钥
     if not os.getenv("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY not set in .env")
+        print("错误: 未在 .env 中设置 OPENAI_API_KEY")
         return
 
     print("\n" + "=" * 60)
-    print("Manual Test: Running Analysis")
+    print("手动测试: 正在运行分析")
     print("=" * 60)
 
     graph = build_news_analysis_graph()
 
-    # Sample news item
+    # 测试新闻条目
     test_input = {
         "news_id": 999,
         "title": "Ethereum ETF Approved by SEC",
@@ -73,36 +73,36 @@ async def test_manual_analysis():
         "Major firms including BlackRock and Fidelity will launch trading next week.",
     }
 
-    print(f"\nAnalyzing: {test_input['title']}")
-    print(f"Content: {test_input['content'][:100]}...")
+    print(f"\n正在分析: {test_input['title']}")
+    print(f"内容: {test_input['content'][:100]}...")
 
     try:
         result = await graph.ainvoke(test_input)
 
         print("\n" + "-" * 60)
-        print("Analysis Results:")
+        print("分析结果:")
         print("-" * 60)
-        print(f"  Investment Value: {result.get('investment_value')}")
-        print(f"  Confidence: {result.get('investment_confidence')}")
-        print(f"  Tokens: {[t['symbol'] for t in (result.get('tokens') or [])]}")
-        print(f"  Recommendation: {result.get('recommendation')}")
-        print(f"  Risk Level: {result.get('risk_level')}")
-        print(f"  Reasoning: {result.get('recommendation_reasoning')}")
+        print(f"  投资价值: {result.get('investment_value')}")
+        print(f"  置信度: {result.get('investment_confidence')}")
+        print(f"  代币: {[t['symbol'] for t in (result.get('tokens') or [])]}")
+        print(f"  建议: {result.get('recommendation')}")
+        print(f"  风险等级: {result.get('risk_level')}")
+        print(f"  理由: {result.get('recommendation_reasoning')}")
 
     except Exception as e:
-        print(f"\nError during analysis: {e}")
+        print(f"\n分析过程中出错: {e}")
         import traceback
 
         traceback.print_exc()
 
 
 def main():
-    """Main entry point."""
+    """主入口。"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Debug news analysis graph")
+    parser = argparse.ArgumentParser(description="调试新闻分析图谱")
     parser.add_argument(
-        "action", choices=["visualize", "test"], help="Action to perform"
+        "action", choices=["visualize", "test"], help="要执行的操作"
     )
     args = parser.parse_args()
 

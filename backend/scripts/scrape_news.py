@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Scrape news from Odaily and save to database.
+"""从 Odaily 抓取新闻并保存到数据库。
 
-Usage:
+用法:
     python scripts/scrape_news.py [--limit N]
 """
 
@@ -10,7 +10,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-# Add project root to path
+# 将项目根目录添加到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import select
@@ -28,34 +28,34 @@ from app.services import (
 
 
 async def save_news_item(db: AsyncSession, item: NewsItem) -> tuple[News | None, str]:
-    """Save a news item to database.
+    """将新闻条目保存到数据库。
 
     Args:
-        db: Database session
-        item: News item to save
+        db: 数据库会话
+        item: 要保存的新闻条目
 
     Returns:
-        Tuple of (News object or None, status: 'created'/'duplicate'/'invalid')
+        元组 (News 对象或 None, 状态: 'created'/'duplicate'/'invalid')
     """
-    # Check for duplicate
+    # 检查重复
     if item.source_id:
         result = await db.execute(
             select(News).where(News.source_id == item.source_id)
         )
         existing = result.scalar_one_or_none()
         if existing:
-            print(f"  ✓ Duplicate (skipped): {item.title[:50]}...")
+            print(f"  ✓ 重复（已跳过）: {item.title[:50]}...")
             return existing, "duplicate"
 
-    # Validate news
+    # 验证新闻
     if not is_valid_news(item.title, item.content):
-        print(f"  ✗ Invalid (skipped): {item.title[:50]}...")
+        print(f"  ✗ 无效（已跳过）: {item.title[:50]}...")
         return None, "invalid"
 
-    # Clean title
+    # 清理标题
     cleaned_title = clean_title(item.title)
 
-    # Create news object
+    # 创建新闻对象
     news = News(
         title=cleaned_title,
         content=item.content,
@@ -68,35 +68,35 @@ async def save_news_item(db: AsyncSession, item: NewsItem) -> tuple[News | None,
     await db.commit()
     await db.refresh(news)
 
-    print(f"  + Created: {cleaned_title[:50]}...")
+    print(f"  + 已创建: {cleaned_title[:50]}...")
     return news, "created"
 
 
 async def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(description="Scrape Odaily news")
-    parser.add_argument("--limit", type=int, default=50, help="Max number of news to fetch")
-    parser.add_argument("--dry-run", action="store_true", help="Fetch but don't save to database")
+    """主入口。"""
+    parser = argparse.ArgumentParser(description="抓取 Odaily 新闻")
+    parser.add_argument("--limit", type=int, default=50, help="最大抓取新闻数")
+    parser.add_argument("--dry-run", action="store_true", help="仅获取不保存到数据库")
     args = parser.parse_args()
 
-    print(f"Fetching up to {args.limit} news items from Odaily...")
+    print(f"正在从 Odaily 获取最多 {args.limit} 条新闻...")
 
-    # Scrape news
+    # 抓取新闻
     items = await scrape_odaily_news(limit=args.limit)
 
     if not items:
-        print("No news items found.")
+        print("未找到新闻条目。")
         return
 
-    print(f"Fetched {len(items)} news items.")
+    print(f"已获取 {len(items)} 条新闻。")
 
     if args.dry_run:
         for item in items:
             print(f"  - {item.title}")
         return
 
-    # Save to database
-    print("\nSaving to database...")
+    # 保存到数据库
+    print("\n正在保存到数据库...")
     created_count = 0
     duplicate_count = 0
     invalid_count = 0
@@ -111,7 +111,7 @@ async def main():
             elif status == "invalid":
                 invalid_count += 1
 
-    print(f"\nDone! Created: {created_count}, Duplicates: {duplicate_count}, Invalid: {invalid_count}")
+    print(f"\n完成! 已创建: {created_count}, 重复: {duplicate_count}, 无效: {invalid_count}")
 
 
 if __name__ == "__main__":
