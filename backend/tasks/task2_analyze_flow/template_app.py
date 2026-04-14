@@ -54,7 +54,7 @@ async def run_graph():
 
     graph = build_news_analysis_graph()
     result = await graph.ainvoke({
-        "news_id": 1,
+        "news_id": 2,
         "title": "Bitcoin ETF approved by SEC",
         "content": "The SEC has officially approved the Bitcoin ETF application.",
     })

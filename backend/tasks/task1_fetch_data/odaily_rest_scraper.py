@@ -13,7 +13,7 @@ import httpx
 
 from app.data.logger import create_logger
 
-logger = create_logger("Odaily REST API 爬虫")
+logger = create_logger("Odaily REST API")
 
 BASE_URL = "https://api.odaily.news"
 
