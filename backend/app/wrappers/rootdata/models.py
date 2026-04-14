@@ -1,4 +1,4 @@
-"""Data models for Rootdata scraper."""
+"""RootData 数据模型定义。"""
 
 from dataclasses import dataclass, field
 from typing import Optional
@@ -6,7 +6,7 @@ from typing import Optional
 
 @dataclass
 class TokenInfo:
-    """Token information from Rootdata."""
+    """代币信息。"""
 
     symbol: str
     name: str
@@ -20,7 +20,7 @@ class TokenInfo:
 
 @dataclass
 class Whitepaper:
-    """Whitepaper information."""
+    """白皮书信息。"""
 
     title: str
     url: Optional[str] = None
@@ -29,58 +29,58 @@ class Whitepaper:
 
 @dataclass
 class ProjectInfo:
-    """Project information from Rootdata.
+    """项目信息。
 
-    This contains structured data about a Web3 project that can be
-    imported into the knowledge base.
+    包含 Web3 项目的结构化数据，可导入知识库。
     """
 
-    # Basic info
+    # 基本信息
     rootdata_id: str
     name: str
     name_en: Optional[str] = None
     logo_url: Optional[str] = None
     website_url: Optional[str] = None
 
-    # Description
+    # 描述
     description: Optional[str] = None
     description_en: Optional[str] = None
-    introduction: Optional[str] = None  # Detailed introduction
+    introduction: Optional[str] = None  # 详细介绍
 
-    # Categories
+    # 分类
     categories: list[str] = field(default_factory=list)
     chains: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
 
-    # Token info
+    # 代币信息
     token: Optional[TokenInfo] = None
 
-    # Whitepaper
+    # 白皮书
     whitepaper: Optional[Whitepaper] = None
 
-    # Links
+    # 社交链接
     twitter: Optional[str] = None
     telegram: Optional[str] = None
     discord: Optional[str] = None
     github: Optional[str] = None
     docs_url: Optional[str] = None
 
-    # Metadata
+    # 元数据
     funding_rounds: Optional[int] = None
     investors: list[str] = field(default_factory=list)
 
-    # Source
-    source_url: Optional[str] = None  # Rootdata project page URL
+    # 来源
+    source_url: Optional[str] = None  # RootData 项目页面 URL
 
     def to_kb_document(self) -> dict:
-        """Convert to knowledge base document format.
+        """转换为知识库文档格式。
 
-        Returns a dict suitable for insert_document().
+        Returns:
+            适用于 insert_document() 的字典
         """
-        # Build content from available fields
+        # 从可用字段拼接内容
         content_parts = []
 
-        # Description
+        # 描述
         if self.introduction:
             content_parts.append(self.introduction)
         elif self.description:
@@ -88,31 +88,31 @@ class ProjectInfo:
         elif self.description_en:
             content_parts.append(self.description_en)
 
-        # Add token info
+        # 代币信息
         if self.token:
             token_info = f"Token: {self.token.symbol} ({self.token.name})"
             if self.token.contract_address:
                 token_info += f"\nContract: {self.token.contract_address}"
             content_parts.append(token_info)
 
-        # Add whitepaper info
+        # 白皮书信息
         if self.whitepaper and self.whitepaper.summary:
             content_parts.append(f"Whitepaper: {self.whitepaper.summary}")
 
-        # Add categories and tags
+        # 分类和标签
         if self.categories:
             content_parts.append(f"Categories: {', '.join(self.categories)}")
         if self.tags:
             content_parts.append(f"Tags: {', '.join(self.tags)}")
 
-        # Combine content
+        # 合并内容
         content = "\n\n".join(content_parts) if content_parts else self.name
 
-        # Extract tokens for metadata
+        # 提取代币符号用于元数据
         tokens = []
         if self.token:
             tokens.append(self.token.symbol)
-        # Extract token symbols from tags
+        # 从标签中提取代币符号
         for tag in self.tags:
             if tag and len(tag) <= 10 and tag.isupper():
                 tokens.append(tag)
@@ -127,18 +127,18 @@ class ProjectInfo:
                 "name_en": self.name_en,
                 "categories": self.categories,
                 "chains": self.chains,
-                "tokens": list(set(tokens)),  # Dedupe
+                "tokens": list(set(tokens)),  # 去重
                 "investors": self.investors,
             },
         }
 
     @property
     def tokens_list(self) -> list[str]:
-        """Get list of token symbols for this project."""
+        """获取项目关联的代币符号列表。"""
         tokens = []
         if self.token:
             tokens.append(self.token.symbol)
-        # Extract from tags
+        # 从标签中提取
         for tag in self.tags:
             if tag and len(tag) <= 10 and tag.isupper():
                 tokens.append(tag)

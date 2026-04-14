@@ -1,4 +1,4 @@
-"""Rootdata wrapper for Web3 project information."""
+"""RootData 封装模块，提供 Web3 项目信息获取能力。"""
 
 from app.wrappers.rootdata.models import ProjectInfo, TokenInfo, Whitepaper
 from app.wrappers.rootdata.rootdata_client import (

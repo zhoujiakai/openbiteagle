@@ -128,5 +128,12 @@ class Config:
         NEO4J_MAX_CONNECTION_POOL_SIZE: int = 50
         NEO4J_CONNECTION_ACQUISITION_TIMEOUT: int = 60
 
+    # ── RootData REST API ───────────────────────────────
+    class rootdata:
+        ROOTDATA_API_KEY: str = ""
+        ROOTDATA_BASE_URL: str = "https://api.rootdata.com/open"
+        ROOTDATA_LANGUAGE: str = "en"
+        ROOTDATA_TIMEOUT: float = 15.0
+
 
 cfg = Config()
