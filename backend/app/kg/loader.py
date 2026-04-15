@@ -7,6 +7,7 @@ from app.kg.client import Neo4jClient
 from app.kg.models import (
     ChainNode,
     InstitutionNode,
+    NodeTypes,
     PersonNode,
     ProjectNode,
     RelationTypes,
@@ -15,21 +16,9 @@ from app.kg.models import (
 
 logger = create_logger("知识图谱加载器")
 
-# 节点标签常量
-PROJECT = "Project"          # 区块链项目节点
-TOKEN = "Token"              # 代币/加密货币节点
-PERSON = "Person"            # 人物节点（创始人、团队成员、顾问等）
-INSTITUTION = "Institution"  # 机构节点（投资机构、基金会等）
-CHAIN = "Chain"              # 公链节点（Ethereum、Solana 等）
-
-# 关系类型常量
-ISSUED = "ISSUED"                        # 代币发行：Token -[ISSUED]-> Project
-INVESTED = "INVESTED"                    # 投资关系：Institution -[INVESTED]-> Project
-BELONGS_TO = "BELONGS_TO"                # 所属公链：Project -[BELONGS_TO]-> Chain
-COLLABORATES_WITH = "COLLABORATES_WITH"  # 项目合作：Project -[COLLABORATES_WITH]-> Project
-WORKS_AT = "WORKS_AT"                    # 在职关系：Person -[WORKS_AT]-> Project
-ADVISES = "ADVISES"                      # 顾问关系：Person -[ADVISES]-> Project
-FOUNDED = "FOUNDED"                      # 创始关系：Person -[FOUNDED]-> Project
+# 节点标签简写，方便 Cypher 查询拼接
+N = NodeTypes
+R = RelationTypes
 
 
 class GraphLoader:
@@ -47,20 +36,20 @@ class GraphLoader:
         """为节点标签创建唯一约束。"""
         constraints = [
             # 项目唯一性约束
-            f"CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:{PROJECT}) REQUIRE p.name IS UNIQUE",
+            f"CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:{N.PROJECT.value}) REQUIRE p.name IS UNIQUE",
 
             # 代币唯一性约束
-            f"CREATE CONSTRAINT token_symbol IF NOT EXISTS FOR (t:{TOKEN}) REQUIRE t.symbol IS UNIQUE",
-            f"CREATE CONSTRAINT token_address IF NOT EXISTS FOR (t:{TOKEN}) REQUIRE t.contract_address IS UNIQUE",
+            f"CREATE CONSTRAINT token_symbol IF NOT EXISTS FOR (t:{N.TOKEN.value}) REQUIRE t.symbol IS UNIQUE",
+            f"CREATE CONSTRAINT token_address IF NOT EXISTS FOR (t:{N.TOKEN.value}) REQUIRE t.contract_address IS UNIQUE",
 
             # 人物唯一性约束
-            f"CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:{PERSON}) REQUIRE p.name IS UNIQUE",
+            f"CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:{N.PERSON.value}) REQUIRE p.name IS UNIQUE",
 
             # 机构唯一性约束
-            f"CREATE CONSTRAINT institution_name IF NOT EXISTS FOR (i:{INSTITUTION}) REQUIRE i.name IS UNIQUE",
+            f"CREATE CONSTRAINT institution_name IF NOT EXISTS FOR (i:{N.INSTITUTION.value}) REQUIRE i.name IS UNIQUE",
 
             # 公链唯一性约束
-            f"CREATE CONSTRAINT chain_name IF NOT EXISTS FOR (c:{CHAIN}) REQUIRE c.name IS UNIQUE",
+            f"CREATE CONSTRAINT chain_name IF NOT EXISTS FOR (c:{N.CHAIN.value}) REQUIRE c.name IS UNIQUE",
         ]
 
         for constraint in constraints:
@@ -82,7 +71,7 @@ class GraphLoader:
             创建的节点数据
         """
         query = f"""
-        MERGE (p:{PROJECT} {{name: $name}})
+        MERGE (p:{N.PROJECT.value} {{name: $name}})
         SET p += $props
         RETURN p
         """
@@ -102,7 +91,7 @@ class GraphLoader:
             创建的节点数据
         """
         query = f"""
-        MERGE (t:{TOKEN} {{symbol: $symbol}})
+        MERGE (t:{N.TOKEN.value} {{symbol: $symbol}})
         SET t += $props
         RETURN t
         """
@@ -122,7 +111,7 @@ class GraphLoader:
             创建的节点数据
         """
         query = f"""
-        MERGE (p:{PERSON} {{name: $name}})
+        MERGE (p:{N.PERSON.value} {{name: $name}})
         SET p += $props
         RETURN p
         """
@@ -142,7 +131,7 @@ class GraphLoader:
             创建的节点数据
         """
         query = f"""
-        MERGE (i:{INSTITUTION} {{name: $name}})
+        MERGE (i:{N.INSTITUTION.value} {{name: $name}})
         SET i += $props
         RETURN i
         """
@@ -162,7 +151,7 @@ class GraphLoader:
             创建的节点数据
         """
         query = f"""
-        MERGE (c:{CHAIN} {{name: $name}})
+        MERGE (c:{N.CHAIN.value} {{name: $name}})
         SET c += $props
         RETURN c
         """
@@ -184,9 +173,9 @@ class GraphLoader:
             project_name: 项目名称
         """
         query = f"""
-        MATCH (t:{TOKEN} {{symbol: $token_symbol}})
-        MATCH (p:{PROJECT} {{name: $project_name}})
-        MERGE (t)-[:{ISSUED}]->(p)
+        MATCH (t:{N.TOKEN.value} {{symbol: $token_symbol}})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})
+        MERGE (t)-[:{R.ISSUED.value}]->(p)
         """
         await self.client.execute_write(
             query,
@@ -215,9 +204,9 @@ class GraphLoader:
             props["amount"] = amount
 
         query = f"""
-        MATCH (i:{INSTITUTION} {{name: $institution_name}})
-        MATCH (p:{PROJECT} {{name: $project_name}})
-        MERGE (i)-[r:{INVESTED}]->(p)
+        MATCH (i:{N.INSTITUTION.value} {{name: $institution_name}})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})
+        MERGE (i)-[r:{R.INVESTED.value}]->(p)
         """
         params = {"institution_name": institution_name, "project_name": project_name, **props}
 
@@ -239,9 +228,9 @@ class GraphLoader:
             chain_name: 公链名称
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})
-        MATCH (c:{CHAIN} {{name: $chain_name}})
-        MERGE (p)-[:{BELONGS_TO}]->(c)
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})
+        MATCH (c:{N.CHAIN.value} {{name: $chain_name}})
+        MERGE (p)-[:{R.BELONGS_TO.value}]->(c)
         """
         await self.client.execute_write(
             query,
@@ -275,8 +264,8 @@ class GraphLoader:
             params["role"] = role
 
         query = f"""
-        MATCH (p:{PERSON} {{name: $person_name}})
-        MATCH (pr:{PROJECT} {{name: $project_name}})
+        MATCH (p:{N.PERSON.value} {{name: $person_name}})
+        MATCH (pr:{N.PROJECT.value} {{name: $project_name}})
         MERGE (p)-[r:{relation_type}{rel_props}]->(pr)
         """
         await self.client.execute_write(query, params)
@@ -302,9 +291,9 @@ class GraphLoader:
             params["collab_type"] = collaboration_type
 
         query = f"""
-        MATCH (p1:{PROJECT} {{name: $project_a}})
-        MATCH (p2:{PROJECT} {{name: $project_b}})
-        MERGE (p1)-[r:{COLLABORATES_WITH}{rel_props}]->(p2)
+        MATCH (p1:{N.PROJECT.value} {{name: $project_a}})
+        MATCH (p2:{N.PROJECT.value} {{name: $project_b}})
+        MERGE (p1)-[r:{R.COLLABORATES_WITH.value}{rel_props}]->(p2)
         """
         await self.client.execute_write(query, params)
 

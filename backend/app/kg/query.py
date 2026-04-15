@@ -4,25 +4,13 @@ from typing import Any, Optional
 
 from app.data.logger import create_logger
 from app.kg.client import Neo4jClient
+from app.kg.models import NodeTypes, RelationTypes
 
 logger = create_logger("知识图谱查询")
 
-
-# 节点标签常量
-PROJECT = "Project"
-TOKEN = "Token"
-PERSON = "Person"
-INSTITUTION = "Institution"
-CHAIN = "Chain"
-
-# 关系类型常量
-ISSUED = "ISSUED"
-INVESTED = "INVESTED"
-BELONGS_TO = "BELONGS_TO"
-COLLABORATES_WITH = "COLLABORATES_WITH"
-WORKS_AT = "WORKS_AT"
-ADVISES = "ADVISES"
-FOUNDED = "FOUNDED"
+# 节点标签简写，方便 Cypher 查询拼接
+N = NodeTypes
+R = RelationTypes
 
 
 class GraphQuery:
@@ -46,7 +34,7 @@ class GraphQuery:
             项目节点数据或 None
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $name}})
+        MATCH (p:{N.PROJECT.value} {{name: $name}})
         RETURN p
         """
         result = await self.client.execute_query(query, {"name": name})
@@ -62,7 +50,7 @@ class GraphQuery:
             代币节点列表
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})<-[:{ISSUED}]-(t:{TOKEN})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})<-[:{R.ISSUED.value}]-(t:{N.TOKEN.value})
         RETURN t
         """
         result = await self.client.execute_query(query, {"project_name": project_name})
@@ -78,7 +66,7 @@ class GraphQuery:
             包含角色信息的人物节点列表
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})<-[r]-(person:{PERSON})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})<-[r]-(person:{N.PERSON.value})
         RETURN person, type(r) as relationship, r.role as role
         """
         result = await self.client.execute_query(query, {"project_name": project_name})
@@ -101,7 +89,7 @@ class GraphQuery:
             包含投资详情的机构节点列表
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})<-[r:{INVESTED}]-(i:{INSTITUTION})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})<-[r:{R.INVESTED.value}]-(i:{N.INSTITUTION.value})
         RETURN i, r.round_type as round_type, r.amount as amount
         """
         result = await self.client.execute_query(query, {"project_name": project_name})
@@ -124,7 +112,7 @@ class GraphQuery:
             公链节点或 None
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})-[:{BELONGS_TO}]->(c:{CHAIN})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})-[:{R.BELONGS_TO.value}]->(c:{N.CHAIN.value})
         RETURN c
         """
         result = await self.client.execute_query(query, {"project_name": project_name})
@@ -140,7 +128,7 @@ class GraphQuery:
             包含投资详情的项目节点列表
         """
         query = f"""
-        MATCH (i:{INSTITUTION} {{name: $institution_name}})-[:{INVESTED}]->(p:{PROJECT})
+        MATCH (i:{N.INSTITUTION.value} {{name: $institution_name}})-[:{R.INVESTED.value}]->(p:{N.PROJECT.value})
         RETURN p
         """
         result = await self.client.execute_query(query, {"institution_name": institution_name})
@@ -156,7 +144,7 @@ class GraphQuery:
             包含关系详情的项目节点列表
         """
         query = f"""
-        MATCH (p:{PERSON} {{name: $person_name}})-[r]->(pr:{PROJECT})
+        MATCH (p:{N.PERSON.value} {{name: $person_name}})-[r]->(pr:{N.PROJECT.value})
         RETURN pr, type(r) as relationship, r.role as role
         """
         result = await self.client.execute_query(query, {"person_name": person_name})
@@ -179,7 +167,7 @@ class GraphQuery:
             项目节点列表
         """
         query = f"""
-        MATCH (c:{CHAIN} {{name: $chain_name}})<-[:{BELONGS_TO}]-(p:{PROJECT})
+        MATCH (c:{N.CHAIN.value} {{name: $chain_name}})<-[:{R.BELONGS_TO.value}]-(p:{N.PROJECT.value})
         RETURN p
         """
         result = await self.client.execute_query(query, {"chain_name": chain_name})
@@ -195,7 +183,7 @@ class GraphQuery:
             合作项目节点列表
         """
         query = f"""
-        MATCH (p:{PROJECT} {{name: $project_name}})-[:{COLLABORATES_WITH}]-(collab:{PROJECT})
+        MATCH (p:{N.PROJECT.value} {{name: $project_name}})-[:{R.COLLABORATES_WITH.value}]-(collab:{N.PROJECT.value})
         RETURN collab
         """
         result = await self.client.execute_query(query, {"project_name": project_name})
@@ -212,7 +200,7 @@ class GraphQuery:
             匹配的项目节点列表
         """
         query = f"""
-        MATCH (p:{PROJECT})
+        MATCH (p:{N.PROJECT.value})
         WHERE p.name CONTAINS $keyword OR p.description CONTAINS $keyword
         RETURN p
         LIMIT $limit
@@ -268,7 +256,7 @@ class GraphQuery:
             包含路径信息的关联项目节点列表
         """
         query = f"""
-        MATCH path = (p:{PROJECT} {{name: $project_name}})-[*1..{max_hops}]-(related:{PROJECT})
+        MATCH path = (p:{N.PROJECT.value} {{name: $project_name}})-[*1..{max_hops}]-(related:{N.PROJECT.value})
         WHERE related.name <> $project_name
         RETURN related, [node in nodes(path) | node.name] as path, length(path) as distance
         ORDER BY distance, related.name
@@ -295,13 +283,13 @@ class GraphQuery:
         """
         stats = {}
 
-        for node_type in [PROJECT, TOKEN, PERSON, INSTITUTION, CHAIN]:
+        for node_type in N:
             query = f"""
-            MATCH (n:{node_type})
+            MATCH (n:{node_type.value})
             RETURN count(n) as count
             """
             result = await self.client.execute_query(query)
-            stats[node_type.lower() + "_count"] = result[0]["count"] if result else 0
+            stats[node_type.value.lower() + "_count"] = result[0]["count"] if result else 0
 
         return stats
 
@@ -315,7 +303,7 @@ class GraphQuery:
             包含项目信息的代币节点或 None
         """
         query = f"""
-        MATCH (t:{TOKEN} {{symbol: $symbol}})-[:{ISSUED}]->(p:{PROJECT})
+        MATCH (t:{N.TOKEN.value} {{symbol: $symbol}})-[:{R.ISSUED.value}]->(p:{N.PROJECT.value})
         RETURN t, p
         """
         result = await self.client.execute_query(query, {"symbol": symbol})

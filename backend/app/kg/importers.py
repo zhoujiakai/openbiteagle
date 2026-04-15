@@ -12,7 +12,9 @@ from app.kg.loader import GraphLoader
 from app.kg.models import (
     ChainNode,
     InstitutionNode,
+    NodeTypes,
     ProjectNode,
+    RelationTypes,
     TokenNode,
 )
 from app.wrappers.rootdata.models import ProjectInfo
@@ -181,7 +183,7 @@ class RootdataKGImporter:
 
             # 创建项目
             await self.loader.create_project(project_node)
-            result["nodes_created"].append("Project")
+            result["nodes_created"].append(NodeTypes.PROJECT.value)
 
             # 创建并关联代币
             if token_node:
@@ -189,8 +191,8 @@ class RootdataKGImporter:
                 await self.loader.relate_token_to_project(
                     token_node.symbol, project_node.name
                 )
-                result["nodes_created"].append("Token")
-                result["relationships_created"].append("ISSUED")
+                result["nodes_created"].append(NodeTypes.TOKEN.value)
+                result["relationships_created"].append(RelationTypes.ISSUED.value)
 
             # 创建并关联公链
             for chain_node in chain_nodes:
@@ -198,7 +200,7 @@ class RootdataKGImporter:
                 await self.loader.relate_project_to_chain(project_node.name, chain_node.name)
             if chain_nodes:
                 result["nodes_created"].append(f"{len(chain_nodes)} Chains")
-                result["relationships_created"].append(f"{len(chain_nodes)} BELONGS_TO")
+                result["relationships_created"].append(f"{len(chain_nodes)} {RelationTypes.BELONGS_TO.value}")
 
             # 创建并关联投资方
             for institution_node in institution_nodes:
@@ -208,7 +210,7 @@ class RootdataKGImporter:
                 )
             if institution_nodes:
                 result["nodes_created"].append(f"{len(institution_nodes)} Institutions")
-                result["relationships_created"].append(f"{len(institution_nodes)} INVESTED")
+                result["relationships_created"].append(f"{len(institution_nodes)} {RelationTypes.INVESTED.value}")
 
             result["success"] = True
             logger.info(f"Imported project to KG: {project.name}")
