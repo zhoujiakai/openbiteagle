@@ -3,13 +3,13 @@
 该模块处理新闻分析操作的业务逻辑。
 """
 
-import logging
 from collections import Counter
 from typing import Optional
 
 from sqlalchemy import select, func as sql_func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.data.logger import create_logger
 from app.models.analysis import Analysis
 from app.models.news import News
 from app.schemas.analysis import (
@@ -22,7 +22,7 @@ from app.schemas.analysis import (
     TokenCount,
 )
 
-logger = logging.getLogger(__name__)
+logger = create_logger("分析服务层")
 
 
 class AnalysisService:

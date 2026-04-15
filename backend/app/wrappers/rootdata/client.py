@@ -10,15 +10,15 @@
 """
 
 import asyncio
-import logging
 from typing import Optional
 
 import httpx
 
 from app.core.config import cfg
+from app.data.logger import create_logger
 from app.wrappers.rootdata.models import ProjectInfo, TokenInfo
 
-logger = logging.getLogger(__name__)
+logger = create_logger("RootData客户端")
 
 # 用于发现 Web3 项目的热门搜索关键词
 _DEFAULT_SEARCH_KEYWORDS = [

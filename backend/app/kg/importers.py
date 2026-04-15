@@ -4,9 +4,9 @@
 Neo4j 图节点和关系。
 """
 
-import logging
 from typing import Optional
 
+from app.data.logger import create_logger
 from app.kg.client import Neo4jClient
 from app.kg.loader import GraphLoader
 from app.kg.models import (
@@ -17,7 +17,7 @@ from app.kg.models import (
 )
 from app.wrappers.rootdata.models import ProjectInfo
 
-logger = logging.getLogger(__name__)
+logger = create_logger("知识图谱导入器")
 
 
 # 常见公链名称映射，用于标准化名称

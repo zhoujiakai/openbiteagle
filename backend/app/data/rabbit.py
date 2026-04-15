@@ -16,7 +16,7 @@ from aio_pika.abc import (
 import json
 
 from app.core.config import cfg
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("消息队列")
 

@@ -17,7 +17,7 @@ from tasks.task2_analyze_flow.nodes import (
     trend_analysis_node,
 )
 from tasks.task2_analyze_flow.state import GraphState
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("分析流水线::graph")
 

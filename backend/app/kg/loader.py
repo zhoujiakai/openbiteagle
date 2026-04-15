@@ -1,8 +1,8 @@
 """用于构建知识图谱的图数据加载器。"""
 
-import logging
 from typing import Any, Optional
 
+from app.data.logger import create_logger
 from app.kg.client import Neo4jClient
 from app.kg.models import (
     ChainNode,
@@ -13,23 +13,23 @@ from app.kg.models import (
     TokenNode,
 )
 
-logger = logging.getLogger(__name__)
+logger = create_logger("知识图谱加载器")
 
 # 节点标签常量
-PROJECT = "Project"
-TOKEN = "Token"
-PERSON = "Person"
-INSTITUTION = "Institution"
-CHAIN = "Chain"
+PROJECT = "Project"          # 区块链项目节点
+TOKEN = "Token"              # 代币/加密货币节点
+PERSON = "Person"            # 人物节点（创始人、团队成员、顾问等）
+INSTITUTION = "Institution"  # 机构节点（投资机构、基金会等）
+CHAIN = "Chain"              # 公链节点（Ethereum、Solana 等）
 
 # 关系类型常量
-ISSUED = "ISSUED"
-INVESTED = "INVESTED"
-BELONGS_TO = "BELONGS_TO"
-COLLABORATES_WITH = "COLLABORATES_WITH"
-WORKS_AT = "WORKS_AT"
-ADVISES = "ADVISES"
-FOUNDED = "FOUNDED"
+ISSUED = "ISSUED"                        # 代币发行：Token -[ISSUED]-> Project
+INVESTED = "INVESTED"                    # 投资关系：Institution -[INVESTED]-> Project
+BELONGS_TO = "BELONGS_TO"                # 所属公链：Project -[BELONGS_TO]-> Chain
+COLLABORATES_WITH = "COLLABORATES_WITH"  # 项目合作：Project -[COLLABORATES_WITH]-> Project
+WORKS_AT = "WORKS_AT"                    # 在职关系：Person -[WORKS_AT]-> Project
+ADVISES = "ADVISES"                      # 顾问关系：Person -[ADVISES]-> Project
+FOUNDED = "FOUNDED"                      # 创始关系：Person -[FOUNDED]-> Project
 
 
 class GraphLoader:

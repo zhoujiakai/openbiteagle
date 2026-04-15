@@ -4,12 +4,13 @@ GeckoTerminal 提供免费的 DEX 数据，无需 API 密钥。
 可在 CMC 不可用时作为备用。
 """
 
-import logging
 from typing import Any
 
 import httpx
 
-logger = logging.getLogger(__name__)
+from app.data.logger import create_logger
+
+logger = create_logger("GeckoTerminal")
 
 
 class GeckoClient:

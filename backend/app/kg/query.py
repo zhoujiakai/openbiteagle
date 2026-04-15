@@ -1,11 +1,11 @@
 """知识图谱检索的图查询函数。"""
 
-import logging
 from typing import Any, Optional
 
+from app.data.logger import create_logger
 from app.kg.client import Neo4jClient
 
-logger = logging.getLogger(__name__)
+logger = create_logger("知识图谱查询")
 
 
 # 节点标签常量

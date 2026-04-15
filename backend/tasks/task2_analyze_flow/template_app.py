@@ -2,7 +2,7 @@
 
 import asyncio
 
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("分析流水线::演示")
 

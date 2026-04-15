@@ -19,7 +19,7 @@ from tasks.task2_analyze_flow.prompts import (
 )
 from tasks.task2_analyze_flow.state import GraphState
 from app.wrappers.llm import call_llm_structured, get_llm
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("分析流水线::node")
 

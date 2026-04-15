@@ -1,13 +1,13 @@
 """文本向量化嵌入服务。"""
 
-import logging
 from typing import Optional
 
 import httpx
 
 from app.core.config import cfg
+from app.data.logger import create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger("文本向量化")
 
 
 class JinaEmbeddings:

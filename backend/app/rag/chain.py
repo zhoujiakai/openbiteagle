@@ -1,13 +1,13 @@
 """RAG 检索增强生成链。"""
 
-import logging
 from typing import Optional
 
 from langchain_core.messages import HumanMessage
 
+from app.data.logger import create_logger
 from app.wrappers.llm import get_llm
 
-logger = logging.getLogger(__name__)
+logger = create_logger("RAG链")
 
 
 class RAGChain:

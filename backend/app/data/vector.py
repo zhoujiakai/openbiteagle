@@ -1,15 +1,15 @@
 """使用 pgvector 进行向量数据库操作。"""
 
-import logging
 from typing import Optional
 
 from sqlalchemy import select, text
 from sqlalchemy.orm import make_transient
 
 from app.data.db import AsyncSessionLocal, Base, engine
+from app.data.logger import create_logger
 from app.models.document import Document, DocumentChunk
 
-logger = logging.getLogger(__name__)
+logger = create_logger("向量数据库")
 
 
 async def init_vector_extension() -> None:

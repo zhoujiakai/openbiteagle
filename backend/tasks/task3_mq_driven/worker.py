@@ -10,7 +10,6 @@
 
 import asyncio
 import json
-import logging
 import signal
 import traceback
 from datetime import datetime, timezone
@@ -24,12 +23,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import cfg
 from app.data.db import AsyncSessionLocal
+from app.data.logger import create_logger
 from app.graph import get_graph
 from tasks.task2_analyze_flow.graph import get_tracing_config
 from app.models.analysis import Analysis
 from app.models.news import News
 
-logger = logging.getLogger("biteagle.worker")
+logger = create_logger("MQ Worker")
 
 
 class Worker:

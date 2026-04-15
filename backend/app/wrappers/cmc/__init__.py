@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 
 from app.core.config import cfg
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("CMC查询代币市场信息")
 

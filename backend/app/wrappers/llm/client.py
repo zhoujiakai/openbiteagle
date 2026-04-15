@@ -5,15 +5,15 @@
 """
 
 import json
-import logging
 from typing import Any, Optional
 
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 
 from app.core.config import cfg
+from app.data.logger import create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger("LLM客户端")
 
 
 def get_llm(

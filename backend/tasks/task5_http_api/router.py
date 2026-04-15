@@ -3,13 +3,12 @@
 本模块提供新闻分析相关的 RESTful API 接口。
 """
 
-import logging
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.data.db import get_db
 from app.core.config import cfg
+from app.data.logger import create_logger
 from app.data.rabbit import get_rabbit
 from app.schemas.analysis import (
     AnalysisCreate,
@@ -22,7 +21,7 @@ from app.schemas.analysis import (
 from tasks.task5_http_api.service import AnalysisService
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
-logger = logging.getLogger(__name__)
+logger = create_logger("分析API路由")
 
 
 async def _queue_analysis(news_id: int, priority: int = 5) -> bool:

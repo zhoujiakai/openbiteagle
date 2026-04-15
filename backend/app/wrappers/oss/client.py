@@ -8,7 +8,7 @@ from typing import Any, BinaryIO
 import oss2
 
 from app.core.config import cfg
-from data import create_logger
+from app.data.logger import create_logger
 
 logger = create_logger("阿里云OSS文件存储")
 

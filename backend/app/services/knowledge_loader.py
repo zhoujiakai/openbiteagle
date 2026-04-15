@@ -4,16 +4,16 @@
 """
 
 import json
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from app.data.logger import create_logger
 from app.data.vector import insert_document
 from app.rag.embeddings import EmbeddingService
 from app.wrappers.rootdata import ProjectInfo, scrape_rootdata_projects
 
-logger = logging.getLogger(__name__)
+logger = create_logger("知识库加载服务")
 
 # 本地存储爬取文档的基础目录
 KB_DOCS_DIR = Path(__file__).parent.parent.parent / "data" / "kb_docs"

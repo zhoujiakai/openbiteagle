@@ -1,15 +1,15 @@
 """知识库检索器。"""
 
-import logging
 from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import make_transient
 
 from app.data.db import AsyncSessionLocal
+from app.data.logger import create_logger
 from app.models.document import DocumentChunk
 
-logger = logging.getLogger(__name__)
+logger = create_logger("知识库检索器")
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:

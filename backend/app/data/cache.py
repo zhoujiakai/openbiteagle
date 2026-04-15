@@ -3,15 +3,15 @@
 参考: repos/back-template/data/cache.py
 """
 
-import logging
 from typing import Any, Optional
 
 import redis.asyncio as aioredis
 from pydantic import BaseModel
 
 from app.core.config import cfg
+from app.data.logger import create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger("Redis缓存")
 
 # 所有键的前缀
 PREFIX = "biteagle:"
