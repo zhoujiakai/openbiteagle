@@ -13,11 +13,13 @@ from app.kg.models import (
     ChainNode,
     InstitutionNode,
     NodeTypes,
+    PersonNode,
+    PersonRole,
     ProjectNode,
     RelationTypes,
     TokenNode,
 )
-from app.wrappers.rootdata.models import ProjectInfo
+from app.wrappers.rootdata.models import FundingRound, ProjectInfo, TeamMember
 
 logger = create_logger("知识图谱导入器")
 
@@ -96,6 +98,8 @@ class RootdataKGImporter:
             telegram=project.telegram,
             rootdata_id=project.rootdata_id,
             logo_url=project.logo_url,
+            establishment_date=project.establishment_date,
+            total_funding=project.total_funding,
         )
 
     def token_to_node(self, project: ProjectInfo) -> Optional[TokenNode]:
@@ -142,6 +146,9 @@ class RootdataKGImporter:
     def investors_to_nodes(self, project: ProjectInfo) -> list[InstitutionNode]:
         """将项目投资方转换为 InstitutionNodes。
 
+        优先使用 investor_details（含 logo 等额外信息），
+        回退到 investors（纯名称列表）。
+
         Args:
             project: Rootdata 的 ProjectInfo
 
@@ -149,14 +156,86 @@ class RootdataKGImporter:
             InstitutionNode 列表
         """
         institutions = []
-        for investor_name in project.investors:
-            if investor_name and investor_name.strip():
-                institutions.append(
-                    InstitutionNode(
-                        name=investor_name.strip(),
-                    )
-                )
+        seen = set()
+
+        # 优先使用 investor_details
+        if project.investor_details:
+            for inv in project.investor_details:
+                name = inv.name.strip()
+                if name and name not in seen:
+                    seen.add(name)
+                    institutions.append(InstitutionNode(name=name))
+        else:
+            # 回退到 investors 纯名称列表
+            for investor_name in project.investors:
+                name = investor_name.strip()
+                if name and name not in seen:
+                    seen.add(name)
+                    institutions.append(InstitutionNode(name=name))
+
         return institutions
+
+    def team_to_nodes(self, project: ProjectInfo) -> list[tuple[PersonNode, RelationTypes]]:
+        """将 ProjectInfo.team_members 转换为 (PersonNode, 关系类型) 元组列表。
+
+        根据 position 映射到 PersonRole 和 RelationTypes：
+        - 包含 "founder" → FOUNDER + FOUNDED
+        - 包含 "advisor" → ADVISOR + ADVISES
+        - 其他 → TEAM_MEMBER + WORKS_AT
+
+        Args:
+            project: Rootdata 的 ProjectInfo
+
+        Returns:
+            (PersonNode, RelationTypes) 元组列表
+        """
+        result = []
+        for member in project.team_members:
+            position_lower = (member.position or "").lower()
+
+            if "founder" in position_lower:
+                role = PersonRole.FOUNDER
+                relation = RelationTypes.FOUNDED
+            elif "advisor" in position_lower:
+                role = PersonRole.ADVISOR
+                relation = RelationTypes.ADVISES
+            else:
+                role = PersonRole.TEAM_MEMBER
+                relation = RelationTypes.WORKS_AT
+
+            person = PersonNode(
+                name=member.name,
+                role=role,
+                twitter=member.twitter,
+                linkedin=member.linkedin,
+            )
+            result.append((person, relation))
+        return result
+
+    def funding_to_relations(
+        self, project: ProjectInfo
+    ) -> list[tuple[str, str, Optional[str], Optional[str]]]:
+        """将 ProjectInfo.funding_details 转换为投资关系元组列表。
+
+        Args:
+            project: Rootdata 的 ProjectInfo
+
+        Returns:
+            (投资方名称, 项目名称, 轮次, 金额) 元组列表
+        """
+        result = []
+        for fr in project.funding_details:
+            round_type = fr.round_name
+            amount_str = str(fr.amount) if fr.amount is not None else None
+            for inv_name in fr.investors:
+                if inv_name and inv_name.strip():
+                    result.append((
+                        inv_name.strip(),
+                        project.name,
+                        round_type,
+                        amount_str,
+                    ))
+        return result
 
     async def import_project(self, project: ProjectInfo) -> dict:
         """将单个 Rootdata 项目导入知识图谱。
@@ -211,6 +290,30 @@ class RootdataKGImporter:
             if institution_nodes:
                 result["nodes_created"].append(f"{len(institution_nodes)} Institutions")
                 result["relationships_created"].append(f"{len(institution_nodes)} {RelationTypes.INVESTED.value}")
+
+            # 创建并关联团队成员
+            team_data = self.team_to_nodes(project)
+            for person, relation_type in team_data:
+                await self.loader.create_person(person)
+                await self.loader.relate_person_to_project(
+                    person.name, project_node.name, relation_type
+                )
+            if team_data:
+                result["nodes_created"].append(f"{len(team_data)} Persons")
+                result["relationships_created"].append(f"{len(team_data)} Team Relations")
+
+            # 创建并关联融资轮次（含详细投资方和金额）
+            funding_data = self.funding_to_relations(project)
+            for inv_name, proj_name, round_type, amount in funding_data:
+                await self.loader.create_institution(
+                    InstitutionNode(name=inv_name)
+                )
+                await self.loader.relate_institution_to_project(
+                    inv_name, proj_name, round_type, amount
+                )
+            if funding_data:
+                result["nodes_created"].append(f"{len(funding_data)} Funding Investors")
+                result["relationships_created"].append(f"{len(funding_data)} {RelationTypes.INVESTED.value} (detailed)")
 
             result["success"] = True
             logger.info(f"Imported project to KG: {project.name}")

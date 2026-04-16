@@ -5,6 +5,35 @@ from typing import Optional
 
 
 @dataclass
+class TeamMember:
+    """团队成员信息。"""
+
+    name: str
+    position: Optional[str] = None
+    twitter: Optional[str] = None
+    linkedin: Optional[str] = None
+
+
+@dataclass
+class FundingRound:
+    """融资轮次信息。"""
+
+    round_name: Optional[str] = None
+    amount: Optional[float] = None
+    valuation: Optional[float] = None
+    date: Optional[str] = None
+    investors: list[str] = field(default_factory=list)
+
+
+@dataclass
+class InvestorBrief:
+    """投资方简要信息。"""
+
+    name: str
+    logo_url: Optional[str] = None
+
+
+@dataclass
 class TokenInfo:
     """代币信息。"""
 
@@ -65,8 +94,13 @@ class ProjectInfo:
     docs_url: Optional[str] = None
 
     # 元数据
-    funding_rounds: Optional[int] = None
+    total_funding: Optional[float] = None
+    establishment_date: Optional[str] = None
     investors: list[str] = field(default_factory=list)
+    investor_details: list[InvestorBrief] = field(default_factory=list)
+    team_members: list[TeamMember] = field(default_factory=list)
+    funding_details: list[FundingRound] = field(default_factory=list)
+    contracts: list[str] = field(default_factory=list)
 
     # 来源
     source_url: Optional[str] = None  # RootData 项目页面 URL
@@ -105,6 +139,30 @@ class ProjectInfo:
         if self.tags:
             content_parts.append(f"Tags: {', '.join(self.tags)}")
 
+        # 团队成员
+        if self.team_members:
+            team_info = ", ".join(
+                f"{m.name}" + (f" ({m.position})" if m.position else "")
+                for m in self.team_members
+            )
+            content_parts.append(f"Team: {team_info}")
+
+        # 融资轮次
+        if self.funding_details:
+            for fr in self.funding_details:
+                parts = [fr.round_name or "Unknown Round"]
+                if fr.amount:
+                    parts.append(f"${fr.amount:,.0f}")
+                if fr.date:
+                    parts.append(fr.date)
+                if fr.investors:
+                    parts.append(f"Investors: {', '.join(fr.investors)}")
+                content_parts.append(" | ".join(parts))
+
+        # 融资总额
+        if self.total_funding:
+            content_parts.append(f"Total Funding: ${self.total_funding:,.0f}")
+
         # 合并内容
         content = "\n\n".join(content_parts) if content_parts else self.name
 
@@ -129,6 +187,10 @@ class ProjectInfo:
                 "chains": self.chains,
                 "tokens": list(set(tokens)),  # 去重
                 "investors": self.investors,
+                "total_funding": self.total_funding,
+                "establishment_date": self.establishment_date,
+                "team_size": len(self.team_members),
+                "funding_rounds_count": len(self.funding_details),
             },
         }
 

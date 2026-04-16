@@ -51,6 +51,8 @@ class ProjectNode:
     telegram: Optional[str] = None
     rootdata_id: Optional[str] = None
     logo_url: Optional[str] = None
+    establishment_date: Optional[str] = None
+    total_funding: Optional[float] = None
 
     def to_dict(self) -> dict[str, Any]:
         """转换为 Neo4j 使用的字典。"""
