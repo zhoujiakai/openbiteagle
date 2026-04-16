@@ -164,6 +164,70 @@ langsmith界面查看langgraph流水线执行结果如下：
 
 图-添加项目到知识图谱
 
+
+
+## 完整案例
+
+## 新闻
+
+```
+"news_id": 2,
+"title": "Bitcoin ETF approved by SEC",
+"content": "The SEC has officially approved the Bitcoin ETF application."
+```
+
+## 日志
+
+![工作流运行日志](./backend/assets/工作流运行日志.png)
+
+图-工作流运行日志
+
+## 结果
+
+```
+news_id: 2
+title: Bitcoin ETF approved by SEC
+content: The SEC has officially approved the Bitcoin ETF application.
+investment_value: bullish
+investment_confidence: 0.9
+investment_reasoning: 1. 代币明确性：新闻明确指向比特币（Bitcoin）。2. 市场影响：SEC批准比特币ETF是重大实质性利好，将大幅降低传统投资者参与比特币投资的门槛，预期带来大量新增资金流入。3. 信息质量：假设新闻来源为权威媒体（如SEC官方公告），信息高度可靠且可验证。4. 市场关注度：此为市场长期期待的关键事件，极有可能引发全球性高度关注、显著增加交易量并推动价格上涨。
+tokens: [{'symbol': 'BTC', 'name': 'Bitcoin', 'confidence': 1.0}]
+token_details: {'BTC': {'symbol': 'BTC', 'name': 'Bitcoin', 'price': 73516.55777901717, 'market_cap': 1471554250552.1128, 'change_24h': -1.10282671, 'volume_24h': 38214267520.941475}}
+rag_context: 在知识库中未找到相关信息。
+rag_sources: []
+kg_context: ## Related Projects (3)
+- BitcoinOS: No description
+- BTC: No description
+- BTC Digital: No description
+
+## Entity Relationships (21)
+- Investor: DNA Fund (近期比特币原生项目融资（2024-2025年）（2025）)
+- Investor: FalconX (近期比特币原生项目融资（2024-2025年）（2025）)
+- Investor: Greenfield Capital (近期比特币原生项目融资（2024-2025年）（2025）)
+- Person: Michael Ford (核心开发者)
+- Person: Ava Chow (核心开发者)
+kg_entities: {'projects': [{'name': 'BitcoinOS'}, {'name': 'BTC'}, {'name': 'BTC Digital'}], 'tokens': [], 'relationships': [{'institution': {'name': 'DNA Fund'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'FalconX'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'Greenfield Capital'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'person': {'name': 'Michael Ford'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Ava Chow'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Hennadii Stepanov'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Gloria Zhao'}, 'relationship': 'WORKS_AT', 'role': '核心维护者'}, {'person': {'name': 'Portland'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Luke Dashjr'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'institution': {'name': 'Blockchain Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Pantera Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Digital Currency Group'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Union Square Ventures'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'a16z'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Y Combinator'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Plug and Play'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Boost VC'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Valor Equity Partners'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Accomplice'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Ribbit Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Founders Fund'}, 'round_type': '主要投资机构', 'amount': None}]}
+trend_analysis: **短期方向**：消息公布后市场可能出现“买预期，卖事实”的短期获利了结（当前24h已跌1.1%），但SEC正式批准将打开传统资本合规入场的闸门，预计抛压消化后资金流入将推动价格反弹。  
+
+**关键因素**：  
+1. **机构准入**：ETF批准消除了传统投资者持有BTC的主要障碍，知识库中DNA Fund、FalconX等机构已活跃于比特币生态投资（如BitcoinOS），后续可能通过ETF加大配置。  
+2. **生态联动**：知识库显示比特币核心开发者（如Michael Ford）及Layer2项目（BitcoinOS）持续推动技术迭代，ETF带来的流动性可能溢出至BTC生态项目（如BTC Digital），强化基本面支撑。  
+
+**风险考量**：  
+1. **技术面压力**：若ETF初期资金流入不及预期，叠加近期涨幅过大，可能引发深度回调。  
+2. **生态脆弱性**：知识库中比特币原生项目仍处早期（融资集中在2024-2025年），若开发进展滞后（如核心开发者变动），可能削弱长期叙事吸引力。  
+
+**时间范围**：资金流入效应将在1-3个月逐步显现，但中期波动可能加剧，需观察ETF月度净流入数据及生态项目进展（如BitcoinOS落地）。  
+
+**趋势分析**：SEC批准比特币ETF是结构性利好，短期波动不改中长期上行趋势。结合知识库中机构投资者（如Greenfield Capital）已布局比特币生态，ETF将加速资本向BTC及Layer2项目（如BitcoinOS）扩散，但需警惕技术性回调及生态发展不及预期的风险。
+recommendation: buy
+risk_level: medium
+recommendation_reasoning: SEC批准比特币ETF是结构性利好，消除了传统资本入场的合规障碍，预计将驱动中长期资金流入。尽管短期存在‘买预期，卖事实’的获利了结压力，但抛压消化后，结合机构配置需求（如DNA Fund、Greenfield Capital）及生态发展（BitcoinOS等Layer2项目），价格有望重拾升势。建议利用短期回调分批买入，以捕捉中长期上行趋势。
+should_continue: True
+```
+
+
+
 ## 许可证
 
 MIT

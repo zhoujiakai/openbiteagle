@@ -29,7 +29,7 @@ async def investment_value_node(state: GraphState) -> dict:
 
     分析快讯是否具有投资价值（利好/利空/无关），输出判断结果和置信度
     """
-    logger.info(f"Node: investment_value for news {state['news_id']}")
+    logger.info(f"节点: 投资价值判断，新闻 {state['news_id']}")
 
     llm = get_llm()
     prompt = format_investment_value_prompt(state["title"], state["content"])
@@ -58,7 +58,7 @@ async def investment_value_node(state: GraphState) -> dict:
             "should_continue": should_continue,
         }
     except Exception as e:
-        logger.error(f"Error in investment_value_node: {e}")
+        logger.error(f"投资价值判断节点出错: {e}")
         return {
             "investment_value": "neutral",
             "investment_confidence": 0.0,
@@ -73,7 +73,7 @@ async def extract_tokens_node(state: GraphState) -> dict:
 
     从有价值的快讯中提取相关代币（名称、符号），如果无关联代币则标记为无
     """
-    logger.info(f"Node: extract_tokens for news {state['news_id']}")
+    logger.info(f"节点: 代币提取，新闻 {state['news_id']}")
 
     llm = get_llm()
     prompt = format_token_extraction_prompt(state["title"], state["content"])
@@ -102,11 +102,11 @@ async def extract_tokens_node(state: GraphState) -> dict:
         response = await call_llm_structured(llm, prompt, TokenExtractionOutput, schema)
 
         tokens = [t.model_dump() if hasattr(t, "model_dump") else t for t in response.tokens]
-        logger.info(f"Extracted {len(tokens)} tokens: {[t.get('symbol') for t in tokens]}")
+        logger.info(f"提取到 {len(tokens)} 个代币: {[t.get('symbol') for t in tokens]}")
 
         return {"tokens": tokens}
     except Exception as e:
-        logger.error(f"Error in extract_tokens_node: {e}")
+        logger.error(f"代币提取节点出错: {e}")
         return {"tokens": [], "error": str(e)}
 
 
@@ -115,7 +115,7 @@ async def search_token_info_node(state: GraphState) -> dict:
 
     对提取到的代币搜索（CMC/GeckoTerminal等接口）补充市场信息（当前价格、市值等）
     """
-    logger.info(f"Node: search_token_info for news {state['news_id']}")
+    logger.info(f"节点: 代币信息搜索，新闻 {state['news_id']}")
 
     tokens = state.get("tokens") or []
 
@@ -135,16 +135,16 @@ async def search_token_info_node(state: GraphState) -> dict:
                 if info:
                     token_details[symbol] = info
             except Exception as e:
-                logger.warning(f"Failed to get info for {symbol}: {e}")
+                logger.warning(f"获取 {symbol} 信息失败: {e}")
                 # 继续处理其他代币
 
-        logger.info(f"Retrieved market data for {len(token_details)} tokens")
+        logger.info(f"已获取 {len(token_details)} 个代币的市场数据")
         return {"token_details": token_details}
     except ImportError:
-        logger.warning("CMC client not available, skipping token info search")
+        logger.warning("CMC 客户端不可用，跳过代币信息搜索")
         return {"token_details": {}}
     except Exception as e:
-        logger.error(f"Error in search_token_info_node: {e}")
+        logger.error(f"代币信息搜索节点出错: {e}")
         return {"token_details": {}, "error": str(e)}
 
 
@@ -153,7 +153,7 @@ async def rag_knowledge_node(state: GraphState) -> dict:
 
     使用知识库中的 Web3 领域知识增强分析。
     """
-    logger.info(f"Node: rag_knowledge for news {state['news_id']}")
+    logger.info(f"节点: RAG 知识检索，新闻 {state['news_id']}")
 
     tokens = state.get("tokens") or []
     title = state.get("title", "")
@@ -184,7 +184,7 @@ async def rag_knowledge_node(state: GraphState) -> dict:
         rag_context = result.get("answer", "")
         sources = result.get("sources", [])
 
-        logger.info(f"RAG retrieved {len(sources)} chunks, context length: {len(rag_context)}")
+        logger.info(f"RAG 检索到 {len(sources)} 个片段，上下文长度: {len(rag_context)}")
 
         return {
             "rag_context": rag_context,
@@ -192,10 +192,10 @@ async def rag_knowledge_node(state: GraphState) -> dict:
         }
 
     except ImportError:
-        logger.warning("RAG chain not available")
+        logger.warning("RAG 链不可用")
         return {"rag_context": None, "rag_sources": []}
     except Exception as e:
-        logger.error(f"Error in rag_knowledge_node: {e}")
+        logger.error(f"RAG 知识检索节点出错: {e}")
         return {"rag_context": None, "rag_sources": [], "error": str(e)}
 
 
@@ -204,7 +204,7 @@ async def kg_knowledge_node(state: GraphState) -> dict:
 
     使用 Neo4j 中的实体关系数据增强分析。
     """
-    logger.info(f"Node: kg_knowledge for news {state['news_id']}")
+    logger.info(f"节点: 知识图谱检索，新闻 {state['news_id']}")
 
     tokens = state.get("tokens") or []
     title = state.get("title", "")
@@ -277,7 +277,7 @@ async def kg_knowledge_node(state: GraphState) -> dict:
                         kg_context_parts.append(f"- Investor: {inst.get('name', 'Unknown')} ({rel.get('round_type', 'Unknown')})")
 
             kg_context = "\n".join(kg_context_parts) if kg_context_parts else ""
-            logger.info(f"KG retrieved {len(kg_entities['projects'])} projects, context length: {len(kg_context)}")
+            logger.info(f"知识图谱检索到 {len(kg_entities['projects'])} 个项目，上下文长度: {len(kg_context)}")
 
             return {
                 "kg_context": kg_context,
@@ -288,10 +288,10 @@ async def kg_knowledge_node(state: GraphState) -> dict:
             await client.close()
 
     except ImportError:
-        logger.warning("Knowledge graph module not available")
+        logger.warning("知识图谱模块不可用")
         return {"kg_context": None, "kg_entities": {}}
     except Exception as e:
-        logger.error(f"Error in kg_knowledge_node: {e}")
+        logger.error(f"知识图谱检索节点出错: {e}")
         return {"kg_context": None, "kg_entities": {}, "error": str(e)}
 
 
@@ -300,7 +300,7 @@ async def trend_analysis_node(state: GraphState) -> dict:
 
     结合 新闻内容 和 市场信息、RAG知识、KG知识图谱 分析代币短期涨跌趋势
     """
-    logger.info(f"Node: trend_analysis for news {state['news_id']}")
+    logger.info(f"节点: 涨跌分析，新闻 {state['news_id']}")
 
     llm = get_llm()
 
@@ -318,12 +318,12 @@ async def trend_analysis_node(state: GraphState) -> dict:
     # 获取 RAG 上下文（如有）
     rag_context = state.get("rag_context")
     if rag_context:
-        logger.info(f"Using RAG context (length: {len(rag_context)})")
+        logger.info(f"使用 RAG 上下文（长度: {len(rag_context)}）")
 
     # 获取 KG 上下文（如有）
     kg_context = state.get("kg_context")
     if kg_context:
-        logger.info(f"Using KG context (length: {len(kg_context)})")
+        logger.info(f"使用知识图谱上下文（长度: {len(kg_context)}）")
 
     # 合并 RAG 和 KG 上下文
     enhanced_context = ""
@@ -347,7 +347,7 @@ async def trend_analysis_node(state: GraphState) -> dict:
 
         return {"trend_analysis": trend_text}
     except Exception as e:
-        logger.error(f"Error in trend_analysis_node: {e}")
+        logger.error(f"涨跌分析节点出错: {e}")
         return {"trend_analysis": "", "error": str(e)}
 
 
@@ -356,7 +356,7 @@ async def generate_recommendation_node(state: GraphState) -> dict:
 
     给出 买入/卖出/观望 建议和风险等级
     """
-    logger.info(f"Node: generate_recommendation for news {state['news_id']}")
+    logger.info(f"节点: 生成交易建议，新闻 {state['news_id']}")
 
     llm = get_llm()
 
@@ -382,7 +382,7 @@ async def generate_recommendation_node(state: GraphState) -> dict:
                 "recommendation_reasoning": response.reasoning,
             }
         except Exception as e:
-            logger.error(f"Error in generate_recommendation_node: {e}")
+            logger.error(f"生成交易建议节点出错: {e}")
             return {
                 "recommendation": "hold",
                 "risk_level": "low",
@@ -404,7 +404,7 @@ async def generate_recommendation_node(state: GraphState) -> dict:
                 "recommendation_reasoning": response.reasoning,
             }
         except Exception as e:
-            logger.error(f"Error in generate_recommendation_node: {e}")
+            logger.error(f"生成交易建议节点出错: {e}")
             return {
                 "recommendation": "hold",
                 "risk_level": "low",
