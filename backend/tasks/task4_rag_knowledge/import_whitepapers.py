@@ -109,6 +109,7 @@ async def _process_whitepaper(pdf_path: Path) -> dict:
         return {"file": filename, "status": "duplicate", "existing_id": existing_id}
 
     # 存入 Document 表
+    # 不设 tokens，让 process_document 通过 LLM 从内容中提取
     doc_id = await insert_document(
         title=pdf_path.stem,
         content=content,

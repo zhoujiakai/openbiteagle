@@ -3,11 +3,78 @@
 from typing import Optional
 
 import httpx
+from pydantic import BaseModel, Field
 
 from app.core.config import cfg
 from app.data.logger import create_logger
 
 logger = create_logger("文本向量化")
+
+
+# ── LLM 代币提取 ──────────────────────────────────────────────
+
+class TokenSymbolOutput(BaseModel):
+    """LLM 结构化输出：代币符号列表。"""
+    symbols: list[str] = Field(default_factory=list, description="提取到的代币符号列表，如 ['BTC', 'ETH']")
+
+
+_TOKEN_EXTRACTION_PROMPT = """你是一名加密货币专家。请从以下文本中提取所有相关的加密货币代币符号。
+
+## 文本内容
+{content}
+
+## 任务
+
+识别文本中提到的加密货币、区块链项目或公司，返回它们的交易代码（symbol），例如 BTC、ETH、SOL 等。
+
+要求：
+- 能识别中文描述（如"比特币"→BTC、"以太坊"→ETH、"索拉纳"→SOL）
+- 能识别英文全称（如 Bitcoin→BTC、Ethereum→ETH）
+- 能识别常见变体写法和简称
+- 能识别项目/公司关联的代币（如提到 Circle 应返回 USDC，提到 Uniswap 应返回 UNI）
+- 排除已停止维护/废弃的项目
+- 排除仅被一带而过、与主题无关的代币
+- 宁可多提取也不要遗漏，因为结果用于 RAG 检索过滤
+
+如果未找到相关代币，请返回空列表。"""
+
+
+async def extract_tokens_from_text(text: str) -> list[str]:
+    """调用 LLM 从文本中提取代币符号。
+
+    Args:
+        text: 待提取的文本（建议不超过 2000 字符以提高速度和准确性）
+
+    Returns:
+        代币符号列表，如 ["BTC", "ETH"]
+    """
+    from app.wrappers.llm.client import call_llm_structured, get_llm
+
+    llm = get_llm(temperature=0)
+    prompt = _TOKEN_EXTRACTION_PROMPT.format(content=text[:2000])
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "symbols": {
+                "type": "array",
+                "items": {"type": "string"},
+            }
+        },
+        "required": ["symbols"],
+    }
+
+    try:
+        result = await call_llm_structured(llm, prompt, TokenSymbolOutput, schema)
+        tokens = [s.upper() for s in result.symbols]
+        logger.info(f"LLM 提取代币: {tokens}")
+        return tokens
+    except Exception as e:
+        logger.warning(f"LLM 代币提取失败: {e}")
+        return []
+
+
+# ── 嵌入服务 ──────────────────────────────────────────────────
 
 
 class JinaEmbeddings:
@@ -197,13 +264,24 @@ class EmbeddingService:
 
         embedding_vectors = await self.embed_texts(chunks)
 
+        # 从文档 metadata 中提取 tokens
+        doc_tokens = (doc.meta_data or {}).get("tokens", [])
+
+        # 如果文档 metadata 没有 tokens，调用 LLM 从标题和内容中提取
+        if not doc_tokens:
+            doc_tokens = await extract_tokens_from_text(
+                f"{doc.title} {doc.content[:2000]}"
+            )
+
         async with AsyncSessionLocal() as db:
             for i, (chunk, embedding) in enumerate(zip(chunks, embedding_vectors)):
+                # 每个 chunk 继承文档级 tokens
                 chunk_record = DocumentChunk(
                     document_id=document_id,
                     chunk_index=i,
                     content=chunk,
                     embedding=embedding,
+                    tokens=list(doc_tokens),
                 )
                 db.add(chunk_record)
 

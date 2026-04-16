@@ -22,7 +22,7 @@ frontend/  # 前端界面
 infra/     # 基础设施
 ```
 
-## 任务说明
+## 任务
 
 ### ✅ 任务 1：数据获取
 
@@ -102,7 +102,7 @@ should_continue: True
     - 处理失败时进行重试，超过重试次数进入死信队列
 - 分析完成后将结果写入数据库
 
-### 任务 4：RAG知识库
+### ✅ 任务 4：RAG知识库
 
 增强RAG分析能力，构建知识库并实现检索，4步：
 
@@ -150,7 +150,7 @@ langsmith界面查看langgraph流水线执行结果如下：
 
 图-langsmith界面查看langgraph流水线执行结果
 
-### 任务 7：知识图谱
+### ✅ 任务 7：知识图谱
 
 使用知识图谱补充实体关系信息。
 
@@ -168,7 +168,7 @@ langsmith界面查看langgraph流水线执行结果如下：
 
 ## 完整案例
 
-## 新闻
+**新闻**
 
 ```
 "news_id": 2,
@@ -176,55 +176,56 @@ langsmith界面查看langgraph流水线执行结果如下：
 "content": "The SEC has officially approved the Bitcoin ETF application."
 ```
 
-## 日志
+**日志**
 
 ![工作流运行日志](./backend/assets/工作流运行日志.png)
 
 图-工作流运行日志
 
-## 结果
+**结果**
 
-```
-news_id: 2
-title: Bitcoin ETF approved by SEC
-content: The SEC has officially approved the Bitcoin ETF application.
-investment_value: bullish
-investment_confidence: 0.9
-investment_reasoning: 1. 代币明确性：新闻明确指向比特币（Bitcoin）。2. 市场影响：SEC批准比特币ETF是重大实质性利好，将大幅降低传统投资者参与比特币投资的门槛，预期带来大量新增资金流入。3. 信息质量：假设新闻来源为权威媒体（如SEC官方公告），信息高度可靠且可验证。4. 市场关注度：此为市场长期期待的关键事件，极有可能引发全球性高度关注、显著增加交易量并推动价格上涨。
-tokens: [{'symbol': 'BTC', 'name': 'Bitcoin', 'confidence': 1.0}]
-token_details: {'BTC': {'symbol': 'BTC', 'name': 'Bitcoin', 'price': 73516.55777901717, 'market_cap': 1471554250552.1128, 'change_24h': -1.10282671, 'volume_24h': 38214267520.941475}}
-rag_context: 在知识库中未找到相关信息。
-rag_sources: []
-kg_context: ## Related Projects (3)
-- BitcoinOS: No description
-- BTC: No description
-- BTC Digital: No description
+- 预测结果
 
-## Entity Relationships (21)
-- Investor: DNA Fund (近期比特币原生项目融资（2024-2025年）（2025）)
-- Investor: FalconX (近期比特币原生项目融资（2024-2025年）（2025）)
-- Investor: Greenfield Capital (近期比特币原生项目融资（2024-2025年）（2025）)
-- Person: Michael Ford (核心开发者)
-- Person: Ava Chow (核心开发者)
-kg_entities: {'projects': [{'name': 'BitcoinOS'}, {'name': 'BTC'}, {'name': 'BTC Digital'}], 'tokens': [], 'relationships': [{'institution': {'name': 'DNA Fund'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'FalconX'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'Greenfield Capital'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'person': {'name': 'Michael Ford'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Ava Chow'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Hennadii Stepanov'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Gloria Zhao'}, 'relationship': 'WORKS_AT', 'role': '核心维护者'}, {'person': {'name': 'Portland'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Luke Dashjr'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'institution': {'name': 'Blockchain Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Pantera Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Digital Currency Group'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Union Square Ventures'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'a16z'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Y Combinator'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Plug and Play'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Boost VC'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Valor Equity Partners'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Accomplice'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Ribbit Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Founders Fund'}, 'round_type': '主要投资机构', 'amount': None}]}
-trend_analysis: **短期方向**：消息公布后市场可能出现“买预期，卖事实”的短期获利了结（当前24h已跌1.1%），但SEC正式批准将打开传统资本合规入场的闸门，预计抛压消化后资金流入将推动价格反弹。  
+  ```
+  news_id: 2
+  title: Bitcoin ETF approved by SEC
+  content: The SEC has officially approved the Bitcoin ETF application.
+  investment_value: bullish
+  investment_confidence: 0.9
+  investment_reasoning: 新闻明确提到比特币ETF获SEC批准，这是加密货币市场期待已久的重大监管突破，将显著降低传统投资者进入比特币市场的门槛，带来大量新增资金流入预期。信息来源（SEC）权威可靠，事件具有里程碑意义，极可能引发市场高度关注和交易量激增，对比特币及整个加密市场构成实质性利好。
+  tokens: [{'symbol': 'BTC', 'name': 'Bitcoin', 'confidence': 1.0}]
+  ```
 
-**关键因素**：  
-1. **机构准入**：ETF批准消除了传统投资者持有BTC的主要障碍，知识库中DNA Fund、FalconX等机构已活跃于比特币生态投资（如BitcoinOS），后续可能通过ETF加大配置。  
-2. **生态联动**：知识库显示比特币核心开发者（如Michael Ford）及Layer2项目（BitcoinOS）持续推动技术迭代，ETF带来的流动性可能溢出至BTC生态项目（如BTC Digital），强化基本面支撑。  
+- 推理过程
 
-**风险考量**：  
-1. **技术面压力**：若ETF初期资金流入不及预期，叠加近期涨幅过大，可能引发深度回调。  
-2. **生态脆弱性**：知识库中比特币原生项目仍处早期（融资集中在2024-2025年），若开发进展滞后（如核心开发者变动），可能削弱长期叙事吸引力。  
+  ```
+  token_details: {'BTC': {'symbol': 'BTC', 'name': 'Bitcoin', 'price': 74364.19153583348, 'market_cap': 1488523556153.7634, 'change_24h': 0.38363839, 'volume_24h': 40404406940.62615}}
+  rag_context: 根据提供的上下文，没有明确信息表明美国证券交易委员会（SEC）在2026年批准了比特币ETF。上下文提到比特币现货ETF是在**2024年1月**获批的，并重点描述了其在2026年的发展状况和影响。
+  rag_sources: [{'chunk_id': 536, 'similarity': np.float32(0.81688404)}, {'chunk_id': 535, 'similarity': np.float32(0.8012183)}, {'chunk_id': 532, 'similarity': np.float32(0.7725047)}]
+  kg_context: ## Related Projects (3)
+  - BTC: No description
+  - BTC Digital: No description
+  - BitcoinOS: No description
 
-**时间范围**：资金流入效应将在1-3个月逐步显现，但中期波动可能加剧，需观察ETF月度净流入数据及生态项目进展（如BitcoinOS落地）。  
+  ## Entity Relationships (21)
+  - Person: Michael Ford (核心开发者)
+  - Person: Ava Chow (核心开发者)
+  - Person: Hennadii Stepanov (核心贡献者)
+  - Person: Gloria Zhao (核心维护者)
+  - Person: Portland (核心贡献者)
+  kg_entities: {'projects': [{'name': 'BTC'}, {'name': 'BTC Digital'}, {'name': 'BitcoinOS'}], 'tokens': [], 'relationships': [{'person': {'name': 'Michael Ford'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Ava Chow'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Hennadii Stepanov'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Gloria Zhao'}, 'relationship': 'WORKS_AT', 'role': '核心维护者'}, {'person': {'name': 'Portland'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Luke Dashjr'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'institution': {'name': 'Blockchain Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Pantera Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Digital Currency Group'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Union Square Ventures'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'a16z'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Y Combinator'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Plug and Play'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Boost VC'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Valor Equity Partners'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Accomplice'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Ribbit Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Founders Fund'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'DNA Fund'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'FalconX'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'Greenfield Capital'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}]}
+  trend_analysis: **短期方向**：新闻虽为旧闻（SEC已于2024年1月批准比特币现货ETF），但若市场误读为“新批准”，可能引发短暂情绪性买盘，推动BTC价格小幅冲高。  
 
-**趋势分析**：SEC批准比特币ETF是结构性利好，短期波动不改中长期上行趋势。结合知识库中机构投资者（如Greenfield Capital）已布局比特币生态，ETF将加速资本向BTC及Layer2项目（如BitcoinOS）扩散，但需警惕技术性回调及生态发展不及预期的风险。
-recommendation: buy
-risk_level: medium
-recommendation_reasoning: SEC批准比特币ETF是结构性利好，消除了传统资本入场的合规障碍，预计将驱动中长期资金流入。尽管短期存在‘买预期，卖事实’的获利了结压力，但抛压消化后，结合机构配置需求（如DNA Fund、Greenfield Capital）及生态发展（BitcoinOS等Layer2项目），价格有望重拾升势。建议利用短期回调分批买入，以捕捉中长期上行趋势。
-should_continue: True
-```
+  **关键因素**：实际价格驱动将依赖ETF的持续资金流入（知识库显示2026年ETF已成为主流投资渠道）及宏观流动性，而非“获批”本身。  
+
+  **风险考量**：若ETF资金流入放缓或出现净流出（反映在知识库中的“发展状况”数据），或比特币网络开发进展滞后（如知识库提及的核心开发者贡献减少），涨势可能逆转。  
+
+  **时间范围**：情绪性影响仅持续数小时至数日，中长期趋势仍取决于ETF资金流与比特币生态基本面。
+  recommendation: hold
+  risk_level: medium
+  recommendation_reasoning: 新闻为旧闻，短期情绪性买盘可能带来小幅冲高但不可持续。中长期趋势取决于ETF资金流和比特币生态基本面，当前信号中性且不确定性较高。作为稳健型交易，应等待更明确的催化剂或价格驱动因素。
+  should_continue: True
+  ```
 
 
 
