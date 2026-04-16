@@ -14,12 +14,117 @@ AI 驱动的 Web3 投资分析系统，从 Odaily 快讯获取 Web3 行业新闻
 - **LLM**: LangChain / LangGraph / LangSmith
 - **消息队列**: RabbitMQ
 
+## 快速开始
+
+### 前置要求
+
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/) (Python 包管理器)
+- Docker & Docker Compose
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/zhoujiakai/openbiteagle.git
+cd openbiteagle
+```
+
+### 2. 启动基础设施
+
+```bash
+cd infra
+docker-compose up -d
+```
+
+启动后可访问以下服务：
+
+| 服务 | 地址 | 账号 |
+|------|------|------|
+| PostgreSQL | localhost:5433 | postgres / postgres |
+| Redis | localhost:6380 | - |
+| RabbitMQ | localhost:5672 | admin / admin |
+| RabbitMQ 管理界面 | http://localhost:15672 | admin / admin |
+| Neo4j | bolt://localhost:7687 | neo4j / biteagle_password |
+| Adminer (数据库管理) | http://localhost:8080 | - |
+
+### 3. 配置 API 密钥
+
+```bash
+cd backend
+cp config.example.yaml config.yaml
+```
+
+编辑 `config.yaml`，填入你的 API 密钥：
+
+```yaml
+deepseek:
+  DEEPSEEK_API_KEY: <你的 DeepSeek API Key>
+
+jina:
+  JINA_API_KEY: <你的 Jina API Key>
+
+langsmith:
+  LANGCHAIN_API_KEY: <你的 LangSmith API Key>
+
+cmc:
+  CMC_API_KEY: <你的 CoinMarketCap API Key>
+
+rootdata:
+  ROOTDATA_API_KEY: <你的 RootData API Key>
+```
+
+### 4. 启动后端服务
+
+```bash
+cd backend
+
+# 安装依赖
+uv sync
+
+# 启动 API 服务
+uv run fastapi dev app/main.py
+```
+
+API 文档访问：http://localhost:8000/docs
+
+### 5. 运行分析流水线（可选）
+
+```bash
+# 运行单条新闻分析演示
+uv run python tasks/task2_analyze_flow/template_app.py
+```
+
 ## 目录结构
 
 ```
-backend/   # 后端服务
-frontend/  # 前端界面
-infra/     # 基础设施
+openbiteagle/
+├── backend/                      # 后端服务
+│   ├── app/                      # 应用主目录
+│   │   ├── main.py               # FastAPI 入口
+│   │   ├── api/                  # API 路由（v1）
+│   │   ├── core/                 # 核心配置
+│   │   ├── data/                 # 数据库、日志、模型
+│   │   ├── graph/                # LangGraph 流水线
+│   │   ├── kg/                   # 知识图谱
+│   │   ├── models/               # SQLAlchemy 模型
+│   │   ├── rag/                  # RAG 检索
+│   │   ├── schemas/              # Pydantic 数据模型
+│   │   ├── services/             # 业务逻辑
+│   │   └── wrappers/             # 外部 API 封装
+│   ├── tasks/                    # 各任务实现
+│   │   ├── task1_fetch_data/     # 任务 1：数据获取
+│   │   ├── task2_analyze_flow/   # 任务 2：分析流水线
+│   │   ├── task3_mq_driven/      # 任务 3：消息队列驱动
+│   │   ├── task4_rag_knowledge/  # 任务 4：RAG 知识库
+│   │   └── task5_http_api/       # 任务 5：HTTP API
+│   ├── scripts/                  # 运维 & 初始化脚本
+│   ├── tests/                    # 测试
+│   ├── docs/                     # 知识库文档（白皮书、YAML 配置）
+│   ├── config.example.yaml       # 配置模板
+│   ├── pyproject.toml            # 项目依赖
+│   └── uv.lock                   # 依赖锁定文件
+├── infra/                        # 基础设施
+│   ├── docker-compose.yml        # Docker Compose 编排（PostgreSQL,Redis,RabbitMQ,Neo4j）
 ```
 
 ## 任务
@@ -206,7 +311,7 @@ langsmith界面查看langgraph流水线执行结果如下：
   - BTC: No description
   - BTC Digital: No description
   - BitcoinOS: No description
-
+  
   ## Entity Relationships (21)
   - Person: Michael Ford (核心开发者)
   - Person: Ava Chow (核心开发者)
@@ -215,11 +320,11 @@ langsmith界面查看langgraph流水线执行结果如下：
   - Person: Portland (核心贡献者)
   kg_entities: {'projects': [{'name': 'BTC'}, {'name': 'BTC Digital'}, {'name': 'BitcoinOS'}], 'tokens': [], 'relationships': [{'person': {'name': 'Michael Ford'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Ava Chow'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'person': {'name': 'Hennadii Stepanov'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Gloria Zhao'}, 'relationship': 'WORKS_AT', 'role': '核心维护者'}, {'person': {'name': 'Portland'}, 'relationship': 'WORKS_AT', 'role': '核心贡献者'}, {'person': {'name': 'Luke Dashjr'}, 'relationship': 'WORKS_AT', 'role': '核心开发者'}, {'institution': {'name': 'Blockchain Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Pantera Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Digital Currency Group'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Union Square Ventures'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'a16z'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Y Combinator'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Plug and Play'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Boost VC'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Valor Equity Partners'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Accomplice'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Ribbit Capital'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'Founders Fund'}, 'round_type': '主要投资机构', 'amount': None}, {'institution': {'name': 'DNA Fund'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'FalconX'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}, {'institution': {'name': 'Greenfield Capital'}, 'round_type': '近期比特币原生项目融资（2024-2025年）（2025）', 'amount': '1000万美元'}]}
   trend_analysis: **短期方向**：新闻虽为旧闻（SEC已于2024年1月批准比特币现货ETF），但若市场误读为“新批准”，可能引发短暂情绪性买盘，推动BTC价格小幅冲高。  
-
+  
   **关键因素**：实际价格驱动将依赖ETF的持续资金流入（知识库显示2026年ETF已成为主流投资渠道）及宏观流动性，而非“获批”本身。  
-
+  
   **风险考量**：若ETF资金流入放缓或出现净流出（反映在知识库中的“发展状况”数据），或比特币网络开发进展滞后（如知识库提及的核心开发者贡献减少），涨势可能逆转。  
-
+  
   **时间范围**：情绪性影响仅持续数小时至数日，中长期趋势仍取决于ETF资金流与比特币生态基本面。
   recommendation: hold
   risk_level: medium
