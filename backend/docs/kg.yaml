@@ -1,0 +1,213 @@
+projects:
+  - name: BTC
+    chain: Bitcoin
+    team:
+      - name: Luke Dashjr
+        role: 核心开发者
+      - name: Portland
+        role: 核心贡献者
+      - name: Gloria Zhao
+        role: 核心维护者
+      - name: Hennadii Stepanov
+        role: 核心贡献者
+      - name: Ava Chow
+        role: 核心开发者
+      - name: Michael Ford
+        role: 核心开发者
+    funding:
+      - round: 早期生态项目融资（2013-2015年）
+        investments:
+          - project: Coinbase
+            year: 2013-2015
+            amount: "7500万美元（C轮）"
+            investors:
+              - a16z
+              - Union Square Ventures
+              - Ribbit Capital
+          - project: BitPay
+            year: "2014"
+            amount: "3000万美元"
+            lead_investors:
+              - Index Ventures
+          - project: Blockchain.com
+            year: "2014"
+            amount: "4000万美元（B轮）"
+            participants:
+              - Google Ventures
+          - project: Blockstream
+            year: "2014"
+            amount: "2100万美元"
+          - project: Circle
+            year: "2014"
+            amount: "900万美元"
+      - round: 近期比特币原生项目融资（2024-2025年）
+        investments:
+          - project: BitcoinOS
+            year: "2025"
+            amount: "1000万美元"
+            lead_investors:
+              - Greenfield Capital
+            participants:
+              - FalconX
+              - DNA Fund
+          - project: Nscale
+            year: "2025"
+            amount: "1.55亿美元"
+            lead_investors:
+              - Sandton Capital Partners
+          - project: BTC Digital
+            year: "2025"
+            amount: "2000万美元"
+          - project: Relai
+            year: "2025"
+            amount: "1200万美元（A轮）"
+      - round: 主要投资机构
+        investments:
+          - investors:
+              - Founders Fund
+              - Ribbit Capital
+              - Accomplice
+              - Valor Equity Partners
+              - Boost VC
+              - Plug and Play
+              - Y Combinator
+              - a16z
+              - Union Square Ventures
+              - Digital Currency Group
+              - Pantera Capital
+              - Blockchain Capital
+
+  - name: ETH
+    chain: Ethereum
+    team:
+      - name: Vitalik Buterin
+        role: 创始人
+      - name: Joseph Lubin
+        role: 联合创始人
+      - name: Amir Chetrit
+        role: 联合创始人
+      - name: Anthony Di Iorio
+        role: 联合创始人
+      - name: Mihai Alisie
+        role: 联合创始人
+      - name: Charles Hoskinson
+        role: 联合创始人
+      - name: David Walsh
+        role: 企业负责人
+      - name: Alberto Cevallos
+        role: 建设者
+    funding:
+      - round: 2014年 ICO（首次代币发行）
+        investments:
+          - year: "2014"
+            amount: "约1800万美元（3.1万枚BTC）"
+            investors:
+              - 比特币基金会
+              - Blockchain Capital
+      - round: 2021年 机构融资轮
+        investments:
+          - year: "2021"
+            amount: "估值约150亿美元"
+            investors:
+              - Coinbase
+              - 摩根大通
+              - 高盛
+              - 新加坡政府投资公司（GIC）
+              - 加拿大养老金投资委员会（CPPIB）
+      - round: 近期生态项目融资
+        investments:
+          - project: Etherealize
+            year: "2025"
+            amount: "4000万美元"
+            lead_investors:
+              - Electric Capital
+              - Paradigm
+          - project: ETH Strategy
+            year: "2025"
+            amount: "4650万美元"
+          - project: 亚洲财团
+            year: "2025"
+            amount: "10亿美元"
+            investors:
+              - 火币李林
+              - 分布式资本沈波
+              - HashKey肖峰
+              - 美图蔡文胜
+
+  - name: Sui
+    chain: Sui
+    team:
+      - name: Evan Cheng
+        role: CEO兼联合创始人
+      - name: Sam Blackshear
+        role: CTO兼联合创始人
+      - name: Adeniyi Abiodun
+        role: CPO兼联合创始人
+      - name: George Danezis
+        role: 首席科学家
+      - name: Kostas Chalkias
+        role: 首席密码学家
+      - name: Kevin Boon
+        role: 首席法务官
+      - name: Todd Fiala
+        role: 工程主管
+      - name: Janet Wu
+        role: 产品总监
+      - name: Alonso de Gortari
+        role: 首席经济师
+    funding:
+      - round: A轮融资（2021年12月）
+        investments:
+          - year: "2021"
+            amount: "3600万美元"
+            lead_investors:
+              - a16z
+            participants:
+              - Coinbase Ventures
+              - Redpoint
+              - Lightspeed
+              - Electric Capital
+              - Slow Ventures
+              - Scribble Ventures
+              - Samsung Next
+              - Lux Capital
+      - round: B轮融资（2022年9月）
+        investments:
+          - year: "2022"
+            amount: "3亿美元"
+            lead_investors:
+              - FTX Ventures
+            participants:
+              - a16z
+              - Jump Crypto
+              - Binance Labs
+      - round: FTX股权回购（2023年3月）
+        investments:
+          - year: "2023"
+            amount: "约9600万美元"
+            investors:
+              - FTX Ventures
+      - round: 近期生态融资（2025年）
+        investments:
+          - project: Mill City Ventures III
+            year: "2025"
+            amount: "4.5亿美元"
+            lead_investors:
+              - Karatage
+              - Sui基金会
+          - project: Bluefin DEX
+            year: "2025"
+            amount: "200万瑞士法郎"
+            participants:
+              - SUI Group
+      - round: 主要投资机构
+        investments:
+          - investors:
+              - a16z
+              - FTX Ventures
+              - Coinbase Ventures
+              - Binance Labs
+              - Jump Crypto
+              - Electric Capital
+              - Galaxy Digital
+              - Pantera Capital
