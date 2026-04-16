@@ -228,7 +228,6 @@ class GraphQuery:
         team = await self.get_project_team(project_name)
         investors = await self.get_project_investors(project_name)
         chain = await self.get_project_chain(project_name)
-        collaborations = await self.get_project_collaborations(project_name)
 
         return {
             "project": project,
@@ -236,7 +235,6 @@ class GraphQuery:
             "team": team,
             "investors": investors,
             "chain": chain,
-            "collaborations": collaborations,
         }
 
     async def find_related_projects(
