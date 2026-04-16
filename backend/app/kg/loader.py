@@ -260,7 +260,7 @@ class GraphLoader:
         params = {"person_name": person_name, "project_name": project_name}
 
         if role:
-            rel_props = " {{role: $role}}"
+            rel_props = " {role: $role}"
             params["role"] = role
 
         query = f"""
